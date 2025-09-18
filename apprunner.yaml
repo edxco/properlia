@@ -57,7 +57,7 @@ run:
 
   # Health check para que App Runner valide la app (implementa /up abajo)
   health-check:
-    path: /up
+    path: /health
     interval: 10
     timeout: 5
     healthy-threshold: 1
