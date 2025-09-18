@@ -71,5 +71,5 @@ run:
       value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb
 
     # Asegúrate que el SecretString contenga la URL COMPLETA (postgres://user:pass@host:5432/db?sslmode=require)
-    - name: DATABASE_URL
-      value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:stage/postgres-OWsdnr
+    - name: STAGE_DATABASE_URL
+      value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv
