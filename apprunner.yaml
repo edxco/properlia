@@ -3,22 +3,32 @@ runtime: ruby31
 
 build:
   env:
+    # Rails en modo producción durante la build
     - name: RAILS_ENV
       value: production
+    # Fija la versión exacta de Bundler para coincidir con tu Gemfile.lock
     - name: BUNDLER_VERSION
-      value: "2.3.26"    # usa la de tu Gemfile.lock (BUNDLED WITH)
+      value: "2.3.26"
   commands:
     build:
+      - set -euxo pipefail
+      - ruby -v && gem -v
       - gem install bundler -v "$BUNDLER_VERSION"
       - bundle config set force_ruby_platform true
       - bundle config set without "development test"
       - bundle config set path "vendor/bundle"
-      - bundle install --jobs 4 --retry 3
+      - bundle install --jobs 4 --retry 3 --verbose
 
 run:
+  # Comando de arranque; Puma debe escuchar en el puerto que App Runner inyecta
   command: bundle exec puma -C config/puma.rb
+
+  # App Runner usa el puerto 8080 por defecto; aquí lo fijamos explícitamente
   network:
     port: 8080
+    env: APP_PORT
+
+  # Variables de entorno disponibles en runtime
   env:
     - name: RACK_ENV
       value: production
@@ -32,6 +42,14 @@ run:
       value: "1"
     - name: RAILS_MAX_THREADS
       value: "5"
+
+  # Health check para que App Runner valide la app
+  health-check:
+    path: /health
+    interval: 10        # en segundos
+    timeout: 5          # en segundos
+    healthy-threshold: 1
+    unhealthy-threshold: 3
   # Secrets inyectados como variables (valores reales vienen de AWS Secrets Manager o SSM Parameter Store)
   secrets:
     # Secrets Manager (ARN completo o nombre):
@@ -41,7 +59,7 @@ run:
       value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb
 
     # SSM Parameter Store (ARN o nombre del parámetro):
-    - name: STAGE_DATABASE_URL
+    - name: DATABASE_URL
       value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv
     # Ejemplos alternativos si no usas DATABASE_URL:
     # - name: DB_HOST
