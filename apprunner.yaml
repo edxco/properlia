@@ -3,10 +3,8 @@ runtime: ruby31
 
 build:
   env:
-    # Rails en modo producción durante la build
     - name: RAILS_ENV
       value: production
-    # Fija la versión exacta de Bundler para coincidir con tu Gemfile.lock
     - name: BUNDLER_VERSION
       value: "2.3.26"
   commands:
@@ -20,15 +18,10 @@ build:
       - bundle install --jobs 4 --retry 3 --verbose
 
 run:
-  # Comando de arranque; Puma debe escuchar en el puerto que App Runner inyecta
   command: bundle exec puma -C config/puma.rb
-
-  # App Runner usa el puerto 8080 por defecto; aquí lo fijamos explícitamente
   network:
     port: 8080
     env: APP_PORT
-
-  # Variables de entorno disponibles en runtime
   env:
     - name: RACK_ENV
       value: production
@@ -42,15 +35,7 @@ run:
       value: "1"
     - name: RAILS_MAX_THREADS
       value: "5"
-
-  # Health check para que App Runner valide la app
-  health-check:
-    path: /health
-    interval: 10        # en segundos
-    timeout: 5          # en segundos
-    healthy-threshold: 1
-    unhealthy-threshold: 3
-  # Secrets inyectados como variables (valores reales vienen de AWS Secrets Manager o SSM Parameter Store)
+      
   secrets:
     # Secrets Manager (ARN completo o nombre):
     - name: SECRET_KEY_BASE
