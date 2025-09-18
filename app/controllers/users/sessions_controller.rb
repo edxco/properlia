@@ -4,10 +4,13 @@ class Users::SessionsController < Devise::SessionsController
   private
 
   def respond_with(resource, _opts = {})
-    render json: { message: 'Inicio de sesión exitoso', user: resource }, status: :ok
+    render_success(
+      data: resource.as_json(only: %i[id email name role]),
+      message: 'Inicio de sesión exitoso'
+    )
   end
 
   def respond_to_on_destroy
-    head :no_content
+    render_success(message: 'Sesión cerrada')
   end
 end

@@ -1,0 +1,84 @@
+# apprunner.yaml — coloca este archivo en la raíz del repo
+# Doc base / sintaxis oficial:
+# - Qué es y qué cubre: https://docs.aws.amazon.com/apprunner/latest/dg/config-file.html
+# - Referencia de claves: https://docs.aws.amazon.com/apprunner/latest/dg/config-file-ref.html
+# - Ruby en App Runner: https://docs.aws.amazon.com/apprunner/latest/dg/service-source-code-ruby.html
+
+version: 1.0
+runtime: ruby31         # App Runner soporta ruby31 (soporte hasta 2025-12-01). Considera migrar a la versión que AWS indique como siguiente. :contentReference[oaicite:1]{index=1}
+
+build:
+  # Si tu app es API-only y no compila assets, basta con bundle install.
+  # Si usas pg gem, estas libs suelen ayudar en Amazon Linux:
+  # - postgresql-devel (cabeceras para compilar 'pg')
+  # - gcc / make (build-essential)
+  # Si no las necesitas, elimina pre-build.
+  commands:
+    pre-build:
+      - yum -y install postgresql-devel gcc make
+    build:
+      - bundle install --without development test --deployment --path vendor/bundle
+    post-build:
+      # Si precompilas assets (no API-only), habilita:
+      # - bundle exec rails assets:precompile
+      - echo "Build stage done"
+
+  # Variables SOLO disponibles durante build/pre-run (no en runtime)
+  env:
+    - name: RAILS_ENV
+      value: production
+
+run:
+  # Puedes fijar un 'runtime-version' específico (p.ej. 3.1.7) si quieres evitar upgrades menores.
+  # runtime-version: 3.1.7
+
+  # Comando de arranque. Asegura que Puma escucha el PORT que App Runner inyecta.
+  command: bundle exec puma -C config/puma.rb
+
+  # Puerto; por defecto App Runner usa 8080. Cámbialo si tu puma.rb escucha otro.
+  network:
+    port: 8080
+    env: APP_PORT   # Opcional: expone también el puerto en APP_PORT además de PORT. :contentReference[oaicite:2]{index=2}
+
+  # Variables de entorno disponibles en runtime
+  env:
+    - name: RACK_ENV
+      value: production
+    - name: RAILS_ENV
+      value: production
+    - name: RAILS_LOG_TO_STDOUT
+      value: "true"
+    - name: RAILS_SERVE_STATIC_FILES
+      value: "true"
+    # Ajusta concurrencia por variables si tu puma.rb las usa:
+    - name: WEB_CONCURRENCY
+      value: "1"      # en 0.5 vCPU suele ir bien con 1 worker
+    - name: RAILS_MAX_THREADS
+      value: "5"
+
+  # Secrets inyectados como variables (valores reales vienen de AWS Secrets Manager o SSM Parameter Store)
+  secrets:
+    # Secrets Manager (ARN completo o nombre):
+    - name: SECRET_KEY_BASE
+      value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/secret_key_base-6GKC6m
+    - name: RAILS_MASTER_KEY
+      value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb
+
+    # SSM Parameter Store (ARN o nombre del parámetro):
+    - name: DATABASE_URL
+      value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:stage/postgres-OWsdnr
+    # Ejemplos alternativos si no usas DATABASE_URL:
+    # - name: DB_HOST
+    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/HOST
+    # - name: DB_USER
+    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/USER
+    # - name: DB_PASS
+    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/PASS
+    # - name: DB_NAME
+    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/NAME
+    # - name: DB_SSLMODE
+    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/SSLMODE
+
+  # (Opcional) Comandos pre-run si necesitas ajustar algo en la imagen de runtime
+  # pre-run:
+  #   - echo "Pre-run adjustments"
