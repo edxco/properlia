@@ -6,37 +6,25 @@ build:
     - name: RAILS_ENV
       value: production
     - name: BUNDLER_VERSION
-      value: "2.5.13"   # <- pon la de tu Gemfile.lock
+      value: "2.3.26"
   commands:
-    build:
+    pre-build:
       - set -euxo pipefail
-      - ruby -v && gem -v
       - gem install bundler -v "$BUNDLER_VERSION"
       - bundle config set force_ruby_platform true
       - bundle config set without "development test"
       - bundle config set path "vendor/bundle"
-      - bundle env
+      - |
+        if grep -qE "^[[:space:]]*gem[[:space:]]+['\"]pg['\"]" Gemfile; then
+          if command -v dnf >/dev/null 2>&1; then PKG="dnf -y install"; else PKG="yum -y install"; fi
+          ($PKG gcc make || true)
+          ($PKG libpq-devel || true)
+          ($PKG postgresql15-devel || true)
+          ($PKG postgresql-devel || true)
+        fi
+      - bundle config set build.nokogiri "--use-system-libraries" || true
+    build:
       - bundle install --jobs 4 --retry 3 --verbose
-    post-build:
-      - echo "Build stage done"
-
-run:
-  command: bundle exec puma -C config/puma.rb
-  network:
-    port: 8080
-  env:
-    - name: RAILS_ENV
-      value: production
-    - name: RACK_ENV
-      value: production
-    - name: RAILS_LOG_TO_STDOUT
-      value: "true"
-    - name: RAILS_SERVE_STATIC_FILES
-      value: "true"
-    - name: WEB_CONCURRENCY
-      value: "1"
-    - name: RAILS_MAX_THREADS
-      value: "5"
 
   # Secrets inyectados como variables (valores reales vienen de AWS Secrets Manager o SSM Parameter Store)
   secrets:
