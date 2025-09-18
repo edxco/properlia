@@ -55,14 +55,6 @@ run:
     - name: RAILS_MAX_THREADS
       value: "5"
 
-  # Health check para que App Runner valide la app (implementa /up abajo)
-  health-check:
-    path: /health
-    interval: 10
-    timeout: 5
-    healthy-threshold: 1
-    unhealthy-threshold: 3
-
   # Secrets inyectados como variables (valores reales vienen de AWS Secrets Manager o SSM Parameter Store)
   secrets:
     # Secrets Manager (ARN completo o nombre):
