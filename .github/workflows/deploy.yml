@@ -1,0 +1,67 @@
+name: Migrate & Deploy (Proper API)
+
+on:
+  push:
+    branches: ["stage", "production"]
+  workflow_dispatch:
+
+jobs:
+  migrate-and-deploy:
+    runs-on: ubuntu-latest
+
+    # Asignamos el Environment de GitHub según la rama
+    environment: ${{ github.ref_name }}  # 'stage' o 'production'
+
+    permissions:
+      id-token: write   # OIDC
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Rails env (staging vs production)
+        run: |
+          if [ "${{ github.ref_name }}" = "production" ]; then
+            echo "RAILS_ENV=production" >> $GITHUB_ENV
+          else
+            echo "RAILS_ENV=staging" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"        # ajusta a tu versión
+          bundler-cache: true
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Fetch secrets from AWS Secrets Manager
+        id: sm
+        run: |
+          DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_DB_URL_ID }}" --query 'SecretString' --output text)
+          MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_MASTER_KEY_ID }}" --query 'SecretString' --output text)
+          echo "DATABASE_URL=$DB_URL" >> $GITHUB_ENV
+          echo "RAILS_MASTER_KEY=$MASTER_KEY" >> $GITHUB_ENV
+
+      - name: Verify DB connectivity (optional)
+        run: |
+          ruby -e "require 'uri'; u=URI(ENV['DATABASE_URL']); puts \"Connecting to #{u.host}:#{u.port}#{u.path}\""
+
+      # Si tu DB ya existe en RDS, usa db:migrate; evita db:prepare para no requerir CREATEDB.
+      - name: Run migrations
+        env:
+          RAILS_ENV: ${{ env.RAILS_ENV }}
+        run: |
+          bundle exec rails db:migrate
+          bundle exec rails db:abort_if_pending_migrations
+
+      # Si App Runner está conectado a tu repo y auto-construye con push,
+      # este paso es opcional. Si quieres forzar el despliegue inmediato:
+      - name: Trigger App Runner deployment
+        run: |
+          aws apprunner start-deployment --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"

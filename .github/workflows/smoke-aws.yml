@@ -1,0 +1,84 @@
+name: Smoke Test AWS OIDC & Secrets
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Environment a probar"
+        type: choice
+        required: true
+        options: [stage, production]
+        default: stage
+      db_check:
+        description: "Probar conexión a la DB con psql (SELECT 1)"
+        type: boolean
+        default: false
+      apprunner_check:
+        description: "Describir servicio de App Runner"
+        type: boolean
+        default: true
+      start_deploy:
+        description: "Lanzar start-deployment en App Runner (¡cuidadito!)"
+        type: boolean
+        default: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    # Esto hace que el job use los environment secrets del entorno elegido
+    environment: ${{ inputs.target_env }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Who am I? (STS)
+        run: aws sts get-caller-identity
+
+      - name: Fetch secrets from AWS Secrets Manager (masking)
+        id: secrets
+        run: |
+          DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_DB_URL }}" --query 'SecretString' --output text)
+          MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_MASTER_KEY }}" --query 'SecretString' --output text)
+
+          # Enmascarar para que no aparezcan en logs
+          echo "::add-mask::$DB_URL"
+          echo "::add-mask::$MASTER_KEY"
+
+          # Exportar como envs para los siguientes pasos
+          echo "DATABASE_URL=$DB_URL" >> $GITHUB_ENV
+          echo "RAILS_MASTER_KEY=$MASTER_KEY" >> $GITHUB_ENV
+
+          # Comprobación básica
+          test -n "$DB_URL" || (echo "DATABASE_URL vacío"; exit 1)
+          test -n "$MASTER_KEY" || (echo "RAILS_MASTER_KEY vacío"; exit 1)
+
+      - name: DB connectivity check (optional)
+        if: ${{ inputs.db_check }}
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+          # Si tu URL ya incluye ?sslmode=require no hace falta añadir flags extra
+          echo "SELECT 1;" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1
+
+      - name: App Runner - describe (optional)
+        if: ${{ inputs.apprunner_check }}
+        run: |
+          aws apprunner describe-service --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}" \
+            --query 'Service.{Status:Status,ServiceName:ServiceName,Runtime:SourceConfiguration.ImageRepository.ImageConfiguration.Runtime}' \
+            --output table
+
+      - name: App Runner - start deployment (optional & dangerous)
+        if: ${{ inputs.start_deploy }}
+        run: |
+          aws apprunner start-deployment --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"
