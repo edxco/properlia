@@ -16,11 +16,6 @@ jobs:
       id-token: write   # OIDC
       contents: read
 
-    env:
-      RUBYOPT: -rlogger 
-      DISABLE_SPRING: "1"
-      BOOTSNAP_CACHE_DISABLE: "1"
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
