@@ -9,11 +9,17 @@ build:
       value: "development:test"
   commands:
     build:
+      - echo "Building the application..."
       - set -euxo pipefail
+      - echo "Installing dependencies..."
       - bundle config set --local path vendor/bundle
+      - echo "Installing gems..."
       - bundle install --jobs 4 --retry 3 --verbose
+      - echo "Installing Node.js dependencies..."
       - bundle exec rails assets:precompile
+      - echo "Running database migrations..."
       - bundle exec rails db:migrate
+      - echo "Build completed."
 
 run:
   command: bundle exec puma -C config/puma.rb
