@@ -51,22 +51,18 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Fetch secrets from AWS Secrets Manager (JSON DB + safe URL)
+      - name: Fetch secrets from AWS Secrets Manager (JSON DB + encode password safely)
         id: sm
         env:
-          DB_SECRET_ID: ${{ secrets.DATABASE_URL }}         # ID/ARN del secreto de DB
+          DB_SECRET_ID: ${{ secrets.DATABASE_URL }}         # ID/ARN del secreto JSON
           DB_JSON_KEY: STAGE_DATABASE_URL                   # clave dentro del JSON
-          MASTER_SECRET_ID: ${{ secrets.SECRET_KEY_BASE }}  # ID/ARN del secreto para master/secret
+          MASTER_SECRET_ID: ${{ secrets.RAILS_MASTER_KEY }} # ID/ARN del secreto JSON o texto plano
         run: |
           set -euo pipefail
-
-          # jq si no está
           command -v jq >/dev/null || { sudo apt-get update -y && sudo apt-get install -y jq; }
 
-          # --- DB URL ---
+          # --- DB URL desde JSON ---
           RAW_DB=$(aws secretsmanager get-secret-value --secret-id "$DB_SECRET_ID" --query 'SecretString' --output text)
-
-          # Extraer del JSON con la clave indicada
           DB_URL=$(jq -r --arg k "$DB_JSON_KEY" '.[$k] // empty' <<< "$RAW_DB")
           if [ -z "$DB_URL" ]; then
             echo "🔎 Claves disponibles en el secreto de DB:" >&2
@@ -75,42 +71,45 @@ jobs:
             exit 1
           fi
 
-          # Percent-encode del password si trae caracteres especiales, evitando doble-encoding
+          # --- Encodificar SOLO el password, sin parsear la URL completa ---
           DB_URL_SAFE=$(ruby - "$DB_URL" <<'RUBY'
-            require "uri"
-            u = URI.parse(ARGV[0])
-            if u.password && u.password !~ /%[0-9A-Fa-f]{2}/
-              u.password = URI.encode_www_form_component(u.password)
+            raw = ARGV[0]
+            # schema://userinfo@rest  (userinfo = user[:password])
+            m = raw.match(/\A([a-z][a-z0-9+.\-]*):\/\/([^@]+)@(.+)\z/i)
+            unless m
+              # Si no hay userinfo (sin '@'), devuelve igual
+              puts raw
+              exit
             end
-            puts u.to_s
+            scheme, userinfo, rest = m.captures
+            user, pass = userinfo.split(":", 2)  # solo primer ':'
+            require "uri"
+            if pass
+              pass = URI.encode_www_form_component(pass) # %23, %24, %25, etc.
+              userinfo = "#{user}:#{pass}"
+            else
+              userinfo = user
+            end
+            puts "#{scheme}://#{userinfo}@#{rest}"
           RUBY
           )
 
               echo "::add-mask::$DB_URL_SAFE"
               echo "DATABASE_URL=$DB_URL_SAFE" >> "$GITHUB_ENV"
 
-              # --- MASTER / SECRET ---
+              # --- Master key / Secret key base ---
               RAW_MASTER=$(aws secretsmanager get-secret-value --secret-id "$MASTER_SECRET_ID" --query 'SecretString' --output text)
 
-              # Soporta texto plano o JSON con claves comunes
+              # Soporta JSON { "RAILS_MASTER_KEY": "..."} o texto plano
               if [[ "$RAW_MASTER" =~ ^\{ ]]; then
                 MASTER=$(jq -r '.RAILS_MASTER_KEY // .SECRET_KEY_BASE // empty' <<< "$RAW_MASTER")
               else
                 MASTER="$RAW_MASTER"
               fi
-
-              if [ -z "$MASTER" ]; then
-                echo "🔎 Claves disponibles en el secreto MASTER:" >&2
-                if [[ "$RAW_MASTER" =~ ^\{ ]]; then jq -r 'keys[]' <<< "$RAW_MASTER" >&2; fi
-                echo "::error::MASTER secret empty (expected RAILS_MASTER_KEY or SECRET_KEY_BASE)"
-                exit 1
-              fi
+              [ -n "$MASTER" ] || { echo "::error::MASTER secret empty"; exit 1; }
 
               echo "::add-mask::$MASTER"
-              # Si aquí guardas la master key de Rails, exporta RAILS_MASTER_KEY:
               echo "RAILS_MASTER_KEY=$MASTER" >> "$GITHUB_ENV"
-              # Si en realidad guardas secret_key_base, cambia la línea anterior por:
-              # echo "SECRET_KEY_BASE=$MASTER" >> "$GITHUB_ENV"
 
 
       - name: Verify DB connectivity (optional)
