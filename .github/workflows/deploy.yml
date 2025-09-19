@@ -39,22 +39,6 @@ jobs:
             echo "RAILS_ENV=staging" >> $GITHUB_ENV
           fi
 
-      - name: Debug OIDC token claims
-        env:
-          ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
-          ACTIONS_ID_TOKEN_REQUEST_URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
-        run: |
-          set -e
-          # Solicita un id-token con audience sts.amazonaws.com
-          RESP=$(curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com")
-          IDT=$(echo "$RESP" | jq -r '.value')
-
-          echo "OIDC aud:"
-          echo "$IDT" | awk -F. '{print $2}' | base64 -d 2>/dev/null | jq -r .aud
-          echo "OIDC sub:"
-          echo "$IDT" | awk -F. '{print $2}' | base64 -d 2>/dev/null | jq -r .sub
-
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -70,7 +54,7 @@ jobs:
       - name: Fetch secrets from AWS Secrets Manager
         id: sm
         run: |
-          DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_DB_URL }}" --query 'SecretString' --output text)
+          DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.DATABASE_URL }}" --query 'SecretString' --output text)
           MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_MASTER_KEY }}" --query 'SecretString' --output text)
           echo "DATABASE_URL=$DB_URL" >> $GITHUB_ENV
           echo "RAILS_MASTER_KEY=$MASTER_KEY" >> $GITHUB_ENV
