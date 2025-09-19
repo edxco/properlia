@@ -1,58 +1,48 @@
 version: 1.0
-runtime: ruby31  # or ruby32 for Ruby 3.2
+runtime: ruby31
 
 build:
   commands:
     build:
-      # Install dependencies
       - echo "Installing dependencies..."
       - bundle install --deployment --without development test
-      
-      # Precompile assets (if needed for API-only apps with some assets)
       - echo "Precompiling assets..."
       - bundle exec rails assets:precompile RAILS_ENV=production
-      
-      # Database setup (if using a database)
       - echo "Setting up database..."
       - bundle exec rails db:create RAILS_ENV=production || true
       - bundle exec rails db:migrate RAILS_ENV=production
-      
     pre-build:
-      # Install system dependencies if needed
       - echo "Installing system packages..."
-      # Uncomment if you need specific packages
-      # - yum install -y postgresql-devel
-      
   env:
-    # Build-time environment variables
-    RAILS_ENV: production
-    NODE_ENV: production
+    - name: RAILS_ENV
+      value: production
+    - name: NODE_ENV
+      value: production
 
 run:
-  runtime-version: ruby-3.1.0  # Specify Ruby version
-  
+  runtime-version: ruby-3.1.0
   commands:
     start:
-      # Start the Rails server
       - bundle exec rails server -e production -p 8080 -b 0.0.0.0
-      
   network:
     port: 8080
-    
   env:
-    # Runtime environment variables (plain text)
-    RAILS_ENV: production
-    RAILS_LOG_TO_STDOUT: "true"
-    RAILS_SERVE_STATIC_FILES: "true"
-    PORT: "8080"
-    
-    # Non-sensitive configuration
-    CORS_ORIGINS: "https://yourdomain.com,https://www.yourdomain.com"
+    - name: RAILS_ENV
+      value: production
+    - name: RAILS_LOG_TO_STDOUT
+      value: "true"
+    - name: RAILS_SERVE_STATIC_FILES
+      value: "true"
+    - name: PORT
+      value: "8080"
     
   secrets:
-    SECRET_KEY_BASE: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/secret_key_base-6GKC6m"
-    RAILS_MASTER_KEY: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb"
-    DATABASE_URL: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv"
+    - name: DATABASE_URL
+      value_from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv"
+    - name: SECRET_KEY_BASE
+      value_from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/secret_key_base-6GKC6m"
+    - name: RAILS_MASTER_KEY
+      value-from:: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb"
     # Ejemplos alternativos si no usas DATABASE_URL:
     # - name: DB_HOST
     #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/HOST
