@@ -20,14 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Who am I?
-        run: aws sts get-caller-identity
+      - name: Debug repo/ref
+        run: |
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"   # Owner/Repo exactos
+          echo "GITHUB_REF=$GITHUB_REF"                 # refs/heads/stage
 
       - name: Debug GitHub ref
         run: |
