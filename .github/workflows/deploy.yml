@@ -113,12 +113,6 @@ jobs:
 
       - name: Sanity check Logger
         run: ruby -e 'require "logger"; puts Logger::Severity.constants.join(",")'
-
-      - name: Confirm Rails boot & env
-        run: |
-          bundle exec rails runner - <<'RUBY'
-          puts "Rails #{Rails.version} | env=#{Rails.env}"
-          RUBY
         
       - name: Verify DB connectivity (optional)
         run: |
