@@ -112,11 +112,22 @@ jobs:
               echo "RAILS_MASTER_KEY=$MASTER" >> "$GITHUB_ENV"
 
       - name: Sanity check Logger
-        run: ruby -e 'require "logger"; puts Logger::Severity.constants.map(&:to_s).join(",")'
+        run: ruby -e 'require "logger"; puts Logger::Severity.constants.join(",")'
+
+      - name: Confirm Rails boot & env
+        env:
+          RAILS_ENV: ${{ env.RAILS_ENV }}
+          RAILS_MASTER_KEY: ${{ env.RAILS_MASTER_KEY }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: bundle exec rails r 'puts "Rails #{Rails.version} | env=#{Rails.env}"'
         
       - name: Verify DB connectivity (optional)
         run: |
           ruby -e "require 'uri'; u=URI(ENV['DATABASE_URL']); puts \"Connecting to #{u.host}:#{u.port}#{u.path}\""
+
+      - name: Show logger version
+        run: |
+          bundle exec ruby -e 'require "logger"; spec=Gem.loaded_specs["logger"]; puts "logger=#{spec ? spec.version : "stdlib"}"'
 
       # Si tu DB ya existe en RDS, usa db:migrate; evita db:prepare para no requerir CREATEDB.
       - name: Run migrations
