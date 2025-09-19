@@ -111,7 +111,9 @@ jobs:
               echo "::add-mask::$MASTER"
               echo "RAILS_MASTER_KEY=$MASTER" >> "$GITHUB_ENV"
 
-
+      - name: Sanity check Logger
+        run: ruby -e 'require "logger"; puts Logger::Severity.constants.map(&:to_s).join(",")'
+        
       - name: Verify DB connectivity (optional)
         run: |
           ruby -e "require 'uri'; u=URI(ENV['DATABASE_URL']); puts \"Connecting to #{u.host}:#{u.port}#{u.path}\""
