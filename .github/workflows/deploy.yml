@@ -43,8 +43,8 @@ jobs:
       - name: Fetch secrets from AWS Secrets Manager
         id: sm
         run: |
-          DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_DB_URL_ID }}" --query 'SecretString' --output text)
-          MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_MASTER_KEY_ID }}" --query 'SecretString' --output text)
+          DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_DB_URL }}" --query 'SecretString' --output text)
+          MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_MASTER_KEY }}" --query 'SecretString' --output text)
           echo "DATABASE_URL=$DB_URL" >> $GITHUB_ENV
           echo "RAILS_MASTER_KEY=$MASTER_KEY" >> $GITHUB_ENV
 
