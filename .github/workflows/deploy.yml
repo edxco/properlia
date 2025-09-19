@@ -51,30 +51,55 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Fetch secrets from AWS Secrets Manager
+      - name: Fetch secrets from AWS Secrets Manager (JSON)
         id: sm
-        env: 
-          DB_JSON_KEY: STAGE_DATABASE_URL
+        env:
+          DB_SECRET_ID: ${{ secrets.DATABASE_URL }}         # ID/ARN del secreto que contiene { "DATABASE_URL": "..." }
+          MASTER_SECRET_ID: ${{ secrets.RAILS_MASTER_KEY }} # ID/ARN del secreto que contiene { "RAILS_MASTER_KEY": "..." }
+          DB_JSON_KEY: DATABASE_URL
+          MASTER_JSON_KEY: RAILS_MASTER_KEY
         run: |
-          RAW_DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.DATABASE_URL }}" --query 'SecretString' --output text)
-          MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_KEY_BASE }}" --query 'SecretString' --output text)
+          set -euo pipefail
 
-          DB_URL_TMP=$(jq -r --arg k "${DB_JSON_KEY:-}" '.[$k]' <<< "$RAW_DB_URL")
-          test -n "$DB_URL_TMP" || { echo "::error::Key $DB_JSON_KEY missing in secret JSON"; exit 1; }
+          RAW_DB=$(aws secretsmanager get-secret-value --secret-id "$DB_SECRET_ID" --query 'SecretString' --output text)
+          RAW_MASTER=$(aws secretsmanager get-secret-value --secret-id "$MASTER_SECRET_ID" --query 'SecretString' --output text)
 
-          # (Opcional pero MUY recomendado) re-codifica la contraseña si trae caracteres especiales (#, @, :, /, & ...)
-          DB_URL_SAFE=$(ruby -e '
-            require "uri";
-            u = URI.parse(ARGV[0]);
-            if u.password
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update -y && sudo apt-get install -y jq
+          fi
+
+          DB_URL=$(jq -r --arg k "$DB_JSON_KEY" '.[$k] // empty' <<< "$RAW_DB")
+          if [ -z "$DB_URL" ]; then
+            echo "🔎 DB secret keys disponibles:" >&2
+            jq -r 'keys[]' <<< "$RAW_DB" >&2
+            echo "::error::Key '$DB_JSON_KEY' missing or empty in DB secret JSON"
+            exit 1
+          fi
+
+          MASTER=$(jq -r --arg k "$MASTER_JSON_KEY" '.[$k] // empty' <<< "$RAW_MASTER")
+          if [ -z "$MASTER" ]; then
+            echo "🔎 MASTER secret keys disponibles:" >&2
+            jq -r 'keys[]' <<< "$RAW_MASTER" >&2
+            echo "::error::Key '$MASTER_JSON_KEY' missing or empty in MASTER secret JSON"
+            exit 1
+          fi
+
+          # Percent-encode del password por si hay #, @, :, /, & ...
+          DB_URL_SAFE=$(ruby - "$DB_URL" <<'RUBY'
+            require "uri"
+            u = URI.parse(ARGV[0])
+            if u.password && u.password !~ /%[0-9A-Fa-f]{2}/
               u.password = URI.encode_www_form_component(u.password)
             end
             puts u.to_s
-          ' "$DB_URL_TMP")
+          RUBY
+          )
 
           echo "::add-mask::$DB_URL_SAFE"
+          echo "::add-mask::$MASTER"
+
           echo "DATABASE_URL=$DB_URL_SAFE" >> $GITHUB_ENV
-          echo "RAILS_MASTER_KEY=$MASTER_KEY" >> $GITHUB_ENV
+          echo "RAILS_MASTER_KEY=$MASTER"  >> $GITHUB_ENV
 
       - name: Verify DB connectivity (optional)
         run: |
