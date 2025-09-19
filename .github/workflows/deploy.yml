@@ -54,7 +54,7 @@ jobs:
       - name: Fetch secrets from AWS Secrets Manager
         id: sm
         env: 
-          DB_JSON_KEY: STAGE_DATABASE_URL
+          DB_JSON_KEY: "STAGE_DATABASE_URL"
         run: |
           RAW_DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.DATABASE_URL }}" --query 'SecretString' --output text)
           MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_KEY_BASE }}" --query 'SecretString' --output text)
