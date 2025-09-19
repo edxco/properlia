@@ -21,9 +21,7 @@ build:
 
 run:
   runtime-version: ruby-3.1.0
-  commands:
-    start:
-      - bundle exec rails server -e production -p 8080 -b 0.0.0.0
+  command: bundle exec rails server -e production -p 8080 -b 0.0.0.0
   network:
     port: 8080
   env:
@@ -35,26 +33,16 @@ run:
       value: "true"
     - name: PORT
       value: "8080"
-    
+    - name: CORS_ORIGINS
+      value: "https://yourdomain.com,https://www.yourdomain.com"
   secrets:
     - name: DATABASE_URL
-      value_from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv"
+      value_from: "arn:aws:secretsmanager:us-east-1:123456789012:secret:rails-app/database-url-AbCdEf"
     - name: SECRET_KEY_BASE
-      value_from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/secret_key_base-6GKC6m"
-    - name: RAILS_MASTER_KEY
-      value-from:: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb"
-    # Ejemplos alternativos si no usas DATABASE_URL:
-    # - name: DB_HOST
-    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/HOST
-    # - name: DB_USER
-    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/USER
-    # - name: DB_PASS
-    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/PASS
-    # - name: DB_NAME
-    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/NAME
-    # - name: DB_SSLMODE
-    #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/SSLMODE
-
-  # (Opcional) Comandos pre-run si necesitas ajustar algo en la imagen de runtime
-  # pre-run:
-  #   - echo "Pre-run adjustments"
+      value_from: "arn:aws:secretsmanager:us-east-1:123456789012:secret:rails-app/secret-key-base-XyZ123"
+    - name: REDIS_URL
+      value_from: "arn:aws:secretsmanager:us-east-1:123456789012:secret:rails-app/redis-url-MnOpQr"
+    - name: API_KEY
+      value_from: "arn:aws:secretsmanager:us-east-1:123456789012:secret:rails-app/api-key-StUvWx"
+    - name: JWT_SECRET
+      value_from: "arn:aws:secretsmanager:us-east-1:123456789012:secret:rails-app/jwt-secret-GhIjKl"
