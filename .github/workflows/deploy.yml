@@ -54,9 +54,24 @@ jobs:
       - name: Fetch secrets from AWS Secrets Manager
         id: sm
         run: |
-          DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.DATABASE_URL }}" --query 'SecretString' --output text)
+          RAW_DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.DATABASE_URL }}" --query 'SecretString' --output text)
           MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_KEY_BASE }}" --query 'SecretString' --output text)
-          echo "DATABASE_URL=$DB_URL" >> $GITHUB_ENV
+
+          DB_URL_TMP=$(jq -r --arg k "$DB_JSON_KEY" '.[$k]' <<< "$RAW")
+          test -n "$DB_URL" || { echo "::error::Key $DB_JSON_KEY missing in secret JSON"; exit 1; }
+
+          # (Opcional pero MUY recomendado) re-codifica la contraseña si trae caracteres especiales (#, @, :, /, & ...)
+          DB_URL_SAFE=$(ruby -e '
+            require "uri";
+            u = URI.parse(ARGV[0]);
+            if u.password
+              u.password = URI.encode_www_form_component(u.password)
+            end
+            puts u.to_s
+          ' "$DB_URL_TMP")
+
+          echo "::add-mask::$DB_URL_SAFE"
+          echo "DATABASE_URL=$DB_URL_SAFE" >> $GITHUB_ENV
           echo "RAILS_MASTER_KEY=$MASTER_KEY" >> $GITHUB_ENV
 
       - name: Verify DB connectivity (optional)
