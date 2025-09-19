@@ -5,15 +5,13 @@ build:
   env:
     - name: RAILS_ENV
       value: production
-    - name: BUNDLER_WITHOUT # Use BUNDLER_WITHOUT instead of modifying config
+    - name: BUNDLER_WITHOUT
       value: "development:test"
-    # No need to explicitly install Bundler here
   commands:
-    # Use the correct `commands` structure without the extra `build` key
+    # Correctly indented list of commands
     - set -euxo pipefail
     - bundle config set --local path vendor/bundle
     - bundle install --jobs 4 --retry 3 --verbose
-    # Add database migration and asset precompilation steps
     - bundle exec rails assets:precompile
     - bundle exec rails db:migrate
 
