@@ -37,11 +37,11 @@ run:
       value: "https://yourdomain.com,https://www.yourdomain.com"
   secrets:
     - name: DATABASE_URL
-      value_from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv"
+      value-from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv"
     - name: SECRET_KEY_BASE
-      value_from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/secret_key_base-6GKC6m"
+      value-from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/secret_key_base-6GKC6m"
     - name: RAILS_MASTER_KEY
-      value_from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb"
+      value-from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb"
     # Ejemplos alternativos si no usas DATABASE_URL:
     # - name: DB_HOST
     #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/HOST
