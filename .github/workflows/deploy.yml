@@ -54,13 +54,13 @@ jobs:
       - name: Fetch secrets from AWS Secrets Manager
         id: sm
         env: 
-          DB_JSON_KEY: "STAGE_DATABASE_URL"
+          DB_JSON_KEY: STAGE_DATABASE_URL
         run: |
           RAW_DB_URL=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.DATABASE_URL }}" --query 'SecretString' --output text)
           MASTER_KEY=$(aws secretsmanager get-secret-value --secret-id "${{ secrets.SECRET_KEY_BASE }}" --query 'SecretString' --output text)
 
-          DB_URL_TMP=$(jq -r --arg k "$DB_JSON_KEY" '.[$k]' <<< "$RAW_DB_URL")
-          test -n "$DB_URL" || { echo "::error::Key $DB_JSON_KEY missing in secret JSON"; exit 1; }
+          DB_URL_TMP=$(jq -r --arg k "${DB_JSON_KEY:-}" '.[$k]' <<< "$RAW_DB_URL")
+          test -n "$DB_URL_TMP" || { echo "::error::Key $DB_JSON_KEY missing in secret JSON"; exit 1; }
 
           # (Opcional pero MUY recomendado) re-codifica la contraseña si trae caracteres especiales (#, @, :, /, & ...)
           DB_URL_SAFE=$(ruby -e '
