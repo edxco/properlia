@@ -20,7 +20,7 @@ build:
       value: production
 
 run:
-  runtime-version: ruby-3.1.7
+  runtime-version: 3.1
   command: bundle exec rails server -e production -p 8080 -b 0.0.0.0
   network:
     port: 8080
