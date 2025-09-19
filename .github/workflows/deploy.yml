@@ -115,10 +115,6 @@ jobs:
         run: ruby -e 'require "logger"; puts Logger::Severity.constants.join(",")'
 
       - name: Confirm Rails boot & env
-        env:
-          RAILS_ENV: ${{ env.RAILS_ENV }}
-          RAILS_MASTER_KEY: ${{ env.RAILS_MASTER_KEY }}
-          DATABASE_URL: ${{ env.DATABASE_URL }}
         run: |
           bundle exec rails runner - <<'RUBY'
           puts "Rails #{Rails.version} | env=#{Rails.env}"
