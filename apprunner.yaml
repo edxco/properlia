@@ -20,7 +20,7 @@ build:
       value: production
 
 run:
-  runtime-version: ruby-3.1.0
+  runtime-version: ruby-3.1.7
   command: bundle exec rails server -e production -p 8080 -b 0.0.0.0
   network:
     port: 8080
@@ -33,8 +33,6 @@ run:
       value: "true"
     - name: PORT
       value: "8080"
-    - name: CORS_ORIGINS
-      value: "https://yourdomain.com,https://www.yourdomain.com"
   secrets:
     - name: DATABASE_URL
       value-from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv"
