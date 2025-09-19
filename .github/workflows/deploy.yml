@@ -120,7 +120,7 @@ jobs:
           RAILS_MASTER_KEY: ${{ env.RAILS_MASTER_KEY }}
           DATABASE_URL: ${{ env.DATABASE_URL }}
         run: |
-          bundle exec rails r <<'RUBY'
+          bundle exec rails runner - <<'RUBY'
           puts "Rails #{Rails.version} | env=#{Rails.env}"
           RUBY
         
