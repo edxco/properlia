@@ -8,12 +8,12 @@ build:
     - name: BUNDLER_WITHOUT
       value: "development:test"
   commands:
-    # Correctly indented list of commands
-    - set -euxo pipefail
-    - bundle config set --local path vendor/bundle
-    - bundle install --jobs 4 --retry 3 --verbose
-    - bundle exec rails assets:precompile
-    - bundle exec rails db:migrate
+    build:
+      - set -euxo pipefail
+      - bundle config set --local path vendor/bundle
+      - bundle install --jobs 4 --retry 3 --verbose
+      - bundle exec rails assets:precompile
+      - bundle exec rails db:migrate
 
 run:
   command: bundle exec puma -C config/puma.rb
