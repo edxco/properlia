@@ -13,9 +13,10 @@ Rails.application.routes.draw do
       registrations: 'users/registrations'
     }
 
-  # Ejemplo de endpoint protegido
-  namespace :v1 do
-    resources :properties, only: [:index]  # ejemplo
+   namespace :api do
+    namespace :v1 do
+      resources :properties, only: %i[index show create update]
+    end
   end
 end
 

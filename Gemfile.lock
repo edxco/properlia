@@ -148,6 +148,7 @@ GEM
     nokogiri (1.18.8-x86_64-linux-gnu)
       racc (~> 1.4)
     orm_adapter (0.5.0)
+    pagy (9.4.0)
     pg (1.5.9)
     pp (0.6.2)
       prettyprint
@@ -248,6 +249,7 @@ DEPENDENCIES
   devise-jwt
   factory_bot_rails
   faker
+  pagy
   pg (~> 1.1)
   puma (~> 5.0)
   rack-cors
