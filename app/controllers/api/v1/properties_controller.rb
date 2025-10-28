@@ -4,12 +4,23 @@ module Api
     class PropertiesController < ApplicationController
       before_action :authenticate_user!, only: [:create, :update]
       before_action :set_property, only: %i[show update]
+      after_action { pagy_headers_merge(@pagy) if @pagy }
 
       # GET /api/v1/properties
       def index
-        # Add pagination/filtering later as needed
-        properties = Property.order(created_at: :desc)
-        render json: properties.as_json
+        @pagy, @properties = pagy(Property.all.order(created_at: :desc))
+
+        render json: {
+          data: @properties,
+          metadata: {
+            count: @pagy.count,
+            page:  @pagy.page,
+            items: (@pagy.respond_to?(:items) ? @pagy.items : @pagy.vars[:items]),
+            pages: @pagy.pages,
+            next:  @pagy.next,
+            prev:  @pagy.prev
+          }
+        }
       end
 
       def show
