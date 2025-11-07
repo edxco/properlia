@@ -157,8 +157,9 @@ jobs:
           script: |
             set -euo pipefail
             cd "${{ steps.envmap.outputs.EC2_PATH }}"
+            echo "Creating env file: ${{ steps.envmap.outputs.ENV_FILE }}"
             cat > "${{ steps.envmap.outputs.ENV_FILE }}" << 'EOF'
-            PORT=${{ steps.envmap.outputs.PORT }}
+            PORT=3000
             RAILS_ENV=${{ secrets.RAILS_ENV }}
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
@@ -174,6 +175,8 @@ jobs:
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             EOF
+            echo "✅ Env file created"
+            cat "${{ steps.envmap.outputs.ENV_FILE }}"
 
       - name: Debug - Check EC2 IAM Role
         uses: appleboy/ssh-action@v1.2.0
