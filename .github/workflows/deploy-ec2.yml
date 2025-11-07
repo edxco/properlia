@@ -13,6 +13,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
 
     permissions:
       id-token: write # for AWS OIDC
@@ -37,6 +38,21 @@ jobs:
             echo "✅ AWS_ROLE_ARN secret found"
           fi
 
+      - name: Verify deploy artifacts exist
+        id: check
+        run: |
+          set -e
+          echo "Expecting compose file: ${{ steps.envmap.outputs.COMPOSE_FILE }}"
+          ls -la
+          test -f "./${{ steps.envmap.outputs.COMPOSE_FILE }}" || (echo "❌ Missing compose file at repo root"; exit 1)
+
+          if [ -f "./${{ steps.envmap.outputs.ENV_FILE }}" ]; then
+            echo "✅ Found env file in repo: ${{ steps.envmap.outputs.ENV_FILE }}"
+            echo "COPY_ENV=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ℹ️ Env file not in repo: ${{ steps.envmap.outputs.ENV_FILE }} (will create on EC2)"
+            echo "COPY_ENV=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # --- AWS login via OIDC (recommended) ---
       - name: Configure AWS credentials
@@ -103,9 +119,10 @@ jobs:
           username: ${{ steps.envmap.outputs.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: |
-            ${{ steps.envmap.outputs.COMPOSE_FILE }}
-            ${{ steps.envmap.outputs.ENV_FILE }}
+            ./${{ steps.envmap.outputs.COMPOSE_FILE }}
+            ${{ steps.check.outputs.COPY_ENV == 'true' && format('./{0}', steps.envmap.outputs.ENV_FILE) || '' }}
           target: ${{ steps.envmap.outputs.EC2_PATH }}
+          debug: true
 
       # --- Deploy on EC2 ---
       - name: Deploy on EC2 (pull, up, migrate)
@@ -143,3 +160,30 @@ jobs:
 
             # Cleanup old images
             docker image prune -f
+      - name: Write env file on EC2 when missing
+        if: steps.check.outputs.COPY_ENV == 'false'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ steps.envmap.outputs.EC2_HOST }}
+          username: ${{ steps.envmap.outputs.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd "${{ steps.envmap.outputs.EC2_PATH }}"
+            cat > "${{ steps.envmap.outputs.ENV_FILE }}" << 'EOF'
+            PORT=${{ steps.envmap.outputs.PORT }}
+            RAILS_ENV=${{ secrets.RAILS_ENV }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
+            RAILS_MAX_THREADS=${{ secrets.RAILS_MAX_THREADS }}
+            RAILS_SERVE_STATIC_FILES=${{ secrets.RAILS_SERVE_STATIC_FILES }}
+            RAILS_LOG_TO_STDOUT=${{ secrets.RAILS_LOG_TO_STDOUT }}
+            ACTIVE_STORAGE_SERVICE=${{ secrets.ACTIVE_STORAGE_SERVICE }}
+            AWS_REGION=${{ env.AWS_REGION }}
+            AWS_BUCKET=${{ secrets.AWS_BUCKET }}
+            DEVISE_JWT_SECRET_KEY=${{ secrets.DEVISE_JWT_SECRET_KEY }}
+            CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            EOF
