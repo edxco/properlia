@@ -177,16 +177,22 @@ jobs:
             fi
             echo "✅ IAM role found: $ROLE_NAME"
 
+            # Get temporary credentials from instance metadata and export them
+            echo "Fetching temporary AWS credentials from instance role..."
+            CREDS=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE_NAME)
+            export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq -r '.AccessKeyId')
+            export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.SecretAccessKey')
+            export AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Token')
+
             # Verify AWS credentials are working
             echo "Verifying AWS credentials..."
             if ! aws sts get-caller-identity --output text 2>&1; then
-              echo "❌ AWS credentials not working. Checking AWS CLI version..."
-              aws --version
+              echo "❌ AWS credentials not working"
               exit 1
             fi
             echo "✅ AWS credentials verified"
 
-            # ECR login (fail on error)
+            # ECR login
             echo "Logging into ECR..."
             aws ecr get-login-password --region "${{ env.AWS_REGION }}" \
               | docker login --username AWS --password-stdin "${REGISTRY}"
@@ -202,6 +208,11 @@ jobs:
             echo "Pulling Docker image..."
             docker pull "$IMAGE"
 
+            # Add AWS credentials to env file for the containers to use
+            echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> "$ENV_FILE"
+            echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> "$ENV_FILE"
+            echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> "$ENV_FILE"
+
             echo "Starting services with Docker Compose..."
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
 
@@ -211,7 +222,8 @@ jobs:
             echo "Cleaning up old images..."
             docker image prune -f
             
-            echo "✅ Deployment complete!"
+            echo "✅ Deployment complete!"      - name: Deploy on EC2 (pull, up, migrate)
+      
       - name: Write env file on EC2 when missing
         if: steps.check.outputs.COPY_ENV == 'false'
         uses: appleboy/ssh-action@v1.2.0
