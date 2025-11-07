@@ -272,6 +272,25 @@ jobs:
             docker image prune -f
             
             echo "✅ Deployment complete!"
+
+      - name: Debug - Check container logs
+        if: failure()
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ steps.envmap.outputs.EC2_HOST }}
+          username: ${{ steps.envmap.outputs.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd "${{ steps.envmap.outputs.EC2_PATH }}"
+            
+            echo "=== Container Status ==="
+            docker compose -f docker-compose.stage.yml ps -a
+            
+            echo -e "\n=== Database Logs ==="
+            docker compose -f docker-compose.stage.yml logs db
+            
+            echo -e "\n=== Web Logs ==="
+            docker compose -f docker-compose.stage.yml logs web
       
       - name: Write env file on EC2 when missing
         if: steps.check.outputs.COPY_ENV == 'false'
