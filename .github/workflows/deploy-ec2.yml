@@ -234,6 +234,7 @@ jobs:
 
             echo "Using IMAGE=$IMAGE"
             echo "Using COMPOSE_FILE=$COMPOSE_FILE"
+            echo "Using ENV_FILE=$ENV_FILE"
 
             # Get token for IMDSv2
             echo "Requesting IMDSv2 token..."
@@ -280,15 +281,17 @@ jobs:
             docker pull "$IMAGE"
 
             # Add AWS credentials to env file for the containers to use
-            echo "Adding AWS credentials to env file..."
+            echo "Adding AWS credentials and IMAGE to env file..."
             # Remove old credentials if they exist
             sed -i '/^AWS_ACCESS_KEY_ID=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^AWS_SECRET_ACCESS_KEY=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^AWS_SESSION_TOKEN=/d' "$ENV_FILE" 2>/dev/null || true
-            # Add new credentials
+            sed -i '/^IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            # Add new credentials and IMAGE
             echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> "$ENV_FILE"
             echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> "$ENV_FILE"
             echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> "$ENV_FILE"
+            echo "IMAGE=$IMAGE" >> "$ENV_FILE"
 
             echo "Starting services with Docker Compose..."
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
