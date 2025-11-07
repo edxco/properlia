@@ -22,6 +22,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Debug ref and actor
+        run: |
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_REF_NAME=${GITHUB_REF_NAME}"
+          echo "Expect trust policy sub=repo:${{ github.repository }}:ref:refs/heads/${GITHUB_REF_NAME}"
+
         # --- Fail-fast guard (before AWS credentials setup) ---
       - name: Assert AWS_ROLE_ARN is present
         run: |
@@ -52,6 +58,7 @@ jobs:
             echo "EC2_USER=${{ secrets.EC2_SSH_USER }}" >> $GITHUB_OUTPUT
             echo "EC2_PATH=${{ secrets.STAGE_EC2_PATH }}" >> $GITHUB_OUTPUT
             echo "ENV_FILE=.env.stage" >> $GITHUB_OUTPUT
+            echo "COMPOSE_FILE=docker-compose.stage.yml" >> $GITHUB_OUTPUT
             echo "PORT=3000" >> $GITHUB_OUTPUT
           else
             echo "ENV_NAME=prod" >> $GITHUB_OUTPUT
@@ -59,6 +66,7 @@ jobs:
             echo "EC2_USER=${{ secrets.EC2_SSH_USER }}" >> $GITHUB_OUTPUT
             echo "EC2_PATH=${{ secrets.PROD_EC2_PATH }}" >> $GITHUB_OUTPUT
             echo "ENV_FILE=.env.prod" >> $GITHUB_OUTPUT
+            echo "COMPOSE_FILE=docker-compose.prod.yml" >> $GITHUB_OUTPUT
             echo "PORT=3000" >> $GITHUB_OUTPUT
           fi
 
@@ -87,7 +95,7 @@ jobs:
 
       # --- Copy deploy files to EC2 (compose + env files, if you keep them in repo) ---
       # (Skip if these already live on the instance)
-      - name: Copy docker-compose.ec2.yml and env to EC2
+      - name: Copy docker-compose and env to EC2
         if: success()
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -95,7 +103,7 @@ jobs:
           username: ${{ steps.envmap.outputs.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: |
-            docker-compose.ec2.yml
+            ${{ steps.envmap.outputs.COMPOSE_FILE }}
             ${{ steps.envmap.outputs.ENV_FILE }}
           target: ${{ steps.envmap.outputs.EC2_PATH }}
 
@@ -118,18 +126,20 @@ jobs:
             export IMAGE="${{ steps.vars.outputs.IMAGE_URI }}"
             export PORT="${{ steps.envmap.outputs.PORT }}"
             export ENV_FILE="${{ steps.envmap.outputs.ENV_FILE }}"
+            export COMPOSE_FILE="${{ steps.envmap.outputs.COMPOSE_FILE }}"
 
             echo "Using IMAGE=$IMAGE"
+            echo "Using COMPOSE_FILE=$COMPOSE_FILE"
             docker pull "$IMAGE"
 
             # Ensure compose is present (Compose V2)
             docker compose version || sudo curl -L "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
 
             # Bring up (remove orphans, recreate changed)
-            docker compose -f docker-compose.ec2.yml --env-file "$ENV_FILE" up -d --remove-orphans
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
 
             # Run DB migrations
-            docker compose -f docker-compose.ec2.yml --env-file "$ENV_FILE" run --rm web bundle exec rails db:migrate
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm web bundle exec rails db:migrate
 
             # Cleanup old images
             docker image prune -f

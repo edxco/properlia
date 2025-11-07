@@ -17,30 +17,29 @@ services:
     restart: unless-stopped
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${IMAGE:-properlia-api:latest}
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
     volumes:
       - storage_data:/app/storage
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:${PORT:-3000}"
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/properlia2025_production
-      RAILS_ENV: production
+      PORT: ${PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL}
+      RAILS_ENV: ${RAILS_ENV:-production}
       RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      RAILS_SERVE_STATIC_FILES: "true"
-      RAILS_LOG_TO_STDOUT: "true"
-      # Active Storage - use amazon for production
+      RAILS_SERVE_STATIC_FILES: ${RAILS_SERVE_STATIC_FILES:-true}
+      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT:-true}
+      # Active Storage
       ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE:-amazon}
       # AWS Configuration
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_REGION: ${AWS_REGION}
       AWS_BUCKET: ${AWS_BUCKET}
       # Devise JWT
       DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
+      # CORS Origins
+      CORS_ORIGINS: ${CORS_ORIGINS}
     depends_on:
       db:
         condition: service_healthy

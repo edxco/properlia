@@ -19,9 +19,7 @@ services:
       - app-network
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${IMAGE:-properlia-api:latest}
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
     volumes:
       - storage_data:/app/storage
