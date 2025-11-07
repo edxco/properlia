@@ -5,9 +5,9 @@ on:
     branches: ["stage", "prod"]
 
 env:
-  AWS_REGION: us-east-1 # <-- change if needed
-  ECR_REPO: edxco/properlia # <-- your ECR repo name (no registry URL)
-  IMAGE_NAME: properlia-web # local image name for tagging
+  AWS_REGION: us-east-1
+  ECR_REPO: edxco/properlia
+  IMAGE_NAME: properlia-api
   DOCKER_BUILDKIT: 1
 
 jobs:
@@ -21,6 +21,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+        # --- Fail-fast guard (before AWS credentials setup) ---
+      - name: Assert AWS_ROLE_ARN is present
+        run: |
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ]; then
+            echo "❌ Missing AWS_ROLE_ARN secret"; exit 1
+          else
+            echo "✅ AWS_ROLE_ARN secret found"
+          fi
+
 
       # --- AWS login via OIDC (recommended) ---
       - name: Configure AWS credentials
