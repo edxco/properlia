@@ -1,75 +1,56 @@
-version: 1.0
-runtime: ruby31   # usa ruby32 si ya lo tienes soportado en tu cuenta/región
+# version: 1.0
+# runtime: ruby31
 
-build:
-  commands:
-    pre-build:
-      # 1) Asegura Bundler EXACTO al de tu Gemfile.lock (ver nota BUNDLER_VERSION abajo)
-      - if [ -n "$BUNDLER_VERSION" ]; then gem install bundler -v "$BUNDLER_VERSION"; else gem install bundler; fi
+# build:
+#   commands:
+#     build:
+#       - echo "Installing dependencies..."
+#       - bundle install --deployment --without development test
+#       - echo "Precompiling assets..."
+#       - bundle exec rails assets:precompile RAILS_ENV=production
+#       - echo "Setting up database..."
+#       - bundle exec rails db:create RAILS_ENV=production || true
+#       - bundle exec rails db:migrate RAILS_ENV=production
+#     pre-build:
+#       - echo "Installing system packages..."
+#   env:
+#     - name: RAILS_ENV
+#       value: production
+#     - name: NODE_ENV
+#       value: production
 
-      # 2) Fuerza a compilar gems como si fuera linux (evita binarios precompilados que no apliquen)
-      - bundle config set force_ruby_platform true
+# run:
+#   command: bundle exec rails server -e production -p 8080 -b 0.0.0.0
+#   network:
+#     port: 8080
+#   env:
+#     - name: RAILS_ENV
+#       value: production
+#     - name: RAILS_LOG_TO_STDOUT
+#       value: "true"
+#     - name: RAILS_SERVE_STATIC_FILES
+#       value: "true"
+#     - name: PORT
+#       value: "8080"
+#   secrets:
+#     - name: DATABASE_URL
+#       value-from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv"
+#     - name: SECRET_KEY_BASE
+#       value-from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/secret_key_base-6GKC6m"
+#     - name: RAILS_MASTER_KEY
+#       value-from: "arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb"
+#     # Ejemplos alternativos si no usas DATABASE_URL:
+#     # - name: DB_HOST
+#     #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/HOST
+#     # - name: DB_USER
+#     #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/USER
+#     # - name: DB_PASS
+#     #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/PASS
+#     # - name: DB_NAME
+#     #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/NAME
+#     # - name: DB_SSLMODE
+#     #   value-from: arn:aws:ssm:REGION:ACCOUNT:parameter/proper/db/SSLMODE
 
-      # 3) (Opcional) Si compilas pg/nokogiri, esto suele ayudar
-      - bundle config set build.nokogiri "--use-system-libraries"
-      # - yum -y install postgresql-devel gcc make     # Úsalo solo si el build de 'pg' se queja por headers faltantes
-
-      # 4) Config de instalación
-      - bundle config set without "development test"
-      - bundle config set path "vendor/bundle"
-
-    build:
-      - bundle install --jobs 4 --retry 3
-      # Si NO es API-only y compilas assets:
-      # - bundle exec rails assets:precompile
-
-    post-build:
-      - echo "Build stage done"
-
-  env:
-    - name: RAILS_ENV
-      value: production
-    # (Muy útil) Coloca la versión exacta de Bundler de tu Gemfile.lock
-    # La puedes inyectar desde Secrets/SSM o hardcodear si no cambia:
-    # - name: BUNDLER_VERSION
-    #   value: "2.5.13"
-
-run:
-  command: bundle exec puma -C config/puma.rb
-
-  network:
-    port: 8080
-    env: APP_PORT
-
-  env:
-    - name: RACK_ENV
-      value: production
-    - name: RAILS_ENV
-      value: production
-    - name: RAILS_LOG_TO_STDOUT
-      value: "true"
-    - name: RAILS_SERVE_STATIC_FILES
-      value: "true"
-    - name: WEB_CONCURRENCY
-      value: "1"
-    - name: RAILS_MAX_THREADS
-      value: "5"
-
-  # Health check para que App Runner valide la app (implementa /up abajo)
-  health-check:
-    path: /up
-    interval: 10
-    timeout: 5
-    healthy-threshold: 1
-    unhealthy-threshold: 3
-
-  secrets:
-    - name: SECRET_KEY_BASE
-      value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/secret_key_base-6GKC6m
-
-    - name: RAILS_MASTER_KEY
-      value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/rails/master_key-xZP2Wb
-
-    # Asegúrate que el SecretString contenga la URL COMPLETA (postgres://user:pass@host:5432/db?sslmode=require)
-    - name: STAGE_DATABASE_URL
-      value-from: arn:aws:secretsmanager:us-east-1:211125514217:secret:properlia/stage/postgres-YaL3cv
+#   # (Opcional) Comandos pre-run si necesitas ajustar algo en la imagen de runtime
+#   # pre-run:
+#   #   - echo "Pre-run adjustments"

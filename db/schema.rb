@@ -10,10 +10,75 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_09_04_001815) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_28_041434) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
+
+  create_table "active_storage_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.uuid "record_id", null: false
+    t.uuid "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "properties", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "featured", default: false, null: false
+    t.string "title", null: false
+    t.text "description"
+    t.decimal "land_area", precision: 10, scale: 2
+    t.decimal "built_area", precision: 10, scale: 2
+    t.integer "rooms", default: 0, null: false
+    t.integer "bathrooms", default: 0, null: false
+    t.integer "half_bathrooms", default: 0, null: false
+    t.integer "parking_spaces", default: 0, null: false
+    t.string "property_type", null: false
+    t.decimal "price", precision: 12, scale: 2, null: false
+    t.string "status", default: "en_venta", null: false
+    t.string "address"
+    t.string "city"
+    t.string "state"
+    t.string "coordinates"
+    t.jsonb "images", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["city"], name: "index_properties_on_city"
+    t.index ["featured"], name: "index_properties_on_featured"
+    t.index ["images"], name: "index_properties_on_images", using: :gin
+    t.index ["price"], name: "index_properties_on_price"
+    t.index ["property_type"], name: "index_properties_on_property_type"
+    t.index ["state"], name: "index_properties_on_state"
+    t.index ["status"], name: "index_properties_on_status"
+    t.check_constraint "bathrooms >= 0", name: "properties_bathrooms_non_negative"
+    t.check_constraint "built_area >= 0::numeric", name: "properties_built_area_non_negative"
+    t.check_constraint "half_bathrooms >= 0", name: "properties_half_bathrooms_non_negative"
+    t.check_constraint "jsonb_typeof(images) = 'array'::text", name: "properties_images_must_be_array"
+    t.check_constraint "land_area >= 0::numeric", name: "properties_land_area_non_negative"
+    t.check_constraint "parking_spaces >= 0", name: "properties_parking_spaces_non_negative"
+    t.check_constraint "price >= 0::numeric", name: "properties_price_non_negative"
+    t.check_constraint "rooms >= 0", name: "properties_rooms_non_negative"
+  end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -31,4 +96,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_04_001815) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
 end
