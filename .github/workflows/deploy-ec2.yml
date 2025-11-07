@@ -38,22 +38,6 @@ jobs:
             echo "✅ AWS_ROLE_ARN secret found"
           fi
 
-      - name: Verify deploy artifacts exist
-        id: check
-        run: |
-          set -e
-          echo "Expecting compose file: ${{ steps.envmap.outputs.COMPOSE_FILE }}"
-          ls -la
-          test -f "./${{ steps.envmap.outputs.COMPOSE_FILE }}" || (echo "❌ Missing compose file at repo root"; exit 1)
-
-          if [ -f "./${{ steps.envmap.outputs.ENV_FILE }}" ]; then
-            echo "✅ Found env file in repo: ${{ steps.envmap.outputs.ENV_FILE }}"
-            echo "COPY_ENV=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ℹ️ Env file not in repo: ${{ steps.envmap.outputs.ENV_FILE }} (will create on EC2)"
-            echo "COPY_ENV=false" >> "$GITHUB_OUTPUT"
-          fi
-
       # --- AWS login via OIDC (recommended) ---
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -84,6 +68,22 @@ jobs:
             echo "ENV_FILE=.env.prod" >> $GITHUB_OUTPUT
             echo "COMPOSE_FILE=docker-compose.prod.yml" >> $GITHUB_OUTPUT
             echo "PORT=3000" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify deploy artifacts exist
+        id: check
+        run: |
+          set -e
+          echo "Expecting compose file: ${{ steps.envmap.outputs.COMPOSE_FILE }}"
+          ls -la
+          test -f "./${{ steps.envmap.outputs.COMPOSE_FILE }}" || (echo "❌ Missing compose file at repo root"; exit 1)
+
+          if [ -f "./${{ steps.envmap.outputs.ENV_FILE }}" ]; then
+            echo "✅ Found env file in repo: ${{ steps.envmap.outputs.ENV_FILE }}"
+            echo "COPY_ENV=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ℹ️ Env file not in repo: ${{ steps.envmap.outputs.ENV_FILE }} (will create on EC2)"
+            echo "COPY_ENV=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Compute image tags
