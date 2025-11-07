@@ -158,31 +158,38 @@ jobs:
             set -euo pipefail
             cd "${{ steps.envmap.outputs.EC2_PATH }}"
 
-            # Login to ECR (instance role recommended; fallback uses docker login)
-            aws --version >/dev/null 2>&1 && \
-              aws ecr get-login-password --region ${{ env.AWS_REGION }} \
-              | docker login --username AWS --password-stdin ${{ steps.ecr.outputs.registry }} || true
-
             export IMAGE="${{ steps.vars.outputs.IMAGE_URI }}"
             export PORT="${{ steps.envmap.outputs.PORT }}"
             export ENV_FILE="${{ steps.envmap.outputs.ENV_FILE }}"
             export COMPOSE_FILE="${{ steps.envmap.outputs.COMPOSE_FILE }}"
+            REGISTRY="${{ steps.ecr.outputs.registry }}"
 
             echo "Using IMAGE=$IMAGE"
             echo "Using COMPOSE_FILE=$COMPOSE_FILE"
+
+            # Ensure AWS CLI exists and identity is available
+            aws --version
+            aws sts get-caller-identity --output text >/dev/null
+
+            # ECR login (fail on error)
+            aws ecr get-login-password --region "${{ env.AWS_REGION }}" \
+              | docker login --username AWS --password-stdin "${REGISTRY}"
+
+            # Ensure compose CLI
+            docker compose version || {
+              sudo curl -fsSL "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" \
+                -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            }
+
             docker pull "$IMAGE"
 
-            # Ensure compose is present (Compose V2)
-            docker compose version || sudo curl -L "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
-
-            # Bring up (remove orphans, recreate changed)
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
 
-            # Run DB migrations
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm web bundle exec rails db:migrate
 
-            # Cleanup old images
             docker image prune -f
+
       - name: Write env file on EC2 when missing
         if: steps.check.outputs.COPY_ENV == 'false'
         uses: appleboy/ssh-action@v1.2.0
