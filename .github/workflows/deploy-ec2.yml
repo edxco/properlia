@@ -1,0 +1,125 @@
+name: Deploy to EC2 (stage/prod)
+
+on:
+  push:
+    branches: ["stage", "prod"]
+
+env:
+  AWS_REGION: us-east-1 # <-- change if needed
+  ECR_REPO: edxco/properlia # <-- your ECR repo name (no registry URL)
+  IMAGE_NAME: properlia-web # local image name for tagging
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # for AWS OIDC
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --- AWS login via OIDC (recommended) ---
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }} # IAM role with ECR push perms
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set env per branch (stage/prod)
+        id: envmap
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "stage" ]; then
+            echo "ENV_NAME=stage" >> $GITHUB_OUTPUT
+            echo "EC2_HOST=${{ secrets.STAGE_EC2_HOST }}" >> $GITHUB_OUTPUT
+            echo "EC2_USER=${{ secrets.EC2_SSH_USER }}" >> $GITHUB_OUTPUT
+            echo "EC2_PATH=${{ secrets.STAGE_EC2_PATH }}" >> $GITHUB_OUTPUT
+            echo "ENV_FILE=.env.stage" >> $GITHUB_OUTPUT
+            echo "PORT=3000" >> $GITHUB_OUTPUT
+          else
+            echo "ENV_NAME=prod" >> $GITHUB_OUTPUT
+            echo "EC2_HOST=${{ secrets.PROD_EC2_HOST }}" >> $GITHUB_OUTPUT
+            echo "EC2_USER=${{ secrets.EC2_SSH_USER }}" >> $GITHUB_OUTPUT
+            echo "EC2_PATH=${{ secrets.PROD_EC2_PATH }}" >> $GITHUB_OUTPUT
+            echo "ENV_FILE=.env.prod" >> $GITHUB_OUTPUT
+            echo "PORT=3000" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compute image tags
+        id: vars
+        run: |
+          SHA_SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          REGISTRY="${{ steps.ecr.outputs.registry }}"
+          IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:${GITHUB_REF_NAME}-${SHA_SHORT}"
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_OUTPUT
+
+      # --- Build & push image to ECR ---
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.IMAGE_URI }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --- Copy deploy files to EC2 (compose + env files, if you keep them in repo) ---
+      # (Skip if these already live on the instance)
+      - name: Copy docker-compose.ec2.yml and env to EC2
+        if: success()
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ steps.envmap.outputs.EC2_HOST }}
+          username: ${{ steps.envmap.outputs.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: |
+            docker-compose.ec2.yml
+            ${{ steps.envmap.outputs.ENV_FILE }}
+          target: ${{ steps.envmap.outputs.EC2_PATH }}
+
+      # --- Deploy on EC2 ---
+      - name: Deploy on EC2 (pull, up, migrate)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ steps.envmap.outputs.EC2_HOST }}
+          username: ${{ steps.envmap.outputs.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd "${{ steps.envmap.outputs.EC2_PATH }}"
+
+            # Login to ECR (instance role recommended; fallback uses docker login)
+            aws --version >/dev/null 2>&1 && \
+              aws ecr get-login-password --region ${{ env.AWS_REGION }} \
+              | docker login --username AWS --password-stdin ${{ steps.ecr.outputs.registry }} || true
+
+            export IMAGE="${{ steps.vars.outputs.IMAGE_URI }}"
+            export PORT="${{ steps.envmap.outputs.PORT }}"
+            export ENV_FILE="${{ steps.envmap.outputs.ENV_FILE }}"
+
+            echo "Using IMAGE=$IMAGE"
+            docker pull "$IMAGE"
+
+            # Ensure compose is present (Compose V2)
+            docker compose version || sudo curl -L "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
+
+            # Bring up (remove orphans, recreate changed)
+            docker compose -f docker-compose.ec2.yml --env-file "$ENV_FILE" up -d --remove-orphans
+
+            # Run DB migrations
+            docker compose -f docker-compose.ec2.yml --env-file "$ENV_FILE" run --rm web bundle exec rails db:migrate
+
+            # Cleanup old images
+            docker image prune -f
