@@ -109,6 +109,29 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # Map SG per branch
+      - name: Map SG per env
+        id: sg
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "stage" ]; then
+            echo "SG_ID=${{ secrets.STAGE_SG_ID }}" >> $GITHUB_OUTPUT
+          else
+            echo "SG_ID=${{ secrets.PROD_SG_ID }}" >> $GITHUB_OUTPUT
+          fi
+
+      # Allow runner IP on port 22
+      - name: Allow SSH from this runner IP
+        if: success()
+        run: |
+          set -e
+          MYIP="$(curl -s https://checkip.amazonaws.com)/32"
+          echo "Allowing ${MYIP} on SG ${SG_ID}"
+          aws ec2 authorize-security-group-ingress \
+            --group-id "${{ steps.sg.outputs.SG_ID }}" \
+            --protocol tcp --port 22 --cidr "${MYIP}" || true
+        env:
+          SG_ID: ${{ steps.sg.outputs.SG_ID }}
+
       # --- Copy deploy files to EC2 (compose + env files, if you keep them in repo) ---
       # (Skip if these already live on the instance)
       - name: Copy docker-compose and env to EC2
@@ -187,3 +210,15 @@ jobs:
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             EOF
+
+      - name: Revoke SSH from this runner IP
+        if: always()
+        run: |
+          set -e
+          MYIP="$(curl -s https://checkip.amazonaws.com)/32"
+          echo "Revoking ${MYIP} on SG ${SG_ID}"
+          aws ec2 revoke-security-group-ingress \
+            --group-id "${{ steps.sg.outputs.SG_ID }}" \
+            --protocol tcp --port 22 --cidr "${MYIP}" || true
+        env:
+          SG_ID: ${{ steps.sg.outputs.SG_ID }}
