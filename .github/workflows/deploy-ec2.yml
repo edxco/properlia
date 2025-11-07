@@ -147,6 +147,46 @@ jobs:
           target: ${{ steps.envmap.outputs.EC2_PATH }}
           debug: true
 
+      - name: Debug - Check EC2 IAM Role
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ steps.envmap.outputs.EC2_HOST }}
+          username: ${{ steps.envmap.outputs.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "=== Checking IAM Role Attachment ==="
+            
+            # Check if instance has a role
+            ROLE_NAME=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>/dev/null || echo "FAILED")
+            echo "Role name from metadata: $ROLE_NAME"
+            
+            if [ "$ROLE_NAME" = "FAILED" ] || [ -z "$ROLE_NAME" ]; then
+              echo "❌ METADATA SERVICE NOT ACCESSIBLE OR NO ROLE ATTACHED"
+              
+              # Check if IMDSv2 is required
+              echo "Trying with IMDSv2..."
+              TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" 2>/dev/null)
+              ROLE_NAME_V2=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>/dev/null || echo "FAILED")
+              echo "Role name with IMDSv2: $ROLE_NAME_V2"
+            else
+              echo "✅ Role found: $ROLE_NAME"
+              
+              # Get full credentials
+              echo "Fetching credentials..."
+              CREDS=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE_NAME)
+              echo "Credentials response:"
+              echo "$CREDS" | jq '.' || echo "$CREDS"
+              
+              # Test AWS CLI
+              echo "Testing AWS CLI..."
+              aws --version
+              aws sts get-caller-identity || echo "❌ AWS CLI failed"
+            fi
+            
+            # Check if jq is installed
+            which jq || echo "⚠️ jq not installed, installing..."
+            sudo yum install -y jq || sudo apt-get install -y jq
+
       # --- Deploy on EC2 ---
       - name: Deploy on EC2 (pull, up, migrate)
         uses: appleboy/ssh-action@v1.2.0
