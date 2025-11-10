@@ -29,7 +29,7 @@ services:
     environment:
       PORT: 3000
       DATABASE_URL: ${POSTGRES_URL}
-      RAILS_ENV: ${RAILS_ENV}
+      RAILS_ENV: local
       RAILS_MAX_THREADS: 5
       # Active Storage configuration for local development
       ACTIVE_STORAGE_SERVICE: local

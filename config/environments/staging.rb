@@ -1,6 +1,7 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  puts "Loading STAGING environment"
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
@@ -32,7 +33,7 @@ Rails.application.configure do
 
   # Store uploaded files on Amazon S3 (see config/storage.yml for options).
   # Can be overridden with ACTIVE_STORAGE_SERVICE env var
-  config.active_storage.service = ENV.fetch('ACTIVE_STORAGE_SERVICE', 'amazon').to_sym
+  config.active_storage.service = ENV.fetch('ACTIVE_STORAGE_SERVICE', :amazon).to_sym
 
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
