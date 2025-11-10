@@ -304,8 +304,7 @@ jobs:
 
             echo "Clearing migration locks (if any)..."
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm web bundle exec rails runner "
-            ActiveRecord::Base.connection.execute('DELETE FROM ar_internal_metadata WHERE key = \\'environment\\' AND value != \\'${RAILS_ENV}\\';')
-            ActiveRecord::Base.connection.execute('SELECT pg_advisory_unlock_all();')
+              ActiveRecord::Base.connection.execute('SELECT pg_advisory_unlock_all();')
             " || echo "No locks to clear"
 
             echo "Running database migrations..."
