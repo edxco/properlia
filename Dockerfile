@@ -1,7 +1,7 @@
 # Use official Ruby image
 FROM ruby:3.2.2-slim
 
-# Install dependencies
+# Install dependencies including AWS CLI requirements
 RUN apt-get update -qq && apt-get install -y \
   build-essential \
   libpq-dev \
@@ -11,9 +11,10 @@ RUN apt-get update -qq && apt-get install -y \
   libvips \
   git \
   curl \
+  unzip \
   && rm -rf /var/lib/apt/lists/*
 
-# Install AWS CLI
+# Install AWS CLI (must be after unzip is installed)
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awsclip.zip" && \
     unzip awsclip.zip && \
     ./aws/install && \
