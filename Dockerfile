@@ -13,6 +13,12 @@ RUN apt-get update -qq && apt-get install -y \
   curl \
   && rm -rf /var/lib/apt/lists/*
 
+# Install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awsclip.zip" && \
+    unzip awsclip.zip && \
+    ./aws/install && \
+    rm -rf awsclip.zip aws
+
 # Set working directory
 WORKDIR /app
 
