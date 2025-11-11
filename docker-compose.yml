@@ -6,9 +6,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: properlia2025_development
     ports:
       - "5432:5432"
     healthcheck:
@@ -16,35 +16,60 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
-  web:
-    build: .
+  backend:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
     volumes:
-      - .:/app
+      - ./packages/backend:/app
       - bundle_cache:/usr/local/bundle
       - storage_data:/app/storage
     ports:
       - "3000:3000"
     environment:
       PORT: 3000
-      DATABASE_URL: ${POSTGRES_URL}
-      RAILS_ENV: local
+      DATABASE_URL: postgres://postgres:postgres@db:5432/properlia2025_development
+      RAILS_ENV: development
       RAILS_MAX_THREADS: 5
-      # Active Storage configuration for local development
       ACTIVE_STORAGE_SERVICE: local
-      # Add your AWS credentials for staging/production
-      # AWS_ACCESS_KEY_ID: your_access_key
-      # AWS_SECRET_ACCESS_KEY: your_secret_key
-      # AWS_REGION: us-east-1
-      # AWS_BUCKET: your-bucket-name
     depends_on:
       db:
         condition: service_healthy
     stdin_open: true
     tty: true
+    networks:
+      - app-network
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ./packages/frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    depends_on:
+      - backend
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
   bundle_cache:
   storage_data:
+  frontend_node_modules:
+
+networks:
+  app-network:
+    driver: bridge

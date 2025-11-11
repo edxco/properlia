@@ -18,17 +18,17 @@ services:
     networks:
       - app-network
 
-  web:
-    image: ${IMAGE:-properlia-api:latest}
+  backend:
+    image: ${BACKEND_IMAGE:-properlia-backend:latest}
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
     volumes:
       - storage_data:/app/storage
     ports:
-      - "${PORT:-3000}:${PORT:-3000}"
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     environment:
-      PORT: ${PORT}
+      PORT: ${BACKEND_PORT:-3000}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      RAILS_ENV: staging
+      RAILS_ENV: ${RAILS_ENV:-staging}
       RAILS_MAX_THREADS: ${RAILS_MAX_THREADS}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       RAILS_SERVE_STATIC_FILES: ${RAILS_SERVE_STATIC_FILES}
@@ -48,6 +48,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-properlia-frontend:latest}
+    ports:
+      - "${FRONTEND_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    depends_on:
+      - backend
     restart: unless-stopped
     networks:
       - app-network

@@ -7,7 +7,8 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPO: edxco/properlia
-  IMAGE_NAME: properlia-api
+  BACKEND_IMAGE_NAME: properlia-backend
+  FRONTEND_IMAGE_NAME: properlia-frontend
   DOCKER_BUILDKIT: 1
 
 jobs:
@@ -59,7 +60,8 @@ jobs:
             echo "EC2_PATH=${{ secrets.STAGE_EC2_PATH }}" >> $GITHUB_OUTPUT
             echo "ENV_FILE=.env.stage" >> $GITHUB_OUTPUT
             echo "COMPOSE_FILE=docker-compose.stage.yml" >> $GITHUB_OUTPUT
-            echo "PORT=3000" >> $GITHUB_OUTPUT
+            echo "BACKEND_PORT=3000" >> $GITHUB_OUTPUT
+            echo "FRONTEND_PORT=3001" >> $GITHUB_OUTPUT
           else
             echo "ENV_NAME=prod" >> $GITHUB_OUTPUT
             echo "EC2_HOST=${{ secrets.PROD_EC2_HOST }}" >> $GITHUB_OUTPUT
@@ -67,7 +69,8 @@ jobs:
             echo "EC2_PATH=${{ secrets.PROD_EC2_PATH }}" >> $GITHUB_OUTPUT
             echo "ENV_FILE=.env.prod" >> $GITHUB_OUTPUT
             echo "COMPOSE_FILE=docker-compose.prod.yml" >> $GITHUB_OUTPUT
-            echo "PORT=3000" >> $GITHUB_OUTPUT
+            echo "BACKEND_PORT=3000" >> $GITHUB_OUTPUT
+            echo "FRONTEND_PORT=3001" >> $GITHUB_OUTPUT
           fi
 
       - name: Verify deploy artifacts exist
@@ -91,23 +94,37 @@ jobs:
         run: |
           SHA_SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
           REGISTRY="${{ steps.ecr.outputs.registry }}"
-          IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:${GITHUB_REF_NAME}-${SHA_SHORT}"
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_OUTPUT
+          BACKEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:backend-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          FRONTEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:frontend-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          echo "BACKEND_IMAGE_URI=$BACKEND_IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "FRONTEND_IMAGE_URI=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_OUTPUT
 
-      # --- Build & push image to ECR ---
+      # --- Build & push images to ECR ---
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push
+      - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./packages/backend
+          file: ./packages/backend/Dockerfile
           push: true
           tags: |
-            ${{ steps.vars.outputs.IMAGE_URI }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ steps.vars.outputs.BACKEND_IMAGE_URI }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./packages/frontend
+          file: ./packages/frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
 
       # Map SG per branch
       - name: Map SG per env
@@ -159,7 +176,8 @@ jobs:
             cd "${{ steps.envmap.outputs.EC2_PATH }}"
             echo "Creating env file: ${{ steps.envmap.outputs.ENV_FILE }}"
             cat > "${{ steps.envmap.outputs.ENV_FILE }}" << 'EOF'
-            PORT=3000
+            # Backend Configuration
+            BACKEND_PORT=${{ steps.envmap.outputs.BACKEND_PORT }}
             RAILS_ENV=${{ secrets.RAILS_ENV }}
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
@@ -171,9 +189,15 @@ jobs:
             AWS_BUCKET=${{ secrets.AWS_BUCKET }}
             DEVISE_JWT_SECRET_KEY=${{ secrets.DEVISE_JWT_SECRET_KEY }}
             CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
+
+            # Database Configuration
             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+
+            # Frontend Configuration
+            FRONTEND_PORT=${{ steps.envmap.outputs.FRONTEND_PORT }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
             EOF
             echo "✅ Env file created"
             cat "${{ steps.envmap.outputs.ENV_FILE }}"
@@ -229,13 +253,16 @@ jobs:
             set -euo pipefail
             cd "${{ steps.envmap.outputs.EC2_PATH }}"
 
-            export IMAGE="${{ steps.vars.outputs.IMAGE_URI }}"
-            export PORT="${{ steps.envmap.outputs.PORT }}"
+            export BACKEND_IMAGE="${{ steps.vars.outputs.BACKEND_IMAGE_URI }}"
+            export FRONTEND_IMAGE="${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}"
+            export BACKEND_PORT="${{ steps.envmap.outputs.BACKEND_PORT }}"
+            export FRONTEND_PORT="${{ steps.envmap.outputs.FRONTEND_PORT }}"
             export ENV_FILE="${{ steps.envmap.outputs.ENV_FILE }}"
             export COMPOSE_FILE="${{ steps.envmap.outputs.COMPOSE_FILE }}"
             REGISTRY="${{ steps.ecr.outputs.registry }}"
 
-            echo "Using IMAGE=$IMAGE"
+            echo "Using BACKEND_IMAGE=$BACKEND_IMAGE"
+            echo "Using FRONTEND_IMAGE=$FRONTEND_IMAGE"
             echo "Using COMPOSE_FILE=$COMPOSE_FILE"
             echo "Using ENV_FILE=$ENV_FILE"
 
@@ -280,21 +307,24 @@ jobs:
               sudo chmod +x /usr/local/bin/docker-compose
             }
 
-            echo "Pulling Docker image..."
-            docker pull "$IMAGE"
+            echo "Pulling Docker images..."
+            docker pull "$BACKEND_IMAGE"
+            docker pull "$FRONTEND_IMAGE"
 
-            # Add AWS credentials to env file for the containers to use
-            echo "Adding AWS credentials and IMAGE to env file..."
-            # Remove old credentials if they exist
+            # Add AWS credentials and image URIs to env file for the containers to use
+            echo "Adding AWS credentials and image URIs to env file..."
+            # Remove old values if they exist
             sed -i '/^AWS_ACCESS_KEY_ID=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^AWS_SECRET_ACCESS_KEY=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^AWS_SESSION_TOKEN=/d' "$ENV_FILE" 2>/dev/null || true
-            sed -i '/^IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
-            # Add new credentials and IMAGE
+            sed -i '/^BACKEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^FRONTEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            # Add new credentials and image URIs
             echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> "$ENV_FILE"
             echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> "$ENV_FILE"
             echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> "$ENV_FILE"
-            echo "IMAGE=$IMAGE" >> "$ENV_FILE"
+            echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$ENV_FILE"
+            echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$ENV_FILE"
 
             echo "Starting services with Docker Compose..."
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
@@ -303,12 +333,12 @@ jobs:
             sleep 5
 
             echo "Clearing migration locks (if any)..."
-            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm web bundle exec rails runner "
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails runner "
               ActiveRecord::Base.connection.execute('SELECT pg_advisory_unlock_all();')
             " || echo "No locks to clear"
 
             echo "Running database migrations..."
-            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm web bundle exec rails db:migrate
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails db:migrate
 
             echo "Cleaning up old images..."
             docker image prune -f
@@ -324,15 +354,19 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd "${{ steps.envmap.outputs.EC2_PATH }}"
-            
+            COMPOSE_FILE="${{ steps.envmap.outputs.COMPOSE_FILE }}"
+
             echo "=== Container Status ==="
-            docker compose -f docker-compose.stage.yml ps -a
-            
+            docker compose -f "$COMPOSE_FILE" ps -a
+
             echo -e "\n=== Database Logs ==="
-            docker compose -f docker-compose.stage.yml logs db
-            
-            echo -e "\n=== Web Logs ==="
-            docker compose -f docker-compose.stage.yml logs web
+            docker compose -f "$COMPOSE_FILE" logs db
+
+            echo -e "\n=== Backend Logs ==="
+            docker compose -f "$COMPOSE_FILE" logs backend
+
+            echo -e "\n=== Frontend Logs ==="
+            docker compose -f "$COMPOSE_FILE" logs frontend
 
       - name: Revoke SSH from this runner IP
         if: always()
