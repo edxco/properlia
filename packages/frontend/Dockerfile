@@ -5,28 +5,32 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 RUN npm ci
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# Build argument - MUST be set during docker build
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set environment variables for build
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the application
+# Build the application (NEXT_PUBLIC_API_URL is baked into the JS bundle here)
 RUN npm run build
 
 # Stage 3: Runner
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -40,7 +44,7 @@ USER nextjs
 
 EXPOSE 3001
 
-ENV PORT 3001
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3001
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]

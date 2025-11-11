@@ -62,6 +62,7 @@ jobs:
             echo "COMPOSE_FILE=docker-compose.stage.yml" >> $GITHUB_OUTPUT
             echo "BACKEND_PORT=3000" >> $GITHUB_OUTPUT
             echo "FRONTEND_PORT=3001" >> $GITHUB_OUTPUT
+            echo "NEXT_PUBLIC_API_URL=${{ secrets.STAGE_API_URL }}" >> $GITHUB_OUTPUT
           else
             echo "ENV_NAME=prod" >> $GITHUB_OUTPUT
             echo "EC2_HOST=${{ secrets.PROD_EC2_HOST }}" >> $GITHUB_OUTPUT
@@ -71,6 +72,7 @@ jobs:
             echo "COMPOSE_FILE=docker-compose.prod.yml" >> $GITHUB_OUTPUT
             echo "BACKEND_PORT=3000" >> $GITHUB_OUTPUT
             echo "FRONTEND_PORT=3001" >> $GITHUB_OUTPUT
+            echo "NEXT_PUBLIC_API_URL=${{ secrets.PROD_API_URL }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Verify deploy artifacts exist
@@ -121,6 +123,8 @@ jobs:
           context: ./packages/frontend
           file: ./packages/frontend/Dockerfile
           push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}
           tags: |
             ${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}
           cache-from: type=gha,scope=frontend
@@ -197,7 +201,7 @@ jobs:
 
             # Frontend Configuration
             FRONTEND_PORT=${{ steps.envmap.outputs.FRONTEND_PORT }}
-            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            # Note: NEXT_PUBLIC_API_URL is baked into frontend image at build time
             EOF
             echo "✅ Env file created"
             cat "${{ steps.envmap.outputs.ENV_FILE }}"
