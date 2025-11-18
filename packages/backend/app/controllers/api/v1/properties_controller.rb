@@ -90,6 +90,11 @@ module Api
       def property_json(property)
         # include signed URLs for immediate consumption by your frontend
         property.attributes.except('created_at', 'updated_at').merge(
+          'property_type' => property.property_type ? {
+            id: property.property_type.id,
+            name: property.property_type.name,
+            es_name: property.property_type.es_name
+          } : nil,
           'images' => property.images.attached? ? property.images.map { |i| { id: i.id, url: url_for(i), filename: i.filename.to_s, content_type: i.content_type } } : [],
           'videos' => property.videos.attached? ? property.videos.map { |v| { id: v.id, url: url_for(v), filename: v.filename.to_s, content_type: v.content_type } } : []
         )

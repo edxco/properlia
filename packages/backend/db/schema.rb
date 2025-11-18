@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_10_28_041434) do
+ActiveRecord::Schema[7.0].define(version: 2025_11_18_192030) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -53,7 +53,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_28_041434) do
     t.integer "bathrooms", default: 0, null: false
     t.integer "half_bathrooms", default: 0, null: false
     t.integer "parking_spaces", default: 0, null: false
-    t.string "property_type", null: false
     t.decimal "price", precision: 12, scale: 2, null: false
     t.string "status", default: "en_venta", null: false
     t.string "address"
@@ -63,11 +62,12 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_28_041434) do
     t.jsonb "images", default: [], null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "property_type_id"
     t.index ["city"], name: "index_properties_on_city"
     t.index ["featured"], name: "index_properties_on_featured"
     t.index ["images"], name: "index_properties_on_images", using: :gin
     t.index ["price"], name: "index_properties_on_price"
-    t.index ["property_type"], name: "index_properties_on_property_type"
+    t.index ["property_type_id"], name: "index_properties_on_property_type_id"
     t.index ["state"], name: "index_properties_on_state"
     t.index ["status"], name: "index_properties_on_status"
     t.check_constraint "bathrooms >= 0", name: "properties_bathrooms_non_negative"
@@ -78,6 +78,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_28_041434) do
     t.check_constraint "parking_spaces >= 0", name: "properties_parking_spaces_non_negative"
     t.check_constraint "price >= 0::numeric", name: "properties_price_non_negative"
     t.check_constraint "rooms >= 0", name: "properties_rooms_non_negative"
+  end
+
+  create_table "property_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["es_name"], name: "index_property_types_on_es_name", unique: true
+    t.index ["name"], name: "index_property_types_on_name", unique: true
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -98,4 +107,5 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_28_041434) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "properties", "property_types"
 end

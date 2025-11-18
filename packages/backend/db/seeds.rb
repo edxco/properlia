@@ -5,3 +5,14 @@
 #
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
+
+# Property Types
+puts "Creating property types..."
+PropertyType.create!([
+  { name: 'departament', es_name: 'departamento' },
+  { name: 'house', es_name: 'casa' },
+  { name: 'land', es_name: 'terreno' },
+  { name: 'retail space', es_name: 'local comercial' },
+  { name: 'warehouse', es_name: 'bodega o nave' }
+])
+puts "Created #{PropertyType.count} property types"

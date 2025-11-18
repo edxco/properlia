@@ -1,9 +1,11 @@
 class Property < ApplicationRecord
-  
+  # Associations
+  belongs_to :property_type
   has_many_attached :images
   has_many_attached :videos
 
-  validates :title, :address, :price, presence: true
+  # Validations
+  validates :title, :address, :price, :property_type, presence: true
   validates :price, numericality: { greater_than_or_equal_to: 0 }
 
   validate :acceptable_attachments
