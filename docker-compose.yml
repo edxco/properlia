@@ -36,6 +36,7 @@ services:
       RAILS_ENV: development
       RAILS_MAX_THREADS: 5
       ACTIVE_STORAGE_SERVICE: local
+      DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
     depends_on:
       db:
         condition: service_healthy
