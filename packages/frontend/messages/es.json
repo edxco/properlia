@@ -7,11 +7,16 @@
   "helpU": "Te ayudamos a",
   "buySellInvest": "Comprar, vender o invertir en propiedades",
   "buy": "comprar",
+  "rent": "rentar",
   "sell": "vender",
   "invest": "invertir",
   "residentialCommercialIndustrial": "Propiedades residenciales, comerciales o industriales",
   "letsGetYourPropertySold": "Hagamos Que Tu Propiedad Se Venda",
   "readyToInvest": "¿Listo para Invertir? Te Acompañamos en Cada Paso",
+
+  "search": "Buscar",
+  "searchByCityOrLocation": "Busca por ciudad o ubicación",
+  "doYouWantToSellYourProperty": "¿Quieres vender tu propiedad?",
 
   "properliaBriefTitle": "Tu Socio Confiable en Bienes Raíces",
   "properliaBriefDescription": "En Properlia, conectamos a compradores exigentes con propiedades excepcionales en Puebla y México. Nuestra experiencia, basada en años de acompañar a inversionistas, familias y desarrolladores, nos permite entender a profundidad el mercado y ofrecer un servicio verdaderamente personalizado.",

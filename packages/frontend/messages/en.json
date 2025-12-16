@@ -7,11 +7,16 @@
   "helpU": "We help you",
   "buySellInvest": "buy, sell, or invest in",
   "buy": "buy",
+  "rent": "rent",
   "sell": "sell",
   "invest": "invest",
   "residentialCommercialIndustrial": "residential, commercial, and industrial properties",
   "letsGetYourPropertySold": "Let’s Get Your Property Sold",
   "readyToInvest": "Ready to Invest? We’ll Guide You Every Step",
+
+  "search": "Search",
+  "searchByCityOrLocation": "Search by city or location",
+  "doYouWantToSellYourProperty": "Do you want to sell your property?",
 
   "properliaBriefTitle": "Your Trusted Real Estate Partner",
   "properliaBriefDescription": "At Properlia, we help discerning buyers find exceptional properties in Puebla and across Mexico. With years of experience supporting investors, families, and developers, we understand the market in depth and provide a service tailored to your needs.",
