@@ -1,0 +1,17 @@
+{
+  "name": "properlia-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=properlia-frontend",
+    "dev:dashboard": "npm run dev --workspace=properlia-dashboard",
+    "dev:all": "npm run dev --workspaces --if-present",
+    "build:frontend": "npm run build --workspace=properlia-frontend",
+    "build:dashboard": "npm run build --workspace=properlia-dashboard",
+    "build:all": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  }
+}

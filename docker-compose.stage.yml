@@ -35,7 +35,7 @@ services:
       RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
       # Active Storage
       ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE}
-      # AWS Configuration - Will be provided by the deployment script
+      # AWS Configuration
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
@@ -56,6 +56,19 @@ services:
     image: ${FRONTEND_IMAGE:-properlia-frontend:latest}
     ports:
       - "${FRONTEND_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  dashboard:
+    image: ${DASHBOARD_IMAGE:-properlia-dashboard:latest}
+    ports:
+      - "${DASHBOARD_PORT:-3002}:3002"
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}

@@ -1,32 +1,53 @@
-# Multi-stage build for Next.js
+# Multi-stage build for Next.js Frontend with Monorepo support
 
 # Stage 1: Dependencies
-FROM node:20-alpine AS deps
-WORKDIR /app
+FROM node:20-slim AS deps
+WORKDIR /monorepo
 
-# Install dependencies
+RUN apt-get update && apt-get install -y \
+  python3 \
+  make \
+  g++ \
+  && rm -rf /var/lib/apt/lists/*
+
+# Copy workspace root files
 COPY package.json package-lock.json ./
-RUN npm ci
+COPY packages/frontend/package.json ./packages/frontend/
+COPY packages/shared/package.json ./packages/shared/
+
+RUN npm ci --build-from-source
 
 # Stage 2: Builder
-FROM node:20-alpine AS builder
-WORKDIR /app
+FROM node:20-slim AS builder
+WORKDIR /monorepo
 
 # Build argument - MUST be set during docker build
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Copy dependencies
+COPY --from=deps /monorepo/node_modules ./node_modules
+
+# Copy workspace root
+COPY package.json package-lock.json ./
+
+# Copy shared package
+COPY packages/shared ./packages/shared
+
+# Copy frontend package
+COPY packages/frontend ./packages/frontend
+
+# Set working directory to frontend
+WORKDIR /monorepo/packages/frontend
 
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the application (NEXT_PUBLIC_API_URL is baked into the JS bundle here)
+# Build the application
 RUN npm run build
 
 # Stage 3: Runner
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -36,9 +57,9 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy standalone output
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /monorepo/packages/frontend/public ./public
+COPY --from=builder --chown=nextjs:nodejs /monorepo/packages/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /monorepo/packages/frontend/.next/static ./.next/static
 
 USER nextjs
 

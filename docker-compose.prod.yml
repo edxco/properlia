@@ -6,15 +6,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: properlia2025_production
+      POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
     restart: unless-stopped
+    networks:
+      - app-network
 
   backend:
     image: ${BACKEND_IMAGE:-properlia-backend:latest}
@@ -25,15 +27,18 @@ services:
       - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     environment:
       PORT: ${BACKEND_PORT:-3000}
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       RAILS_ENV: ${RAILS_ENV:-production}
-      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      RAILS_SERVE_STATIC_FILES: ${RAILS_SERVE_STATIC_FILES:-true}
-      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT:-true}
+      RAILS_SERVE_STATIC_FILES: ${RAILS_SERVE_STATIC_FILES}
+      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
       # Active Storage
-      ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE:-amazon}
+      ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE}
       # AWS Configuration
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
       AWS_REGION: ${AWS_REGION}
       AWS_BUCKET: ${AWS_BUCKET}
       # Devise JWT
@@ -51,6 +56,19 @@ services:
     image: ${FRONTEND_IMAGE:-properlia-frontend:latest}
     ports:
       - "${FRONTEND_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  dashboard:
+    image: ${DASHBOARD_IMAGE:-properlia-dashboard:latest}
+    ports:
+      - "${DASHBOARD_PORT:-3002}:3002"
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
