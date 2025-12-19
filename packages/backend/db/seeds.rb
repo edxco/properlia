@@ -16,3 +16,11 @@ PropertyType.create!([
   { name: 'warehouse', es_name: 'bodega o nave' }
 ])
 puts "Created #{PropertyType.count} property types"
+
+# Statuses
+puts "Creating statuses..."
+Status.create!([
+  { name: 'rent', es_name: 'renta' },
+  { name: 'sell', es_name: 'venta' }
+])
+puts "Created #{Status.count} statuses"

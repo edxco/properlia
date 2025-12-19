@@ -2,7 +2,7 @@
 module Api
   module V1
     class PropertyTypesController < ApplicationController
-      before_action :authenticate_user!, only: [:create, :update, :destroy]
+      skip_before_action :authenticate_user!, only: [:index, :show]
       before_action :set_property_type, only: %i[show update destroy]
       after_action { pagy_headers_merge(@pagy) if @pagy }
 

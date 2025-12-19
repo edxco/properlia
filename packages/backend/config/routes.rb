@@ -22,6 +22,7 @@ Rails.application.routes.draw do
       end
 
       resources :property_types
+      resources :statuses
     end
   end
 end

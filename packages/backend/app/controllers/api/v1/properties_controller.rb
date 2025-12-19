@@ -8,7 +8,26 @@ module Api
 
       # GET /api/v1/properties
       def index
-        @pagy, @properties = pagy(Property.all.order(created_at: :desc))
+        properties = Property.all
+
+        # Filter by featured
+        if params[:featured].present?
+          properties = properties.where(featured: ActiveModel::Type::Boolean.new.cast(params[:featured]))
+        end
+
+        # Filter by status (supports id or name)
+        if params[:status_id].present?
+          properties = properties.where(status_id: params[:status_id])
+        elsif params[:status].present?
+          properties = properties.joins(:status).where(statuses: { name: params[:status] })
+        end
+
+        # Filter by property_type_id
+        if params[:property_type_id].present?
+          properties = properties.where(property_type_id: params[:property_type_id])
+        end
+
+        @pagy, @properties = pagy(properties.order(created_at: :desc))
 
         render json: {
           data: @properties.map { |property| property_json(property) },
@@ -94,6 +113,11 @@ module Api
             id: property.property_type.id,
             name: property.property_type.name,
             es_name: property.property_type.es_name
+          } : nil,
+          'status' => property.status ? {
+            id: property.status.id,
+            name: property.status.name,
+            es_name: property.status.es_name,
           } : nil,
           'images' => property.images.attached? ? property.images.map { |i| { id: i.id, url: url_for(i), filename: i.filename.to_s, content_type: i.content_type } } : [],
           'videos' => property.videos.attached? ? property.videos.map { |v| { id: v.id, url: url_for(v), filename: v.filename.to_s, content_type: v.content_type } } : []
