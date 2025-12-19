@@ -14,11 +14,21 @@
   "letsGetYourPropertySold": "Let’s Get Your Property Sold",
   "readyToInvest": "Ready to Invest? We’ll Guide You Every Step",
 
+  "land": "land",
+  "built": "built",
+  "rooms": "rooms",
+  "baths": "baths",
+  "car": "car",
+
   "search": "Search",
   "searchByCityOrLocation": "Search by city or location",
   "doYouWantToSellYourProperty": "Do you want to sell your property?",
 
   "properliaBriefTitle": "Your Trusted Real Estate Partner",
   "properliaBriefDescription": "At Properlia, we help discerning buyers find exceptional properties in Puebla and across Mexico. With years of experience supporting investors, families, and developers, we understand the market in depth and provide a service tailored to your needs.",
-  "properliaBriefDescription2": "For us, finding the right property is about more than size or location—it’s about choosing a lifestyle that matches your vision, comfort, and long-term goals. Whether you're looking for residential, commercial, or industrial properties—or exploring investment opportunities—we guide you with transparency, confidence, and a firm commitment to your success."
+  "properliaBriefDescription2": "For us, finding the right property is about more than size or location—it’s about choosing a lifestyle that matches your vision, comfort, and long-term goals. Whether you're looking for residential, commercial, or industrial properties—or exploring investment opportunities—we guide you with transparency, confidence, and a firm commitment to your success.",
+
+  "featuredProperties": "Featured properties",
+  "viewFullDetails": "View Full Details",
+  "contactMe": "contactar"
 }

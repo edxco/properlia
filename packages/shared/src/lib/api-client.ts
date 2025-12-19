@@ -5,50 +5,119 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public data?: any
+    public errors?: string[]
   ) {
     super(message);
     this.name = 'ApiError';
   }
 }
 
-export async function apiClient<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const isFormData = options?.body instanceof FormData;
+interface RequestOptions extends RequestInit {
+  requiresAuth?: boolean;
+}
 
-  const config: RequestInit = {
-    ...options,
-    headers: {
-      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...options?.headers,
-    },
-  };
+export const apiClient = {
+  async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    const { requiresAuth = false, ...fetchOptions } = options;
 
-  try {
-    const response = await fetch(url, config);
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...fetchOptions.headers,
+    };
+
+    if (requiresAuth) {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    const response = await fetch(url, {
+      ...fetchOptions,
+      headers,
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new ApiError(
         errorData.message || 'An error occurred',
         response.status,
-        errorData
+        errorData.errors
       );
     }
 
-    // Handle 204 No Content
-    if (response.status === 204) {
-      return null as T;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
     }
 
-    return await response.json();
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
+    return {} as T;
+  },
+
+  get<T>(endpoint: string, requiresAuth = false): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET', requiresAuth });
+  },
+
+  post<T>(endpoint: string, data?: unknown, requiresAuth = true): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      requiresAuth,
+    });
+  },
+
+  put<T>(endpoint: string, data?: unknown, requiresAuth = true): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      requiresAuth,
+    });
+  },
+
+  patch<T>(endpoint: string, data?: unknown, requiresAuth = true): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      requiresAuth,
+    });
+  },
+
+  delete<T>(endpoint: string, requiresAuth = true): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'DELETE',
+      requiresAuth,
+    });
+  },
+
+  async uploadFormData<T>(endpoint: string, formData: FormData, requiresAuth = true): Promise<T> {
+    const headers: HeadersInit = {};
+
+    if (requiresAuth) {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     }
-    throw new ApiError('Network error', 500, error);
-  }
-}
+
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        errorData.message || 'An error occurred',
+        response.status,
+        errorData.errors
+      );
+    }
+
+    return response.json();
+  },
+};

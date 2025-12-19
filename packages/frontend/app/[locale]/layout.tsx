@@ -4,7 +4,7 @@ import "../globals.css";
 import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import { TranslationProvider } from "@/src/components/TranslationProvider";
-import LanguageSwitcher from "@/src/components/LanguageSwitcher";
+import { QueryProvider } from "@/src/providers/QueryProvider";
 
 export const metadata: Metadata = {
   title: "Properlia",
@@ -38,7 +38,9 @@ export default async function RootLayout({
   return (
     <html lang={normalizedLocale}>
       <body>
-        <TranslationProvider dictionary={dict}>{children}</TranslationProvider>
+        <QueryProvider>
+        <TranslationProvider dictionary={dict} locale={normalizedLocale}>{children}</TranslationProvider>
+        </QueryProvider>
       </body>
     </html>
   );
