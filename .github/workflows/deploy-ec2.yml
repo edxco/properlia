@@ -9,6 +9,7 @@ env:
   ECR_REPO: edxco/properlia
   BACKEND_IMAGE_NAME: properlia-backend
   FRONTEND_IMAGE_NAME: properlia-frontend
+  DASHBOARD_IMAGE_NAME: properlia-dashboard
   DOCKER_BUILDKIT: 1
 
 jobs:
@@ -62,6 +63,7 @@ jobs:
             echo "COMPOSE_FILE=docker-compose.stage.yml" >> $GITHUB_OUTPUT
             echo "BACKEND_PORT=3000" >> $GITHUB_OUTPUT
             echo "FRONTEND_PORT=3001" >> $GITHUB_OUTPUT
+            echo "DASHBOARD_PORT=3002" >> $GITHUB_OUTPUT
             echo "NEXT_PUBLIC_API_URL=${{ secrets.STAGE_API_URL }}" >> $GITHUB_OUTPUT
           else
             echo "ENV_NAME=prod" >> $GITHUB_OUTPUT
@@ -72,6 +74,7 @@ jobs:
             echo "COMPOSE_FILE=docker-compose.prod.yml" >> $GITHUB_OUTPUT
             echo "BACKEND_PORT=3000" >> $GITHUB_OUTPUT
             echo "FRONTEND_PORT=3001" >> $GITHUB_OUTPUT
+            echo "DASHBOARD_PORT=3002" >> $GITHUB_OUTPUT
             echo "NEXT_PUBLIC_API_URL=${{ secrets.PROD_API_URL }}" >> $GITHUB_OUTPUT
           fi
 
@@ -98,8 +101,10 @@ jobs:
           REGISTRY="${{ steps.ecr.outputs.registry }}"
           BACKEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:backend-${GITHUB_REF_NAME}-${SHA_SHORT}"
           FRONTEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:frontend-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          DASHBOARD_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:dashboard-${GITHUB_REF_NAME}-${SHA_SHORT}"
           echo "BACKEND_IMAGE_URI=$BACKEND_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "FRONTEND_IMAGE_URI=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "DASHBOARD_IMAGE_URI=$DASHBOARD_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_OUTPUT
 
       # --- Build & push images to ECR ---
@@ -129,6 +134,19 @@ jobs:
             ${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
+
+      - name: Build and push dashboard image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./packages/dashboard/Dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}
+          tags: |
+            ${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}
+          cache-from: type=gha,scope=dashboard
+          cache-to: type=gha,mode=max,scope=dashboard
 
       # Map SG per branch
       - name: Map SG per env
@@ -201,7 +219,10 @@ jobs:
 
             # Frontend Configuration
             FRONTEND_PORT=${{ steps.envmap.outputs.FRONTEND_PORT }}
-            # Note: NEXT_PUBLIC_API_URL is baked into frontend image at build time
+            NEXT_PUBLIC_API_URL=${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}
+
+            # Dashboard Configuration
+            DASHBOARD_PORT=${{ steps.envmap.outputs.DASHBOARD_PORT }}
             EOF
             echo "✅ Env file created"
             cat "${{ steps.envmap.outputs.ENV_FILE }}"
@@ -259,6 +280,7 @@ jobs:
 
             export BACKEND_IMAGE="${{ steps.vars.outputs.BACKEND_IMAGE_URI }}"
             export FRONTEND_IMAGE="${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}"
+            export DASHBOARD_IMAGE="${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}"
             export BACKEND_PORT="${{ steps.envmap.outputs.BACKEND_PORT }}"
             export FRONTEND_PORT="${{ steps.envmap.outputs.FRONTEND_PORT }}"
             export ENV_FILE="${{ steps.envmap.outputs.ENV_FILE }}"
@@ -267,6 +289,7 @@ jobs:
 
             echo "Using BACKEND_IMAGE=$BACKEND_IMAGE"
             echo "Using FRONTEND_IMAGE=$FRONTEND_IMAGE"
+            echo "Using DASHBOARD_IMAGE=$DASHBOARD_IMAGE"
             echo "Using COMPOSE_FILE=$COMPOSE_FILE"
             echo "Using ENV_FILE=$ENV_FILE"
 
@@ -314,6 +337,7 @@ jobs:
             echo "Pulling Docker images..."
             docker pull "$BACKEND_IMAGE"
             docker pull "$FRONTEND_IMAGE"
+            docker pull "$DASHBOARD_IMAGE"
 
             # Add AWS credentials and image URIs to env file for the containers to use
             echo "Adding AWS credentials and image URIs to env file..."
@@ -323,12 +347,14 @@ jobs:
             sed -i '/^AWS_SESSION_TOKEN=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^BACKEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^FRONTEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^DASHBOARD_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             # Add new credentials and image URIs
             echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> "$ENV_FILE"
             echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> "$ENV_FILE"
             echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> "$ENV_FILE"
             echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$ENV_FILE"
             echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$ENV_FILE"
+            echo "DASHBOARD_IMAGE=$DASHBOARD_IMAGE" >> "$ENV_FILE"
 
             echo "Starting services with Docker Compose..."
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
