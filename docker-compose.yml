@@ -60,7 +60,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
-      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
     depends_on:
       - backend
     stdin_open: true
@@ -83,7 +83,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3002
-      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
     depends_on:
       - backend
     stdin_open: true
