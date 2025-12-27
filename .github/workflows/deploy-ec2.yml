@@ -120,7 +120,7 @@ jobs:
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
         with:
-          context: ./packages/frontend
+          context: .
           file: ./packages/frontend/Dockerfile
           push: true
           build-args: |
