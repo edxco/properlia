@@ -9,7 +9,7 @@ export function FeaturedProperties() {
   const t = useT();
   const { data: propertiesData, isLoading, isError } = useProperties({ items: 3 });
   const { data: statusesData } = useStatuses();
-console.log('data', propertiesData, '\nstatusesData', statusesData)
+  console.log('propertiesData', propertiesData);
   if (isLoading) {
     return (
       <section className="py-24 bg-white">
@@ -43,8 +43,8 @@ console.log('data', propertiesData, '\nstatusesData', statusesData)
   const properties = propertiesData.data.map((property) => ({
     id: property.id,
     title: property.title,
-    property_type: locale === 'es' ? property?.property_type?.es_name : property?.property_type?.name,
-    status: locale === 'es' ? property?.status?.es_name : property?.status?.name,
+    property_type: (locale === 'es' ? property?.property_type?.es_name : property?.property_type?.name) ?? 'Unknown',
+    status: (locale === 'es' ? property?.status?.es_name : property?.status?.name) ?? 'Unknown',
     images: property.images.map((img) => img.url),
     landArea: property.land_area ?? 0,
     builtArea: property.built_area ?? 0,
@@ -53,6 +53,8 @@ console.log('data', propertiesData, '\nstatusesData', statusesData)
     bathrooms: property.bathrooms,
     slug: property.id,
   }));
+
+  console.log('properties', properties);
 
   return (
     <section className="py-24 bg-white">

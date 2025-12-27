@@ -67,25 +67,25 @@ export const propertyApi = {
     const search = query.toString();
     const endpoint = search ? `/properties?${search}` : '/properties';
 
-    return apiClient<PaginatedResponse<Property>>(endpoint);
+    return apiClient.get<PaginatedResponse<Property>>(endpoint);
   },
 
   // Get a single property by ID
   getById: async (id: string): Promise<Property> => {
-    return apiClient<Property>(`/properties/${id}`);
+    return apiClient.get<Property>(`/properties/${id}`);
   },
 
   // Create a new property
   create: async (data: CreatePropertyDto, token?: string): Promise<Property> => {
     if (hasMedia(data)) {
-      return apiClient<Property>('/properties', {
+      return apiClient.request<Property>('/properties', {
         method: 'POST',
         body: buildFormData(data),
         headers: buildAuthHeaders(token),
       });
     }
 
-    return apiClient<Property>('/properties', {
+    return apiClient.request<Property>('/properties', {
       method: 'POST',
       body: JSON.stringify({ property: data }),
       headers: buildAuthHeaders(token),
@@ -99,14 +99,14 @@ export const propertyApi = {
     token?: string
   ): Promise<Property> => {
     if (hasMedia(data)) {
-      return apiClient<Property>(`/properties/${id}`, {
+      return apiClient.request<Property>(`/properties/${id}`, {
         method: 'PUT',
         body: buildFormData(data),
         headers: buildAuthHeaders(token),
       });
     }
 
-    return apiClient<Property>(`/properties/${id}`, {
+    return apiClient.request<Property>(`/properties/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ property: data }),
       headers: buildAuthHeaders(token),
@@ -119,7 +119,7 @@ export const propertyApi = {
     attachmentId: string,
     token?: string
   ): Promise<void> => {
-    return apiClient<void>(`/properties/${propertyId}/attachments/${attachmentId}`, {
+    return apiClient.request<void>(`/properties/${propertyId}/attachments/${attachmentId}`, {
       method: 'DELETE',
       headers: buildAuthHeaders(token),
     });
