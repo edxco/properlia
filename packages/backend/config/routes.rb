@@ -12,6 +12,9 @@ Rails.application.routes.draw do
       registrations: 'users/registrations'
     }
 
+  # Current user endpoint
+  get '/users/current', to: 'users#current'
+
   # API routes
   namespace :api do
     namespace :v1 do

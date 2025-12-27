@@ -15,12 +15,19 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
   # end
   allow do
     # Local dev frontend
-    origins "http://localhost:5173", "http://localhost:3001"
+    origins "http://localhost:5173", "http://localhost:3001", "http://localhost:3002"
 
     resource "/api/*",
       headers: :any,
       methods: %i[get post put patch delete options head],
-      credentials: true
+      credentials: true,
+      expose: ["Authorization"]
+
+    resource "/users/*",
+      headers: :any,
+      methods: %i[get post put patch delete options head],
+      credentials: true,
+      expose: ["Authorization"]
 
     resource "/rails/active_storage/*",
       headers: :any,
