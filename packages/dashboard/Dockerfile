@@ -22,8 +22,6 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # Copy dependencies
 COPY --from=deps /monorepo/node_modules ./node_modules
-COPY --from=deps /monorepo/packages/dashboard/node_modules ./packages/dashboard/node_modules
-COPY --from=deps /monorepo/packages/shared/node_modules ./packages/shared/node_modules
 
 # Copy workspace root
 COPY package.json package-lock.json ./
