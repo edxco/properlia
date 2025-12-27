@@ -5,6 +5,7 @@ import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import { TranslationProvider } from "@/src/components/TranslationProvider";
 import { QueryProvider } from "@/src/providers/QueryProvider";
+import { AuthProvider } from "@/src/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "Properlia",
@@ -39,7 +40,11 @@ export default async function RootLayout({
     <html lang={normalizedLocale}>
       <body>
         <QueryProvider>
-        <TranslationProvider dictionary={dict} locale={normalizedLocale}>{children}</TranslationProvider>
+          <AuthProvider>
+            <TranslationProvider dictionary={dict} locale={normalizedLocale}>
+              {children}
+            </TranslationProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

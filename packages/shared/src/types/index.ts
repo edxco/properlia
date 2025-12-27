@@ -1,5 +1,8 @@
 // Common types shared across frontend and dashboard
 
+// Auth types
+export * from '../services/auth/types';
+
 export interface CommonEntity {
   id: string;
   name: string;

@@ -41,6 +41,22 @@ export function middleware(req: NextRequest) {
   const currentLocale = extractLocale(pathname);
 
   if (currentLocale) {
+    const token = req.cookies.get("authToken")?.value;
+    const isLoginPage = pathname.includes("/login");
+    const isDashboardPage = pathname.includes("/dashboard");
+
+    if (!token && isDashboardPage) {
+      return NextResponse.redirect(
+        new URL(`/${currentLocale}/login`, req.url)
+      );
+    }
+
+    if (token && isLoginPage) {
+      return NextResponse.redirect(
+        new URL(`/${currentLocale}/dashboard`, req.url)
+      );
+    }
+
     const res = NextResponse.next();
     const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value;
 
