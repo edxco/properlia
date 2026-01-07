@@ -59,7 +59,7 @@ RUN adduser --system --uid 1001 nextjs
 # Copy standalone output
 COPY --from=builder /monorepo/packages/frontend/public ./public
 COPY --from=builder --chown=nextjs:nodejs /monorepo/packages/frontend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /monorepo/packages/frontend/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /monorepo/packages/frontend/.next/static ./packages/frontend/.next/static
 
 USER nextjs
 
@@ -68,4 +68,4 @@ EXPOSE 3001
 ENV PORT=3001
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["node", "packages/frontend/server.js"]
