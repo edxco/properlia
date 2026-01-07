@@ -54,7 +54,7 @@ RUN adduser --system --uid 1001 nextjs
 # Copy standalone output
 COPY --from=builder /monorepo/packages/dashboard/public ./public
 COPY --from=builder --chown=nextjs:nodejs /monorepo/packages/dashboard/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /monorepo/packages/dashboard/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /monorepo/packages/dashboard/.next/static ./packages/dashboard/.next/static
 
 USER nextjs
 
@@ -63,4 +63,4 @@ EXPOSE 3002
 ENV PORT=3002
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["node", "packages/dashboard/server.js"]
