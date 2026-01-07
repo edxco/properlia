@@ -8,19 +8,31 @@
 
 # Property Types
 puts "Creating property types..."
-PropertyType.create!([
+property_types = [
   { name: 'departament', es_name: 'departamento' },
   { name: 'house', es_name: 'casa' },
   { name: 'land', es_name: 'terreno' },
   { name: 'retail space', es_name: 'local comercial' },
   { name: 'warehouse', es_name: 'bodega o nave' }
-])
-puts "Created #{PropertyType.count} property types"
+]
+
+property_types.each do |pt|
+  PropertyType.find_or_create_by!(name: pt[:name]) do |property_type|
+    property_type.es_name = pt[:es_name]
+  end
+end
+puts "Property types ready: #{PropertyType.count}"
 
 # Statuses
 puts "Creating statuses..."
-Status.create!([
+statuses = [
   { name: 'rent', es_name: 'renta' },
   { name: 'sell', es_name: 'venta' }
-])
-puts "Created #{Status.count} statuses"
+]
+
+statuses.each do |s|
+  Status.find_or_create_by!(name: s[:name]) do |status|
+    status.es_name = s[:es_name]
+  end
+end
+puts "Statuses ready: #{Status.count}"

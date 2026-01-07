@@ -370,6 +370,9 @@ jobs:
             echo "Running database migrations..."
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails db:migrate
 
+            echo "Running database seeds..."
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails db:seed
+
             echo "Cleaning up old images..."
             docker image prune -f
             
