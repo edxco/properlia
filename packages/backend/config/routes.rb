@@ -26,6 +26,15 @@ Rails.application.routes.draw do
 
       resources :property_types
       resources :statuses
+
+      # General info endpoint
+      get 'general_info', to: 'general_infos#show'
+      put 'general_info', to: 'general_infos#update'
+
+      # Email endpoints
+      post 'emails/contact', to: 'emails#send_contact_form'
+      post 'emails/property-inquiry', to: 'emails#send_property_inquiry'
+      post 'emails/welcome', to: 'emails#send_welcome'
     end
   end
 end
