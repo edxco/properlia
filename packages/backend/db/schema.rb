@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_01_08_023520) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_08_195651) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -41,6 +41,16 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_08_023520) do
     t.uuid "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "general_infos", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "phone", null: false
+    t.string "whatsapp", null: false
+    t.string "email_to", null: false
+    t.integer "singleton_guard", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["singleton_guard"], name: "index_general_infos_on_singleton_guard", unique: true
   end
 
   create_table "properties", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

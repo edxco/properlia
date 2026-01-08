@@ -19,7 +19,7 @@ property_types = [
 property_types.each do |pt|
   PropertyType.find_or_create_by!(name: pt[:name]) do |property_type|
     property_type.es_name = pt[:es_name]
-  end
+  end rescue ActiveRecord::RecordInvalid
 end
 puts "Property types ready: #{PropertyType.count}"
 
@@ -33,6 +33,21 @@ statuses = [
 statuses.each do |s|
   Status.find_or_create_by!(name: s[:name]) do |status|
     status.es_name = s[:es_name]
-  end
+  end rescue ActiveRecord::RecordInvalid
 end
 puts "Statuses ready: #{Status.count}"
+
+# General Info (Contact Information)
+puts "Creating general info..."
+if GeneralInfo.exists?
+  puts "General info already exists, skipping..."
+else
+  GeneralInfo.create!(
+    phone: '+52 1234567890',
+    whatsapp: '+52 1234567890',
+    email_to: 'contact@properlia.com',
+    singleton_guard: 0
+  )
+  puts "General info created successfully"
+end
+puts "General info ready"
