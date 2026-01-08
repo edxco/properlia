@@ -22,8 +22,11 @@ export const apiClient = {
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { requiresAuth = false, ...fetchOptions } = options;
 
+    // Don't set Content-Type for FormData - browser will set it with boundary
+    const isFormData = fetchOptions.body instanceof FormData;
+
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      ...(!isFormData && { 'Content-Type': 'application/json' }),
       ...(fetchOptions.headers as Record<string, string>),
     };
 
@@ -66,8 +69,11 @@ export const apiClient = {
   async requestWithToken<T>(endpoint: string, options: RequestOptions = {}): Promise<{ data: T; token?: string }> {
     const { requiresAuth = false, ...fetchOptions } = options;
 
+    // Don't set Content-Type for FormData - browser will set it with boundary
+    const isFormData = fetchOptions.body instanceof FormData;
+
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      ...(!isFormData && { 'Content-Type': 'application/json' }),
       ...(fetchOptions.headers as Record<string, string>),
     };
 

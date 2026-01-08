@@ -33,6 +33,8 @@ export interface Property {
   address: string;
   city?: string | null;
   state?: string | null;
+  zip_code?: string | null;
+  neighborhood?: string | null;
   coordinates?: string | null;
   property_type_id: string;
   status_id?: string | null;
@@ -62,6 +64,8 @@ export interface PropertyPayload {
   address: string;
   city?: string;
   state?: string;
+  zip_code?: string;
+  neighborhood?: string;
   coordinates?: string;
   property_type_id: string;
   status_id?: string;

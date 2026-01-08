@@ -9,7 +9,8 @@
     "./components/*": "./src/components/*.tsx",
     "./services/*": "./src/services/*",
     "./lib/*": "./src/lib/*",
-    "./types": "./src/types/index.ts"
+    "./types": "./src/types/index.ts",
+    "./styles/globals.css": "./src/styles/globals.css"
   },
   "scripts": {
     "lint": "eslint .",

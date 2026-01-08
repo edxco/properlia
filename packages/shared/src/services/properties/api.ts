@@ -82,6 +82,7 @@ export const propertyApi = {
         method: 'POST',
         body: buildFormData(data),
         headers: buildAuthHeaders(token),
+        requiresAuth: true,
       });
     }
 
@@ -89,6 +90,7 @@ export const propertyApi = {
       method: 'POST',
       body: JSON.stringify({ property: data }),
       headers: buildAuthHeaders(token),
+      requiresAuth: true,
     });
   },
 
@@ -103,6 +105,7 @@ export const propertyApi = {
         method: 'PUT',
         body: buildFormData(data),
         headers: buildAuthHeaders(token),
+        requiresAuth: true,
       });
     }
 
@@ -110,6 +113,7 @@ export const propertyApi = {
       method: 'PUT',
       body: JSON.stringify({ property: data }),
       headers: buildAuthHeaders(token),
+      requiresAuth: true,
     });
   },
 
@@ -122,6 +126,7 @@ export const propertyApi = {
     return apiClient.request<void>(`/properties/${propertyId}/attachments/${attachmentId}`, {
       method: 'DELETE',
       headers: buildAuthHeaders(token),
+      requiresAuth: true,
     });
   },
 };
