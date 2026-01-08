@@ -35,6 +35,9 @@ services:
       RAILS_MAX_THREADS: 5
       ACTIVE_STORAGE_SERVICE: local
       DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
     depends_on:
       db:
         condition: service_healthy

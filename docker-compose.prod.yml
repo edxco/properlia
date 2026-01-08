@@ -43,6 +43,10 @@ services:
       DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
       # CORS Origins
       CORS_ORIGINS: ${CORS_ORIGINS}
+      # Resend Configuration
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       db:
         condition: service_healthy
