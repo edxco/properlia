@@ -52,6 +52,15 @@ module Api
 
         property = Property.new(property_params)
         if property.save
+          # Send confirmation email asynchronously
+          begin
+            EmailService.send_property_confirmation(property: property)
+            Rails.logger.info "Property confirmation email sent for property #{property.id}"
+          rescue StandardError => e
+            # Log error but don't fail the request
+            Rails.logger.error "Failed to send property confirmation email: #{e.message}"
+          end
+
           render json: property_json(property),
                  status: :created
         else
