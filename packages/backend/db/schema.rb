@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_12_17_000919) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_08_023520) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -63,13 +63,17 @@ ActiveRecord::Schema[7.0].define(version: 2025_12_17_000919) do
     t.datetime "updated_at", null: false
     t.uuid "property_type_id"
     t.uuid "status_id"
+    t.string "neighborhood"
+    t.string "zip_code"
     t.index ["city"], name: "index_properties_on_city"
     t.index ["featured"], name: "index_properties_on_featured"
     t.index ["images"], name: "index_properties_on_images", using: :gin
+    t.index ["neighborhood"], name: "index_properties_on_neighborhood"
     t.index ["price"], name: "index_properties_on_price"
     t.index ["property_type_id"], name: "index_properties_on_property_type_id"
     t.index ["state"], name: "index_properties_on_state"
     t.index ["status_id"], name: "index_properties_on_status_id"
+    t.index ["zip_code"], name: "index_properties_on_zip_code"
     t.check_constraint "bathrooms >= 0", name: "properties_bathrooms_non_negative"
     t.check_constraint "built_area >= 0::numeric", name: "properties_built_area_non_negative"
     t.check_constraint "half_bathrooms >= 0", name: "properties_half_bathrooms_non_negative"

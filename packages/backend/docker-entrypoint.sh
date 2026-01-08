@@ -26,5 +26,9 @@ echo "PostgreSQL is up"
 echo "Preparing database..."
 bundle exec rails db:prepare
 
+# Seed the database
+echo "Seeding database..."
+bundle exec rails db:seed
+
 # Hand off to the container's command (your puma line in compose)
 exec "$@"
