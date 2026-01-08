@@ -1,11 +1,35 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import type { Property, PropertyPayload } from '@properlia/shared/types';
+import { useEffect, useMemo, useState } from "react";
+import {
+  X,
+  Upload,
+  Image as ImageIcon,
+  Video as VideoIcon,
+  MoreVertical,
+  Edit as EditIcon,
+  Trash2,
+  Eye,
+} from "lucide-react";
+import type {
+  Property,
+  PropertyPayload,
+  Attachment,
+} from "@properlia/shared/types";
 
-import { useCreateProperty, useProperties, useUpdateProperty } from '@/src/services/properties/queries';
-import { usePropertyTypes } from '@/src/services/property-types/queries';
-import { useStatuses } from '@/src/services/statuses/queries';
+import {
+  useCreateProperty,
+  useProperties,
+  useUpdateProperty,
+  useDeleteAttachment,
+} from "@/src/services/properties/queries";
+import { usePropertyTypes } from "@/src/services/property-types/queries";
+import { useStatuses } from "@/src/services/statuses/queries";
+import {
+  useLocale,
+  useT,
+} from "@properlia/shared/components/TranslationProvider";
+import { capitalizeFirstWord } from "@properlia/shared";
 
 type FormState = {
   title: string;
@@ -15,41 +39,58 @@ type FormState = {
   status_id: string;
   city: string;
   state: string;
+  zip_code: string;
+  neighborhood: string;
   rooms: string;
   bathrooms: string;
+  half_bathrooms: string;
   parking_spaces: string;
   description: string;
   featured: boolean;
+  images: File[];
+  videos: File[];
 };
 
 const emptyForm: FormState = {
-  title: '',
-  address: '',
-  price: '',
-  property_type_id: '',
-  status_id: '',
-  city: '',
-  state: '',
-  rooms: '',
-  bathrooms: '',
-  parking_spaces: '',
-  description: '',
+  title: "",
+  address: "",
+  price: "",
+  property_type_id: "",
+  status_id: "",
+  city: "",
+  state: "",
+  zip_code: "",
+  neighborhood: "",
+  rooms: "",
+  bathrooms: "",
+  half_bathrooms: "",
+  parking_spaces: "",
+  description: "",
   featured: false,
+  images: [],
+  videos: [],
 };
 
 export default function PropertiesPage() {
+  const t = useT();
+  const locale = useLocale();
   const [filters, setFilters] = useState<{ status_id?: string }>({});
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   const { data, isLoading, isFetching, error } = useProperties({
     status_id: filters.status_id || undefined,
   });
   const { data: propertyTypes } = usePropertyTypes();
   const { data: statuses } = useStatuses();
-  const { mutateAsync: createProperty, isPending: creating } = useCreateProperty();
-  const { mutateAsync: updateProperty, isPending: updating } = useUpdateProperty();
+  const { mutateAsync: createProperty, isPending: creating } =
+    useCreateProperty();
+  const { mutateAsync: updateProperty, isPending: updating } =
+    useUpdateProperty();
+  const { mutateAsync: deleteAttachment, isPending: deletingAttachment } =
+    useDeleteAttachment();
 
   const properties = useMemo(() => data?.data ?? [], [data]);
   const metadata = data?.metadata;
@@ -57,26 +98,71 @@ export default function PropertiesPage() {
   useEffect(() => {
     if (editingProperty) {
       setForm({
-        title: editingProperty.title ?? '',
-        address: editingProperty.address ?? '',
-        price: editingProperty.price?.toString() ?? '',
-        property_type_id: editingProperty.property_type_id ?? '',
-        status_id: editingProperty.status_id ?? '',
-        city: editingProperty.city ?? '',
-        state: editingProperty.state ?? '',
-        rooms: editingProperty.rooms?.toString() ?? '',
-        bathrooms: editingProperty.bathrooms?.toString() ?? '',
-        parking_spaces: editingProperty.parking_spaces?.toString() ?? '',
-        description: editingProperty.description ?? '',
+        title: editingProperty.title ?? "",
+        address: editingProperty.address ?? "",
+        price: editingProperty.price?.toLocaleString() ?? "",
+        property_type_id: editingProperty.property_type_id ?? "",
+        status_id: editingProperty.status_id ?? "",
+        city: editingProperty.city ?? "",
+        state: editingProperty.state ?? "",
+        zip_code: editingProperty.zip_code ?? "",
+        neighborhood: editingProperty.neighborhood ?? "",
+        rooms: editingProperty.rooms?.toString() ?? "",
+        bathrooms: editingProperty.bathrooms?.toString() ?? "",
+        half_bathrooms: editingProperty.half_bathrooms?.toString() ?? "",
+        parking_spaces: editingProperty.parking_spaces?.toString() ?? "",
+        description: editingProperty.description ?? "",
         featured: editingProperty.featured ?? false,
+        images: [],
+        videos: [],
       });
     } else {
       setForm(emptyForm);
     }
   }, [editingProperty]);
 
-  const handleChange = (field: keyof FormState, value: string | boolean) => {
+  const handleChange = (
+    field: keyof FormState,
+    value: string | boolean | File[]
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handlePriceChange = (value: string) => {
+    // Remove non-numeric characters except decimal point
+    const numericValue = value.replace(/[^\d.]/g, "");
+    // Split into integer and decimal parts
+    const parts = numericValue.split(".");
+    // Format integer part with commas
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    // Rejoin with decimal part if it exists
+    const formatted = parts.length > 1 ? parts.slice(0, 2).join(".") : parts[0];
+    setForm((prev) => ({ ...prev, price: formatted }));
+  };
+
+  const handleFileChange = (
+    field: "images" | "videos",
+    files: FileList | null
+  ) => {
+    if (!files) return;
+    const fileArray = Array.from(files);
+    setForm((prev) => ({ ...prev, [field]: [...prev[field], ...fileArray] }));
+  };
+
+  const removeFile = (field: "images" | "videos", index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    if (!editingProperty) return;
+    try {
+      await deleteAttachment({ propertyId: editingProperty.id, attachmentId });
+    } catch (error: any) {
+      setFormError(error?.message || "Failed to delete attachment");
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -86,25 +172,34 @@ export default function PropertiesPage() {
     const payload: PropertyPayload = {
       title: form.title.trim(),
       address: form.address.trim(),
-      price: parseFloat(form.price) || 0,
+      price: parseFloat(form.price.replace(/,/g, "")) || 0,
       property_type_id: form.property_type_id,
       status_id: form.status_id || undefined,
       city: form.city || undefined,
       state: form.state || undefined,
+      zip_code: form.zip_code || undefined,
+      neighborhood: form.neighborhood || undefined,
       rooms: form.rooms ? Number(form.rooms) : undefined,
       bathrooms: form.bathrooms ? Number(form.bathrooms) : undefined,
-      parking_spaces: form.parking_spaces ? Number(form.parking_spaces) : undefined,
+      half_bathrooms: form.half_bathrooms
+        ? Number(form.half_bathrooms)
+        : undefined,
+      parking_spaces: form.parking_spaces
+        ? Number(form.parking_spaces)
+        : undefined,
       description: form.description || undefined,
       featured: form.featured,
+      images: form.images.length > 0 ? form.images : undefined,
+      videos: form.videos.length > 0 ? form.videos : undefined,
     };
 
     if (!payload.title || !payload.address || !payload.property_type_id) {
-      setFormError('Title, address, and property type are required.');
+      setFormError("Title, address, and property type are required.");
       return;
     }
 
     if (!form.price || Number.isNaN(payload.price) || payload.price <= 0) {
-      setFormError('Price must be greater than 0.');
+      setFormError("Price must be greater than 0.");
       return;
     }
 
@@ -119,7 +214,7 @@ export default function PropertiesPage() {
     } catch (mutationError: any) {
       setFormError(
         mutationError?.message ||
-          'There was a problem saving the property. Please try again.'
+          "There was a problem saving the property. Please try again."
       );
     }
   };
@@ -127,7 +222,9 @@ export default function PropertiesPage() {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">Error loading properties: {error.message}</p>
+        <p className="text-red-800">
+          Error loading properties: {error.message}
+        </p>
       </div>
     );
   }
@@ -136,17 +233,17 @@ export default function PropertiesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Properties</h2>
+          <h2 className="text-2xl font-bold text-primary uppercase">{t("propertiesControlPanel")}</h2>
           <p className="text-sm text-gray-500">
             Connected to the Rails API: list, create, and update properties.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <label className="text-sm text-gray-600">Filter by status</label>
+          <label className="text-sm text-gray-600">{t("filterByStatus")}</label>
           <select
             className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-            value={filters.status_id ?? ''}
+            value={filters.status_id ?? ""}
             onChange={(event) =>
               setFilters((prev) => ({
                 ...prev,
@@ -154,10 +251,12 @@ export default function PropertiesPage() {
               }))
             }
           >
-            <option value="">All</option>
+            <option value="">{capitalizeFirstWord(t("all"))}</option>
             {statuses?.map((status) => (
               <option key={status.id} value={status.id}>
-                {status.name}
+                {capitalizeFirstWord(
+                  locale === "es" ? status.es_name : status.name
+                )}
               </option>
             ))}
           </select>
@@ -168,8 +267,8 @@ export default function PropertiesPage() {
         <div className="lg:col-span-1">
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">
-                {editingProperty ? 'Edit property' : 'Add property'}
+              <h3 className="text-lg font-semibold text-primary">
+                {editingProperty ? t("editProperty") : t("addProperty")}
               </h3>
               {editingProperty && (
                 <button
@@ -192,46 +291,99 @@ export default function PropertiesPage() {
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("propertyType")}
+                </label>
+                <select
+                  value={form.property_type_id}
+                  onChange={(event) =>
+                    handleChange("property_type_id", event.target.value)
+                  }
+                  className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                  required
+                >
+                  <option value="">{t("selectType")}</option>
+                  {propertyTypes?.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {capitalizeFirstWord(
+                        locale === "es" ? type.es_name : type.name
+                      )}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("title")}
+                </label>
                 <input
                   type="text"
                   value={form.title}
-                  onChange={(event) => handleChange('title', event.target.value)}
+                  onChange={(event) =>
+                    handleChange("title", event.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="Modern apartment in CDMX"
+                  placeholder={t("modernApartmentInLomas")}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Address</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("address")}
+                </label>
                 <input
                   type="text"
                   value={form.address}
-                  onChange={(event) => handleChange('address', event.target.value)}
+                  onChange={(event) =>
+                    handleChange("address", event.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   placeholder="Street, number, neighborhood"
                   required
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("neighborhood")}
+                </label>
+                <input
+                  type="text"
+                  value={form.neighborhood}
+                  onChange={(event) =>
+                    handleChange("neighborhood", event.target.value)
+                  }
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  placeholder={t("neighborhood")}
+                />
+              </div>
+
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">City</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t("city")}
+                  </label>
                   <input
                     type="text"
                     value={form.city}
-                    onChange={(event) => handleChange('city', event.target.value)}
+                    onChange={(event) =>
+                      handleChange("city", event.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     placeholder="City"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">State</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t("state")}
+                  </label>
                   <input
                     type="text"
                     value={form.state}
-                    onChange={(event) => handleChange('state', event.target.value)}
+                    onChange={(event) =>
+                      handleChange("state", event.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     placeholder="State"
                   />
@@ -240,48 +392,52 @@ export default function PropertiesPage() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Price</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t("zipCode")}
+                  </label>
                   <input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={form.price}
-                    onChange={(event) => handleChange('price', event.target.value)}
+                    type="text"
+                    value={form.zip_code}
+                    onChange={(event) =>
+                      handleChange("zip_code", event.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="5000000"
-                    required
+                    placeholder="78640"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Property type</label>
-                  <select
-                    value={form.property_type_id}
-                    onChange={(event) => handleChange('property_type_id', event.target.value)}
-                    className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t("price")}
+                  </label>
+                  <input
+                    type="text"
+                    value={form.price}
+                    onChange={(event) => handlePriceChange(event.target.value)}
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    placeholder="5,000,000"
                     required
-                  >
-                    <option value="">Select type</option>
-                    {propertyTypes?.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t("status")}
+                  </label>
                   <select
                     value={form.status_id}
-                    onChange={(event) => handleChange('status_id', event.target.value)}
+                    onChange={(event) =>
+                      handleChange("status_id", event.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
                   >
-                    <option value="">Select status</option>
+                    <option value="">{t("selectStatus")}</option>
                     {statuses?.map((status) => (
                       <option key={status.id} value={status.id}>
-                        {status.name}
+                        {capitalizeFirstWord(
+                          locale === "es" ? status.es_name : status.name
+                        )}
                       </option>
                     ))}
                   </select>
@@ -291,43 +447,74 @@ export default function PropertiesPage() {
                     id="featured"
                     type="checkbox"
                     checked={form.featured}
-                    onChange={(event) => handleChange('featured', event.target.checked)}
+                    onChange={(event) =>
+                      handleChange("featured", event.target.checked)
+                    }
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <label htmlFor="featured" className="text-sm text-gray-700">
-                    Mark as featured
+                    {t("markAsFeatured")}
                   </label>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Rooms</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t("rooms")}
+                  </label>
                   <input
                     type="number"
                     min={0}
                     value={form.rooms}
-                    onChange={(event) => handleChange('rooms', event.target.value)}
+                    onChange={(event) =>
+                      handleChange("rooms", event.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Bathrooms</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={form.bathrooms}
-                    onChange={(event) => handleChange('bathrooms', event.target.value)}
-                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Parking</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t("parking")}
+                  </label>
                   <input
                     type="number"
                     min={0}
                     value={form.parking_spaces}
-                    onChange={(event) => handleChange('parking_spaces', event.target.value)}
+                    onChange={(event) =>
+                      handleChange("parking_spaces", event.target.value)
+                    }
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t("baths")}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.bathrooms}
+                    onChange={(event) =>
+                      handleChange("bathrooms", event.target.value)
+                    }
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Half Baths
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.half_bathrooms}
+                    onChange={(event) =>
+                      handleChange("half_bathrooms", event.target.value)
+                    }
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   />
                 </div>
@@ -335,15 +522,187 @@ export default function PropertiesPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Description
+                  {t("description")}
                 </label>
                 <textarea
                   value={form.description}
-                  onChange={(event) => handleChange('description', event.target.value)}
+                  onChange={(event) =>
+                    handleChange("description", event.target.value)
+                  }
                   className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   rows={3}
-                  placeholder="Key highlights for this listing"
+                  placeholder={t("keyHighlightsForThisListing")}
                 />
+              </div>
+
+              {/* Images Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <ImageIcon className="inline h-4 w-4 mr-1" />
+                  Images
+                </label>
+
+                {/* Existing Images */}
+                {editingProperty && editingProperty.images.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-500 mb-2">
+                      {t("currentImages")}:
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {editingProperty.images.map((img) => (
+                        <div key={img.id} className="relative group">
+                          <img
+                            src={img.url}
+                            alt={img.filename}
+                            className="w-full h-20 object-cover rounded border border-gray-200"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAttachment(img.id)}
+                            disabled={deletingAttachment}
+                            className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:opacity-50"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* New Images Upload */}
+                <div className="flex items-center gap-2">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
+                      <Upload className="h-4 w-4" />
+                      <span>{t("uploadImages")}</span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) =>
+                        handleFileChange("images", e.target.files)
+                      }
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* New Images Preview */}
+                {form.images.length > 0 && (
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {form.images.map((file, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-full h-20 object-cover rounded border border-gray-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeFile("images", index)}
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <p className="text-xs text-gray-500 mt-1 truncate">
+                          {file.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Videos Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <VideoIcon className="inline h-4 w-4 mr-1" />
+                  Videos
+                </label>
+
+                {/* Existing Videos */}
+                {editingProperty && editingProperty.videos.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-500 mb-2">
+                      Current videos:
+                    </p>
+                    <div className="space-y-2">
+                      {editingProperty.videos.map((video) => (
+                        <div
+                          key={video.id}
+                          className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded border border-gray-200"
+                        >
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <VideoIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-sm text-gray-700 truncate">
+                              {video.filename}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAttachment(video.id)}
+                            disabled={deletingAttachment}
+                            className="flex-shrink-0 text-red-600 hover:text-red-700 disabled:opacity-50"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* New Videos Upload */}
+                <div className="flex items-center gap-2">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
+                      <Upload className="h-4 w-4" />
+                      <span>{t("uploadVideos")}</span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      multiple
+                      onChange={(e) =>
+                        handleFileChange("videos", e.target.files)
+                      }
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* New Videos Preview */}
+                {form.videos.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {form.videos.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between gap-2 p-2 bg-blue-50 rounded border border-blue-200"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <VideoIcon className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-gray-700 truncate">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile("videos", index)}
+                          className="flex-shrink-0 text-red-600 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <button
@@ -352,24 +711,26 @@ export default function PropertiesPage() {
                 disabled={creating || updating}
               >
                 {creating || updating
-                  ? 'Saving...'
+                  ? "Saving..."
                   : editingProperty
-                    ? 'Update property'
-                    : 'Create property'}
+                  ? t("updateProperty")
+                  : t("createProperty")}
               </button>
             </form>
           </div>
         </div>
 
         <div className="lg:col-span-2">
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div className="overflow-visible rounded-lg border border-gray-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
               <div>
                 <p className="text-sm font-semibold text-gray-800">
-                  {metadata?.count ?? 0} properties
+                  {metadata?.count ?? 0} {t("properties")}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {isFetching ? 'Refreshing...' : 'Live data from the API'}
+                  {isFetching
+                    ? `${t("updating")}...`
+                    : t("updatedPropertiesInDataBase")}
                 </p>
               </div>
               {metadata && (
@@ -379,78 +740,156 @@ export default function PropertiesPage() {
               )}
             </div>
 
-            {isLoading ? (
-              <div className="flex justify-center px-6 py-12 text-gray-500">
-                Loading properties...
-              </div>
-            ) : properties.length ? (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                      Title
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                      Location
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+            <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+              {isLoading ? (
+                <div className="flex justify-center px-6 py-12 text-gray-500">
+                  Loading properties...
+                </div>
+              ) : properties.length ? (
+                <div className="divide-y divide-gray-200">
                   {properties.map((property) => (
-                    <tr key={property.id}>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <div className="font-semibold text-gray-900">{property.title}</div>
-                        <div className="text-xs text-gray-500">
-                          {property.featured ? 'Featured • ' : ''}
-                          {property.description ? property.description.slice(0, 60) : ''}
+                    <div
+                      key={property.id}
+                      className="px-6 py-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="grid grid-cols-12 gap-4 items-start">
+                        {/* Left Column - Main Info (spans 10 columns) */}
+                        <div className="col-span-11 space-y-2">
+                          {/* Row 1: Title and Price */}
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 text-base">
+                                {property.title}
+                                {property.featured && (
+                                  <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                                    Featured
+                                  </span>
+                                )}
+                              </h3>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-gray-900">
+                                ${Number(property.price || 0).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Row 2: Location Details and Status */}
+                          <div className="flex items-center justify-between gap-4 text-sm">
+                            <div className="flex items-center gap-3 text-gray-600 flex-wrap">
+                              {property.neighborhood && (
+                                <span className="font-medium">
+                                  {property.neighborhood}
+                                </span>
+                              )}
+                              <span>•</span>
+                              <span>{property.city || "—"}</span>
+                              <span>•</span>
+                              <span>{property.state || "—"}</span>
+                              {property.zip_code && (
+                                <>
+                                  <span>•</span>
+                                  <span>{property.zip_code}</span>
+                                </>
+                              )}
+                            </div>
+                            <div>
+                              <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                                {capitalizeFirstWord(
+                                  locale === "es"
+                                    ? property.status?.es_name || ""
+                                    : property.status?.name || ""
+                                )}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                        {property.property_type?.name ?? '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                        ${Number(property.price || 0).toLocaleString()}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                        {property.city || '—'}, {property.state || '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                        <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                          {property.status?.name ?? 'Unspecified'}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-                        <button
-                          className="text-blue-600 hover:text-blue-800"
-                          onClick={() => setEditingProperty(property)}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
+
+                        {/* Right Column - Actions Dropdown (spans 1 column) */}
+                        <div className="col-span-1 flex justify-end">
+                          <div className="relative">
+                            <button
+                              onClick={() =>
+                                setOpenDropdownId(
+                                  openDropdownId === property.id
+                                    ? null
+                                    : property.id
+                                )
+                              }
+                              className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                              aria-label="Actions"
+                            >
+                              <MoreVertical className="h-5 w-5 text-gray-500" />
+                            </button>
+
+                            {openDropdownId === property.id && (
+                              <>
+                                <div
+                                  className="fixed inset-0 z-10"
+                                  onClick={() => setOpenDropdownId(null)}
+                                />
+                                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
+                                  <div className="py-1">
+                                    <button
+                                      onClick={() => {
+                                        setEditingProperty(property);
+                                        setOpenDropdownId(null);
+                                      }}
+                                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                      <EditIcon className="h-4 w-4" />
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        window.open(
+                                          `/properties/${property.id}`,
+                                          "_blank"
+                                        );
+                                        setOpenDropdownId(null);
+                                      }}
+                                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                      View
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        if (
+                                          confirm(
+                                            "Are you sure you want to delete this property?"
+                                          )
+                                        ) {
+                                          // TODO: Implement delete functionality
+                                          setOpenDropdownId(null);
+                                        }
+                                      }}
+                                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      Delete
+                                    </button>
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="px-6 py-12 text-center text-gray-500">
-                <p className="font-medium text-gray-700">No properties found</p>
-                <p className="text-sm text-gray-500">
-                  Use the form on the left to create your first listing.
-                </p>
-              </div>
-            )}
+                </div>
+              ) : (
+                <div className="px-6 py-12 text-center text-gray-500">
+                  <p className="font-medium text-gray-700">
+                    No properties found
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Use the form on the left to create your first listing.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
 "use client";
 import { ResidentialCard } from "@/components/ui";
-import { useLocale, useT } from "./TranslationProvider";
 import { useProperties } from "../services/properties/queries";
 import { useStatuses } from "../services/status/queries";
+import { useLocale, useT } from "@properlia/shared/components/TranslationProvider";
 
 export function FeaturedProperties() {
   const locale = useLocale();

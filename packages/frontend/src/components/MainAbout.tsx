@@ -1,5 +1,6 @@
 "use client";
-import { useT } from "./TranslationProvider";
+import { useT } from "@properlia/shared/components/TranslationProvider";
+
 
 export function MainAbout() {
   const t = useT();

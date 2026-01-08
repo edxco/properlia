@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import "../globals.css";
+import "@properlia/shared/styles/globals.css";
 
-import en from "@/messages/en.json";
-import es from "@/messages/es.json";
-import { TranslationProvider } from "@/src/components/TranslationProvider";
+import { enMessages as en, esMessages as es } from "@properlia/shared";
 import { QueryProvider } from "@/src/providers/QueryProvider";
 import { AuthProvider } from "@/src/contexts/AuthContext";
+import { TranslationProvider } from "@properlia/shared/components/TranslationProvider";
 
 export const metadata: Metadata = {
   title: "Properlia",

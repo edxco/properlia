@@ -3,8 +3,8 @@ import { Home, Menu, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import ProperliaLogo from "@/public/properlia.png";
-import { useT } from "./TranslationProvider";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useT } from "@properlia/shared/components/TranslationProvider";
 
 export function Navigation() {
   const t = useT();

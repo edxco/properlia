@@ -1,12 +1,12 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useT } from "./TranslationProvider";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 import { capitalizeEachWord } from "@/lib/utils/index";
 import { PillLink } from "@/components/ui";
 import sellIcon from "@/public/sell.svg";
 import { useState } from "react";
+import { useT } from "@properlia/shared/components/TranslationProvider";
 
 export function Hero() {
   const t = useT();

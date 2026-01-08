@@ -12,7 +12,7 @@ import {
   Bath,
   Car,
 } from "lucide-react";
-import { useT } from "@/src/components/TranslationProvider";
+import { useT } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
 
 interface ResidentialCardProps {
