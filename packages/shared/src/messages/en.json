@@ -39,6 +39,7 @@
   "selectType": "Select type",
   "listingType": "listing type",
   "select": "Select",
+  "cancelEdit": "Cancel edit",
 
   "search": "Search",
   "searchByCityOrLocation": "Search by city or location",
@@ -72,6 +73,11 @@
 
   "updating": "Updating",
   "updatedPropertiesInDataBase": "Updated properties in database",
+
+  "edit": "Edit",
+  "details": "Details",
+  "delete": "Delete",
+  "suspend": "Suspend",
 
   "title": "Title",
   "subtitle": "Create and manage your property listings",

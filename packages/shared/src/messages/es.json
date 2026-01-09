@@ -39,6 +39,7 @@
   "selectType": "Seleccionar tipo",
   "listingType": "tipo de operación",
   "select": "Seleccionar",
+  "cancelEdit": "Cancelar edición",
 
   "search": "Buscar",
   "searchByCityOrLocation": "Busca por ciudad o ubicación",
@@ -72,6 +73,11 @@
 
   "updating": "Actualizando",
   "updatedPropertiesInDataBase": "Propiedades actualizadas en la base de datos",
+
+  "edit": "Editar",
+  "details": "Detalles",
+  "delete": "Borrar",
+  "suspend": "Suspender",
 
   "title": "Titulo",
   "subtitle": "Crea y administra tus listados de propiedades",
