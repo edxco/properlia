@@ -2,6 +2,7 @@ class Property < ApplicationRecord
   # Associations
   belongs_to :property_type
   belongs_to :status
+  belongs_to :listing_type
   has_many_attached :images
   has_many_attached :videos
 

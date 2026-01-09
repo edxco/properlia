@@ -26,6 +26,7 @@ Rails.application.routes.draw do
 
       resources :property_types
       resources :statuses
+      resources :listing_types
 
       # General info endpoint
       get 'general_info', to: 'general_infos#show'
