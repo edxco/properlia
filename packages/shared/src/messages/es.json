@@ -37,6 +37,8 @@
   "markAsFeatured": "Marcar como destacado",
   "filterByStatus": "Filtrar por estatus",
   "selectType": "Seleccionar tipo",
+  "listingType": "tipo de operación",
+  "select": "Seleccionar",
 
   "search": "Buscar",
   "searchByCityOrLocation": "Busca por ciudad o ubicación",

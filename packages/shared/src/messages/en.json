@@ -37,6 +37,8 @@
   "markAsFeatured": "Mark as featured",
   "filterByStatus": "Filter by status",
   "selectType": "Select type",
+  "listingType": "listing type",
+  "select": "Select",
 
   "search": "Search",
   "searchByCityOrLocation": "Search by city or location",

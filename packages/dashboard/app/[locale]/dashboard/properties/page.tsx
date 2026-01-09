@@ -25,6 +25,7 @@ import {
 } from "@/src/services/properties/queries";
 import { usePropertyTypes } from "@/src/services/property-types/queries";
 import { useStatuses } from "@/src/services/statuses/queries";
+import { useListingTypes } from "@/src/services/listing-types/queries";
 import {
   useLocale,
   useT,
@@ -37,6 +38,7 @@ type FormState = {
   price: string;
   property_type_id: string;
   status_id: string;
+  listing_type_id: string;
   city: string;
   state: string;
   zip_code: string;
@@ -57,6 +59,7 @@ const emptyForm: FormState = {
   price: "",
   property_type_id: "",
   status_id: "",
+  listing_type_id: "",
   city: "",
   state: "",
   zip_code: "",
@@ -85,6 +88,7 @@ export default function PropertiesPage() {
   });
   const { data: propertyTypes } = usePropertyTypes();
   const { data: statuses } = useStatuses();
+  const { data: listingTypes } = useListingTypes();
   const { mutateAsync: createProperty, isPending: creating } =
     useCreateProperty();
   const { mutateAsync: updateProperty, isPending: updating } =
@@ -103,6 +107,7 @@ export default function PropertiesPage() {
         price: editingProperty.price?.toLocaleString() ?? "",
         property_type_id: editingProperty.property_type_id ?? "",
         status_id: editingProperty.status_id ?? "",
+        listing_type_id: editingProperty.listing_type_id ?? "",
         city: editingProperty.city ?? "",
         state: editingProperty.state ?? "",
         zip_code: editingProperty.zip_code ?? "",
@@ -175,6 +180,7 @@ export default function PropertiesPage() {
       price: parseFloat(form.price.replace(/,/g, "")) || 0,
       property_type_id: form.property_type_id,
       status_id: form.status_id || undefined,
+      listing_type_id: form.listing_type_id,
       city: form.city || undefined,
       state: form.state || undefined,
       zip_code: form.zip_code || undefined,
@@ -193,8 +199,8 @@ export default function PropertiesPage() {
       videos: form.videos.length > 0 ? form.videos : undefined,
     };
 
-    if (!payload.title || !payload.address || !payload.property_type_id) {
-      setFormError("Title, address, and property type are required.");
+    if (!payload.title || !payload.address || !payload.property_type_id || !payload.listing_type_id) {
+      setFormError("Title, address, property type, and listing type are required.");
       return;
     }
 
@@ -280,7 +286,7 @@ export default function PropertiesPage() {
               )}
             </div>
             <p className="mt-1 text-sm text-gray-500">
-              Required fields: title, address, price, and property type.
+              Required fields: title, address, price, property type, and listing type.
             </p>
 
             {formError && (
@@ -302,8 +308,30 @@ export default function PropertiesPage() {
                   className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
                   required
                 >
-                  <option value="">{t("selectType")}</option>
+                  <option value="">{t("select")}</option>
                   {propertyTypes?.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {capitalizeFirstWord(
+                        locale === "es" ? type.es_name : type.name
+                      )}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t('listingType')}
+                </label>
+                <select
+                  value={form.listing_type_id}
+                  onChange={(event) =>
+                    handleChange("listing_type_id", event.target.value)
+                  }
+                  className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                  required
+                >
+                  <option value="">{t('select')}</option>
+                  {listingTypes?.map((type) => (
                     <option key={type.id} value={type.id}>
                       {capitalizeFirstWord(
                         locale === "es" ? type.es_name : type.name
@@ -432,7 +460,7 @@ export default function PropertiesPage() {
                     }
                     className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
                   >
-                    <option value="">{t("selectStatus")}</option>
+                    <option value="">{t("select")}</option>
                     {statuses?.map((status) => (
                       <option key={status.id} value={status.id}>
                         {capitalizeFirstWord(
@@ -794,7 +822,14 @@ export default function PropertiesPage() {
                               )}
                             </div>
                             <div>
-                              <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                               <span className="inline-flex rounded-full border px-3 py-1 text-xs font-medium text-blue-700 mr-3">
+                                {capitalizeFirstWord(
+                                  locale === "es"
+                                    ? property.property_type?.es_name || ""
+                                    : property.property_type?.name || ""
+                                )}
+                              </span>
+                              <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-primary">
                                 {capitalizeFirstWord(
                                   locale === "es"
                                     ? property.status?.es_name || ""

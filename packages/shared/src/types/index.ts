@@ -38,8 +38,10 @@ export interface Property {
   coordinates?: string | null;
   property_type_id: string;
   status_id?: string | null;
+  listing_type_id: string;
   property_type?: CommonEntity | null;
   status?: CommonEntity | null;
+  listing_type?: CommonEntity | null;
   images: Attachment[];
   videos: Attachment[];
   created_at?: string;
@@ -49,6 +51,8 @@ export interface Property {
 export interface PropertyType extends CommonEntity {}
 
 export interface Status extends CommonEntity {}
+
+export interface ListingType extends CommonEntity {}
 
 export interface PropertyPayload {
   featured?: boolean;
@@ -69,6 +73,7 @@ export interface PropertyPayload {
   coordinates?: string;
   property_type_id: string;
   status_id?: string;
+  listing_type_id: string;
   images?: File[];
   videos?: File[];
 }
