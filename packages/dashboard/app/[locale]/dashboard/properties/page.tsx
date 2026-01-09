@@ -786,7 +786,7 @@ export default function PropertiesPage() {
                           {/* Row 1: Title and Price */}
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900 text-base">
+                              <h3 className="font-semibold text-primary text-base">
                                 {property.title}
                                 {property.featured && (
                                   <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
@@ -825,15 +825,15 @@ export default function PropertiesPage() {
                                <span className="inline-flex rounded-full border px-3 py-1 text-xs font-medium text-blue-700 mr-3">
                                 {capitalizeFirstWord(
                                   locale === "es"
-                                    ? property.property_type?.es_name || ""
-                                    : property.property_type?.name || ""
+                                    ? property?.property_type?.es_name || ""
+                                    : property?.property_type?.name || ""
                                 )}
                               </span>
                               <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-primary">
                                 {capitalizeFirstWord(
                                   locale === "es"
-                                    ? property.status?.es_name || ""
-                                    : property.status?.name || ""
+                                    ? property?.listing_type?.es_name || ""
+                                    : property?.listing_type?.name || ""
                                 )}
                               </span>
                             </div>
