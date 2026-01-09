@@ -30,7 +30,7 @@ import {
   useLocale,
   useT,
 } from "@properlia/shared/components/TranslationProvider";
-import { capitalizeFirstWord } from "@properlia/shared";
+import { capitalizeFirstWord, formatLargeNumber, getBadge } from "@properlia/shared";
 
 type FormState = {
   title: string;
@@ -98,6 +98,13 @@ export default function PropertiesPage() {
 
   const properties = useMemo(() => data?.data ?? [], [data]);
   const metadata = data?.metadata;
+
+  const totalPrice = useMemo(() => {
+    return properties.reduce((sum, property) => {
+      const price = Number(property.price);
+      return sum + (isNaN(price) ? 0 : price);
+    }, 0);
+  }, [properties]);
 
   useEffect(() => {
     if (editingProperty) {
@@ -199,13 +206,32 @@ export default function PropertiesPage() {
       videos: form.videos.length > 0 ? form.videos : undefined,
     };
 
-    if (!payload.title || !payload.address || !payload.property_type_id || !payload.listing_type_id) {
-      setFormError("Title, address, property type, and listing type are required.");
+    // Validate required fields
+    if (
+      !payload.title ||
+      !payload.address ||
+      !payload.property_type_id ||
+      !payload.listing_type_id ||
+      !form.city ||
+      !form.state ||
+      !form.zip_code ||
+      !form.status_id ||
+      !form.description
+    ) {
+      setFormError(
+        "All required fields must be filled: property type, listing type, title, address, city, state, zip code, status, and description."
+      );
       return;
     }
 
     if (!form.price || Number.isNaN(payload.price) || payload.price <= 0) {
       setFormError("Price must be greater than 0.");
+      return;
+    }
+
+    // Validate images for new properties
+    if (!editingProperty && form.images.length === 0) {
+      setFormError("At least one image is required.");
       return;
     }
 
@@ -239,7 +265,9 @@ export default function PropertiesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-primary uppercase">{t("propertiesControlPanel")}</h2>
+          <h2 className="text-2xl font-bold text-primary uppercase">
+            {t("propertiesControlPanel")}
+          </h2>
           <p className="text-sm text-gray-500">
             Connected to the Rails API: list, create, and update properties.
           </p>
@@ -281,12 +309,12 @@ export default function PropertiesPage() {
                   onClick={() => setEditingProperty(null)}
                   className="text-sm text-blue-600 hover:text-blue-700"
                 >
-                  Cancel edit
+                  {t('cancelEdit')}
                 </button>
               )}
             </div>
             <p className="mt-1 text-sm text-gray-500">
-              Required fields: title, address, price, property type, and listing type.
+              Fill out the form to {editingProperty ? "update" : "create"} a property listing.
             </p>
 
             {formError && (
@@ -298,7 +326,7 @@ export default function PropertiesPage() {
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t("propertyType")}
+                  {t("propertyType")} <span className="text-red-600">*</span>
                 </label>
                 <select
                   value={form.property_type_id}
@@ -320,7 +348,7 @@ export default function PropertiesPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t('listingType')}
+                  {t("listingType")} <span className="text-red-600">*</span>
                 </label>
                 <select
                   value={form.listing_type_id}
@@ -330,7 +358,7 @@ export default function PropertiesPage() {
                   className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
                   required
                 >
-                  <option value="">{t('select')}</option>
+                  <option value="">{t("select")}</option>
                   {listingTypes?.map((type) => (
                     <option key={type.id} value={type.id}>
                       {capitalizeFirstWord(
@@ -342,7 +370,7 @@ export default function PropertiesPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t("title")}
+                  {t("title")} <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -358,7 +386,7 @@ export default function PropertiesPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t("address")}
+                  {t("address")} <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -390,7 +418,7 @@ export default function PropertiesPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    {t("city")}
+                    {t("city")} <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -400,11 +428,12 @@ export default function PropertiesPage() {
                     }
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     placeholder="City"
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    {t("state")}
+                    {t("state")} <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -414,6 +443,7 @@ export default function PropertiesPage() {
                     }
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     placeholder="State"
+                    required
                   />
                 </div>
               </div>
@@ -421,7 +451,7 @@ export default function PropertiesPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    {t("zipCode")}
+                    {t("zipCode")} <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -431,11 +461,12 @@ export default function PropertiesPage() {
                     }
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     placeholder="78640"
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    {t("price")}
+                    {t("price")} <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
@@ -451,7 +482,7 @@ export default function PropertiesPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    {t("status")}
+                    {t("status")} <span className="text-red-600">*</span>
                   </label>
                   <select
                     value={form.status_id}
@@ -459,6 +490,7 @@ export default function PropertiesPage() {
                       handleChange("status_id", event.target.value)
                     }
                     className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                    required
                   >
                     <option value="">{t("select")}</option>
                     {statuses?.map((status) => (
@@ -550,7 +582,7 @@ export default function PropertiesPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t("description")}
+                  {t("description")} <span className="text-red-600">*</span>
                 </label>
                 <textarea
                   value={form.description}
@@ -560,6 +592,7 @@ export default function PropertiesPage() {
                   className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   rows={3}
                   placeholder={t("keyHighlightsForThisListing")}
+                  required
                 />
               </div>
 
@@ -567,7 +600,7 @@ export default function PropertiesPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <ImageIcon className="inline h-4 w-4 mr-1" />
-                  Images
+                  Images <span className="text-red-600">*</span>
                 </label>
 
                 {/* Existing Images */}
@@ -748,7 +781,38 @@ export default function PropertiesPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-4">
+          {/* Status Filter Submenu */}
+          <div className="pb-3">
+            <div className="flex items-center justify-end gap-2 overflow-x-auto">
+              <button
+                onClick={() => setFilters({ status_id: undefined })}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+                  !filters.status_id
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {capitalizeFirstWord(t("all"))}
+              </button>
+              {statuses?.map((status) => (
+                <button
+                  key={status.id}
+                  onClick={() => setFilters({ status_id: status.id })}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+                    filters.status_id === status.id
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {capitalizeFirstWord(
+                    locale === "es" ? status.es_name : status.name
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="overflow-visible rounded-lg border border-gray-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
               <div>
@@ -756,9 +820,7 @@ export default function PropertiesPage() {
                   {metadata?.count ?? 0} {t("properties")}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {isFetching
-                    ? `${t("updating")}...`
-                    : t("updatedPropertiesInDataBase")}
+                  Total: ${formatLargeNumber(totalPrice)} (${totalPrice.toLocaleString()})
                 </p>
               </div>
               {metadata && (
@@ -776,24 +838,33 @@ export default function PropertiesPage() {
               ) : properties.length ? (
                 <div className="divide-y divide-gray-200">
                   {properties.map((property) => (
-                    <div
-                      key={property.id}
-                      className="px-6 py-4 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="grid grid-cols-12 gap-4 items-start">
-                        {/* Left Column - Main Info (spans 10 columns) */}
-                        <div className="col-span-11 space-y-2">
+                    <div key={property.id} className="relative group pb-2">
+                      <a
+                        href={`/properties/${property.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block px-6 py-4 pr-16 hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="space-y-2">
                           {/* Row 1: Title and Price */}
                           <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-primary text-base">
+                            <div className="flex-1 flex gap-1 items-center">
+                              <h3 className={`font-semibold text-base ${
+                                property.status_id === "7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64"
+                                  ? "text-gray-500"
+                                  : "text-primary"
+                              }`}>
                                 {property.title}
+                              </h3>
+                                {property.status && property.status_id && (
+                                  getBadge(property.status, locale)
+                                )}
                                 {property.featured && (
                                   <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
                                     Featured
                                   </span>
                                 )}
-                              </h3>
+                              
                             </div>
                             <div className="text-right">
                               <div className="text-lg font-bold text-gray-900">
@@ -822,93 +893,102 @@ export default function PropertiesPage() {
                               )}
                             </div>
                             <div>
-                               <span className="inline-flex rounded-full border px-3 py-1 text-xs font-medium text-blue-700 mr-3">
-                                {capitalizeFirstWord(
-                                  locale === "es"
-                                    ? property?.property_type?.es_name || ""
-                                    : property?.property_type?.name || ""
-                                )}
-                              </span>
-                              <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-primary">
-                                {capitalizeFirstWord(
-                                  locale === "es"
-                                    ? property?.listing_type?.es_name || ""
-                                    : property?.listing_type?.name || ""
-                                )}
-                              </span>
+                              {property.property_type && property.property_type_id && (
+                                getBadge(property.property_type, locale)
+                              )}
+                              {property.listing_type && property.listing_type_id && (
+                                getBadge(property.listing_type, locale)
+                              )}
                             </div>
                           </div>
                         </div>
+                      </a>
 
-                        {/* Right Column - Actions Dropdown (spans 1 column) */}
-                        <div className="col-span-1 flex justify-end">
-                          <div className="relative">
-                            <button
-                              onClick={() =>
-                                setOpenDropdownId(
-                                  openDropdownId === property.id
-                                    ? null
-                                    : property.id
-                                )
-                              }
-                              className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                              aria-label="Actions"
-                            >
-                              <MoreVertical className="h-5 w-5 text-gray-500" />
-                            </button>
+                      {/* Right Column - Actions Dropdown (spans 1 column) */}
+                      <div className="absolute top-4 right-6 z-30">
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setOpenDropdownId(
+                                openDropdownId === property.id
+                                  ? null
+                                  : property.id
+                              );
+                            }}
+                            className="p-2 hover:bg-gray-200 rounded-md transition-colors"
+                            aria-label="Actions"
+                          >
+                            <MoreVertical className="h-5 w-5 text-gray-500" />
+                          </button>
 
-                            {openDropdownId === property.id && (
-                              <>
-                                <div
-                                  className="fixed inset-0 z-10"
-                                  onClick={() => setOpenDropdownId(null)}
-                                />
-                                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
-                                  <div className="py-1">
-                                    <button
-                                      onClick={() => {
-                                        setEditingProperty(property);
-                                        setOpenDropdownId(null);
-                                      }}
-                                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                      <EditIcon className="h-4 w-4" />
-                                      Edit
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        window.open(
-                                          `/properties/${property.id}`,
-                                          "_blank"
-                                        );
-                                        setOpenDropdownId(null);
-                                      }}
-                                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                      View
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        if (
-                                          confirm(
-                                            "Are you sure you want to delete this property?"
-                                          )
-                                        ) {
-                                          // TODO: Implement delete functionality
+                          {openDropdownId === property.id && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setOpenDropdownId(null)}
+                              />
+                              <div className="absolute right-0 mt-2 rounded-md shadow-lg bg-white ring ring-gray-400 ring-opacity-5 z-50">
+                                <div className="flex items-center divide-x divide-gray-400">
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setEditingProperty(property);
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-l-md"
+                                  >
+                                    <EditIcon className="h-4 w-4" />
+                                    {t('edit')}
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      window.open(
+                                        `/properties/${property.id}`,
+                                        "_blank"
+                                      );
+                                      setOpenDropdownId(null);
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    {t('details')}
+                                  </button>
+                                  <button
+                                    onClick={async (e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      if (
+                                        confirm(
+                                          "Are you sure you want to suspend this property?"
+                                        )
+                                      ) {
+                                        try {
+                                          await updateProperty({
+                                            id: property.id,
+                                            data: {
+                                              status_id: "7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64"
+                                            }
+                                          });
                                           setOpenDropdownId(null);
+                                        } catch (error) {
+                                          console.error("Failed to suspend property:", error);
                                         }
-                                      }}
-                                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                      Delete
-                                    </button>
-                                  </div>
+                                      }
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-r-md"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    {t('suspend')}
+                                  </button>
                                 </div>
-                              </>
-                            )}
-                          </div>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
