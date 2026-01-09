@@ -7,7 +7,7 @@ class EmailService
     # @param message [String] Message content
     # @param subject [String] Email subject (optional)
     # @return [Hash] Resend API response or error
-    def send_contact_form(name:, email:, message:, subject: "New Contact Form Submission")
+    def send_contact_form(name:, email:, message:, subject: 'New Contact Form Submission')
       validate_resend_configured!
       general_info = GeneralInfo.instance
 
@@ -30,7 +30,7 @@ class EmailService
     # @param phone [String] Phone number (optional)
     # @param message [String] Inquiry message
     # @return [Hash] Resend API response or error
-    def send_property_inquiry(property_id:, property_title:, name:, email:, phone: nil, message:)
+    def send_property_inquiry(property_id:, property_title:, name:, email:, message:, phone: nil)
       validate_resend_configured!
       general_info = GeneralInfo.instance
 
@@ -62,7 +62,7 @@ class EmailService
       params = {
         from: ENV.fetch('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
         to: user_email,
-        subject: "Welcome to Properlia!",
+        subject: 'Welcome to Properlia!',
         html: welcome_email_html(name: user_name)
       }
 
@@ -82,7 +82,7 @@ class EmailService
       params = {
         from: ENV.fetch('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
         to: general_info.email_to,
-        subject: "Confirmación de propiedad #{truncated_title}",
+        subject: "Confirmación #{property.property_type.es_name} en #{property.listing_type.es_name}, #{property.address}, #{property.city}",
         html: property_confirmation_html(property: property)
       }
 
@@ -92,23 +92,21 @@ class EmailService
     private
 
     def validate_resend_configured!
-      unless ENV['RESEND_API_KEY'].present?
-        raise StandardError, "RESEND_API_KEY is not configured"
-      end
+      return if ENV['RESEND_API_KEY'].present?
+
+      raise StandardError, 'RESEND_API_KEY is not configured'
     end
 
     def send_email(params)
-      begin
-        response = Resend::Emails.send(params)
-        Rails.logger.info "Email sent successfully: #{response}"
-        { success: true, data: response }
-      rescue Resend::Error => e
-        Rails.logger.error "Resend API error: #{e.message}"
-        { success: false, error: e.message }
-      rescue StandardError => e
-        Rails.logger.error "Failed to send email: #{e.message}"
-        { success: false, error: e.message }
-      end
+      response = Resend::Emails.send(params)
+      Rails.logger.info "Email sent successfully: #{response}"
+      { success: true, data: response }
+    rescue Resend::Error => e
+      Rails.logger.error "Resend API error: #{e.message}"
+      { success: false, error: e.message }
+    rescue StandardError => e
+      Rails.logger.error "Failed to send email: #{e.message}"
+      { success: false, error: e.message }
     end
 
     # HTML template for contact form email
