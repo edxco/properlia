@@ -25,7 +25,7 @@ export default function DashboardLayout({
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* <h1 className="text-xl font-semibold">Properlia Dashboard</h1> */}
-            <Image src={ProperliaLogo} alt="Properlia logo" width={200} />
+            <Image src={ProperliaLogo} alt="Properlia logo" width={160} />
             <div className="flex items-center space-x-6">
               <DashboardNav locale={locale} />
               <div className="flex items-center space-x-4 border-l border-gray-200 pl-4">
