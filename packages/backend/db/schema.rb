@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_01_09_161436) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_09_222924) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -85,6 +85,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_09_161436) do
     t.string "neighborhood"
     t.string "zip_code"
     t.uuid "listing_type_id", null: false
+    t.boolean "exclusive_listing", default: true, null: false
     t.index ["city"], name: "index_properties_on_city"
     t.index ["featured"], name: "index_properties_on_featured"
     t.index ["images"], name: "index_properties_on_images", using: :gin
