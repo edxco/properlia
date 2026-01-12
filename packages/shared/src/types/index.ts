@@ -21,6 +21,7 @@ export interface Attachment {
 export interface Property {
   id: string;
   featured: boolean;
+  exclusive_listing: boolean;
   title: string;
   description?: string | null;
   land_area?: number | null;
@@ -30,7 +31,7 @@ export interface Property {
   half_bathrooms: number;
   parking_spaces: number;
   price: number;
-  address: string;
+  address?: string;
   city?: string | null;
   state?: string | null;
   zip_code?: string | null;
@@ -56,6 +57,7 @@ export interface ListingType extends CommonEntity {}
 
 export interface PropertyPayload {
   featured?: boolean;
+  exclusive_listing?: boolean;
   title: string;
   description?: string;
   land_area?: number;

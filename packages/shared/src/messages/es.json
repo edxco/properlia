@@ -7,6 +7,9 @@
   "all": "Todos",
   "modernApartmentInLomas": "Departamento moderno en Lomas",
 
+  "createForm": "Complete el formulario para crear un anuncio de propiedad.",
+  "updateForm": "Complete el formulario para actualizar un anuncio de propiedad.",
+
   "helpU": "Te ayudamos a",
   "buySellInvest": "Comprar, vender o invertir en propiedades",
   "buy": "comprar",
@@ -17,10 +20,7 @@
   "letsGetYourPropertySold": "Hagamos Que Tu Propiedad Se Venda",
   "readyToInvest": "¿Listo para Invertir? Te Acompañamos en Cada Paso",
 
-  "land": "terreno",
   "built": "construcción",
-  "rooms": "recamaras",
-  "baths": "baños",
   "car": "auto",
   "address": "Dirección",
   "neighborhood": "Colonia",
@@ -30,7 +30,6 @@
   "price": "Precio",
   "propertyType": "Tipo de propiedad",
   "status": "Estatus",
-  "parking": "Estacionamiento",
   "description": "Descripción",
   "currentImages": "Imágenes actuales",
   "keyHighlightsForThisListing": "Aspectos destacados de este anuncio",
@@ -40,6 +39,9 @@
   "listingType": "tipo de operación",
   "select": "Seleccionar",
   "cancelEdit": "Cancelar edición",
+  "featured": "Destacada",
+  "exclusiveListing": "En exclusiva",
+  "streetNumberNeighborhood": "Calle y número",
 
   "search": "Buscar",
   "searchByCityOrLocation": "Busca por ciudad o ubicación",
@@ -78,6 +80,23 @@
   "details": "Detalles",
   "delete": "Borrar",
   "suspend": "Suspender",
+  "factSheet": "Ficha Técnica",
+  "factSheetOptions": "Opciones de Ficha Técnica",
+  "displayProperliaInfo": "¿Mostrar información de Properlia?",
+  "yes": "Sí",
+  "no": "No",
+  "cancel": "Cancelar",
+  "download": "Descargar",
+
+  "propertyDetails": "",
+  "builtArea_m2": "construcción m²",
+  "landArea_m2": "terreno m²",
+  "parking": "Estacionamiento",
+  "guestBath": "medio baño",
+  "land": "terreno",
+  "rooms": "recamaras",
+  "baths": "baños",
+
 
   "title": "Titulo",
   "subtitle": "Crea y administra tus listados de propiedades",

@@ -16,6 +16,7 @@ export interface IAttachment {
 export interface IProperty {
   id: string;
   featured: boolean;
+  exclusive_listing: boolean;
   title: string;
   description: string | null;
   land_area: number | null;
@@ -40,6 +41,7 @@ export interface IProperty {
 export interface ICreatePropertyDto {
   property: {
     featured?: boolean;
+    exclusive_listing?: boolean;
     title: string;
     description?: string;
     land_area?: number;
@@ -63,6 +65,7 @@ export interface ICreatePropertyDto {
 export interface IUpdatePropertyDto {
   property: {
     featured?: boolean;
+    exclusive_listing?: boolean;
     title?: string;
     description?: string;
     land_area?: number;
