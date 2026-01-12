@@ -119,7 +119,7 @@ class EmailService
             <style>
               body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+              .header { background-color: #214c9b; color: white; padding: 20px; text-align: center; }
               .content { background-color: #f9fafb; padding: 30px; }
               .field { margin-bottom: 20px; }
               .label { font-weight: bold; color: #374151; }
@@ -162,7 +162,7 @@ class EmailService
             <style>
               body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #2563eb; color: white; padding: 20px; text-align: center; }
+              .header { background-color: #214c9b; color: white; padding: 20px; text-align: center; }
               .content { background-color: #f9fafb; padding: 30px; }
               .field { margin-bottom: 20px; }
               .label { font-weight: bold; color: #374151; }
@@ -212,11 +212,11 @@ class EmailService
             <style>
               body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #2563eb; color: white; padding: 30px; text-align: center; }
+              .header { background-color: #214c9b; color: white; padding: 30px; text-align: center; }
               .content { background-color: #f9fafb; padding: 40px; }
               .cta-button {
                 display: inline-block;
-                background-color: #2563eb;
+                background-color: #214c9b;
                 color: white;
                 padding: 12px 30px;
                 text-decoration: none;
@@ -274,18 +274,18 @@ class EmailService
             <style>
               body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #2563eb; color: white; padding: 30px; text-align: center; }
+              .header { background-color: #214c9b; color: white; padding: 30px; text-align: center; }
               .content { background-color: #f9fafb; padding: 30px; }
-              .section-title { color: #2563eb; font-size: 18px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; }
+              .section-title { color: #214c9b; font-size: 18px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; }
               .property-detail {
                 background-color: white;
                 padding: 15px;
                 margin-bottom: 10px;
                 border-radius: 5px;
-                border-left: 4px solid #2563eb;
+                border-left: 4px solid #214c9b;
               }
               .detail-label {
-                color: #2563eb;
+                color: #214c9b;
                 font-weight: bold;
                 margin-bottom: 5px;
               }
@@ -295,7 +295,7 @@ class EmailService
               }
               .cta-button {
                 display: inline-block;
-                background-color: #2563eb;
+                background-color: #214c9b;
                 color: white !important;
                 padding: 12px 30px;
                 text-decoration: none;
