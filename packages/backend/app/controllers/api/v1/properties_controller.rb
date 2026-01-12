@@ -117,7 +117,12 @@ module Api
 
       def property_json(property)
         # include signed URLs for immediate consumption by your frontend
-        property.attributes.except('created_at', 'updated_at').merge(
+        base_attributes = property.attributes.except('created_at', 'updated_at')
+
+        # Hide address if exclusive_listing is false
+        base_attributes = base_attributes.except('address') unless property.exclusive_listing
+
+        base_attributes.merge(
           'property_type' => property.property_type ? {
             id: property.property_type.id,
             name: property.property_type.name,
