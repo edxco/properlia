@@ -1,0 +1,26 @@
+<%= @t[:greeting] %>
+
+<%= @t[:intro] %>
+
+<%= @property.title %>
+$<%= number_with_delimiter(@property.price, delimiter: ',') %>
+<% if @property.address.present? %><%= @property.address %><% end %>
+
+<% if @message.present? %>
+---
+<%= @message %>
+---
+<% end %>
+
+<%= @t[:attached] %>
+
+<%= @t[:contact] %>
+<%= @t[:phone] %>: <%= @general_info.phone %>
+<%= @t[:whatsapp] %>: <%= @general_info.whatsapp %>
+<%= @t[:email] %>: <%= @general_info.email_to %>
+
+<%= @t[:regards] %>
+<%= @t[:team] %>
+
+---
+© <%= Time.now.year %> Properlia. All rights reserved.

@@ -22,6 +22,10 @@ Rails.application.routes.draw do
         member do
           delete 'attachments/:attachment_id', to: 'properties#delete_attachment', as: 'delete_attachment'
         end
+
+        # PDF generation routes
+        get 'pdf', to: 'pdfs#show', as: 'pdf'
+        post 'pdf/email', to: 'pdfs#email', as: 'email_pdf'
       end
 
       resources :property_types

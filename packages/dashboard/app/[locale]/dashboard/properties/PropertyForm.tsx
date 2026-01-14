@@ -87,6 +87,8 @@ export default function PropertyForm({
   const locale = useLocale();
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState<string | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const { data: propertyTypes } = usePropertyTypes();
   const { data: statuses } = useStatuses();
@@ -147,13 +149,76 @@ export default function PropertyForm({
     setForm((prev) => ({ ...prev, price: formatted }));
   };
 
-  const handleFileChange = (
+  // Convert WebP image to PNG
+  const convertWebPToPNG = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              // Create new File from blob with .png extension
+              const pngFile = new File(
+                [blob],
+                file.name.replace(/\.webp$/i, '.png'),
+                { type: 'image/png' }
+              );
+              resolve(pngFile);
+            } else {
+              reject(new Error('Failed to convert image to PNG'));
+            }
+          }, 'image/png', 0.95); // 95% quality
+        } else {
+          reject(new Error('Canvas context not available'));
+        }
+      };
+
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleFileChange = async (
     field: "images" | "videos",
     files: FileList | null
   ) => {
     if (!files) return;
     const fileArray = Array.from(files);
-    setForm((prev) => ({ ...prev, [field]: [...prev[field], ...fileArray] }));
+
+    // For images, check for WebP and convert to PNG
+    if (field === "images") {
+      const processedFiles: File[] = [];
+
+      for (const file of fileArray) {
+        if (file.type === 'image/webp') {
+          try {
+            const pngFile = await convertWebPToPNG(file);
+            processedFiles.push(pngFile);
+          } catch (error) {
+            console.error('Failed to convert WebP to PNG:', error);
+            // If conversion fails, keep the original file
+            processedFiles.push(file);
+          }
+        } else {
+          processedFiles.push(file);
+        }
+      }
+
+      setForm((prev) => ({ ...prev, [field]: [...prev[field], ...processedFiles] }));
+    } else {
+      // For videos, no conversion needed
+      setForm((prev) => ({ ...prev, [field]: [...prev[field], ...fileArray] }));
+    }
   };
 
   const removeFile = (field: "images" | "videos", index: number) => {
@@ -161,6 +226,64 @@ export default function PropertyForm({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
+  };
+
+  // Image reordering handlers
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/html", index.toString());
+    // Prevent image from being dragged
+    e.dataTransfer.setDragImage(e.currentTarget, 0, 0);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    // Only clear if we're leaving the container, not a child element
+    if (e.currentTarget === e.target) {
+      setDragOverIndex(null);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const dragIndex = draggedIndex !== null ? draggedIndex : parseInt(e.dataTransfer.getData("text/html"));
+
+    if (dragIndex === dropIndex || dragIndex === null) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    setForm((prev) => {
+      const newImages = [...prev.images];
+      const [removed] = newImages.splice(dragIndex, 1);
+      newImages.splice(dropIndex, 0, removed);
+      return { ...prev, images: newImages };
+    });
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   const handleDeleteAttachment = async (attachmentId: string) => {
@@ -644,26 +767,56 @@ export default function PropertyForm({
 
           {/* New Images Preview */}
           {form.images.length > 0 && (
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {form.images.map((file, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={file.name}
-                    className="w-full h-20 object-cover rounded border border-gray-200"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeFile("images", index)}
-                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                  <p className="text-xs text-gray-500 mt-1 truncate">
-                    {file.name}
-                  </p>
-                </div>
-              ))}
+            <div className="mt-2">
+              <p className="text-xs text-gray-500 mb-2">
+                Drag to reorder images (first image will be the cover)
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {form.images.map((file, index) => {
+                  const isDragging = draggedIndex === index;
+                  const isDropTarget = dragOverIndex === index;
+
+                  return (
+                    <div
+                      key={index}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragEnd={handleDragEnd}
+                      onDragEnter={(e) => handleDragEnter(e, index)}
+                      onDragLeave={handleDragLeave}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, index)}
+                      className={`relative group cursor-grab active:cursor-grabbing transition-all ${
+                        isDragging ? "opacity-40 scale-95" : "opacity-100"
+                      } ${
+                        isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""
+                      }`}
+                    >
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
+                        draggable={false}
+                      />
+                      {index === 0 && (
+                        <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+                          Cover
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeFile("images", index)}
+                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                      <p className="text-xs text-gray-500 mt-1 truncate pointer-events-none">
+                        {file.name}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
