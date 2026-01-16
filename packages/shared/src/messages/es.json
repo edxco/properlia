@@ -147,5 +147,18 @@
   "benefit3Title": "Máxima Exposición",
   "benefit3Description": "Tu propiedad será vista por compradores calificados.",
   "benefit4Title": "Precios Justos",
-  "benefit4Description": "Te ayudamos a obtener el mejor precio por tu propiedad."
+  "benefit4Description": "Te ayudamos a obtener el mejor precio por tu propiedad.",
+
+  "leads": "Prospectos",
+  "leadsControlPanel": "Panel de Control de Prospectos",
+  "leadsDescription": "Visualiza y gestiona tus prospectos del CRM.",
+  "loadingLeads": "Cargando prospectos",
+  "errorLoadingLeads": "Error al cargar prospectos",
+  "noLeadsFound": "No se encontraron prospectos",
+  "noLeadsDescription": "Los prospectos aparecerán aquí cuando se envíen a través de los formularios del sitio web.",
+  "budget": "Presupuesto",
+  "property": "Propiedad",
+  "contacts": "contactos",
+  "interest": "Interés",
+  "page": "Página"
 }

@@ -3,6 +3,9 @@
 // Auth types
 export * from '../services/auth/types';
 
+// Lead types
+export * from '../services/leads/types';
+
 export interface CommonEntity {
   id: string;
   name: string;

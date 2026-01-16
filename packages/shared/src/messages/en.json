@@ -147,5 +147,18 @@
   "benefit3Title": "Maximum Exposure",
   "benefit3Description": "Your property will be seen by qualified buyers.",
   "benefit4Title": "Fair Prices",
-  "benefit4Description": "We help you get the best price for your property."
+  "benefit4Description": "We help you get the best price for your property.",
+
+  "leads": "Leads",
+  "leadsControlPanel": "Leads Control Panel",
+  "leadsDescription": "View and manage your leads from the CRM.",
+  "loadingLeads": "Loading leads",
+  "errorLoadingLeads": "Error loading leads",
+  "noLeadsFound": "No leads found",
+  "noLeadsDescription": "Leads will appear here when they are submitted through the website forms.",
+  "budget": "Budget",
+  "property": "Property",
+  "contacts": "contacts",
+  "interest": "Interest",
+  "page": "Page"
 }
