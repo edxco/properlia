@@ -1,5 +1,5 @@
 "use client";
-import { Home, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,18 +21,18 @@ export function Navigation() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            <a
-              href="#properties"
+            <Link
+              href={`/${locale}/properties`}
               className="text-stone-700 uppercase hover:text-stone-900 transition-colors text-sm tracking-wide"
             >
               {t("imABuyer")}
-            </a>
-            <a
-              href="#services"
+            </Link>
+            <Link
+              href={`/${locale}/sell`}
               className="text-stone-700 uppercase hover:text-stone-900 transition-colors text-sm tracking-wide"
             >
               {t("imASeller")}
-            </a>
+            </Link>
             <a
               href="#about"
               className="text-stone-700 uppercase hover:text-stone-900 transition-colors text-sm tracking-wide"
@@ -67,32 +67,34 @@ export function Navigation() {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-stone-100">
           <div className="px-6 py-6 space-y-4">
-            <a
-              href="#properties"
+            <Link
+              href={`/${locale}/properties`}
               className="block text-stone-700 hover:text-stone-900 text-sm tracking-wide"
+              onClick={() => setIsMenuOpen(false)}
             >
-              Properties
-            </a>
-            <a
-              href="#services"
+              {t("imABuyer")}
+            </Link>
+            <Link
+              href={`/${locale}/sell`}
               className="block text-stone-700 hover:text-stone-900 text-sm tracking-wide"
+              onClick={() => setIsMenuOpen(false)}
             >
-              Services
-            </a>
+              {t("imASeller")}
+            </Link>
             <a
               href="#about"
               className="block text-stone-700 hover:text-stone-900 text-sm tracking-wide"
             >
-              About
+              {t("services")}
             </a>
             <a
               href="#contact"
               className="block text-stone-700 hover:text-stone-900 text-sm tracking-wide"
             >
-              Contact
+              {t("contact")}
             </a>
             <button className="w-full bg-stone-900 text-white px-6 py-2.5 text-sm tracking-wide hover:bg-stone-800 transition-colors">
-              Get Started
+              WHATSAPP
             </button>
           </div>
         </div>
