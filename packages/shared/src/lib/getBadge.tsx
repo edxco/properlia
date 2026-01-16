@@ -53,7 +53,7 @@ const BADGE_COLOR_BY_ID: Record<string, BadgeColor> = {
   }, // house
   "23d3905f-a5c1-4372-995e-362b2c10f77f": {
     bgColor: "#0084d1", // sky-600
-    textColor: "#0f172a",
+    textColor: "#ffffff",
   }, // land
   "044af3c1-7cea-4ec5-86e7-07b10afdb147": {
     bgColor: "#0069a8", // sky-700

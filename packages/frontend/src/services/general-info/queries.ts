@@ -1,11 +1,7 @@
 'use client';
 
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
-import { generalInfoApi, UpdateGeneralInfoDto } from '@properlia/shared/services/general-info/api';
+import { useQuery } from '@tanstack/react-query';
+import { generalInfoApi } from '@properlia/shared/services/general-info/api';
 
 /**
  * Hook to fetch general info data with aggressive caching
@@ -27,16 +23,5 @@ export const useGeneralInfo = () => {
     refetchOnReconnect: false,
     // Don't refetch on mount if data exists
     refetchOnMount: false,
-  });
-};
-
-export const useUpdateGeneralInfo = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: UpdateGeneralInfoDto) => generalInfoApi.update(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['generalInfo'] });
-    },
   });
 };

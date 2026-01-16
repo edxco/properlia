@@ -1,15 +1,18 @@
 "use client";
-import { ResidentialCard } from "@/components/ui";
+import { PropertyCard } from "@/components/ui";
 import { useProperties } from "../services/properties/queries";
 import { useStatuses } from "../services/status/queries";
-import { useLocale, useT } from "@properlia/shared/components/TranslationProvider";
+import { useT } from "@properlia/shared/components/TranslationProvider";
 
 export function FeaturedProperties() {
-  const locale = useLocale();
   const t = useT();
-  const { data: propertiesData, isLoading, isError } = useProperties({ items: 3 });
+  const {
+    data: propertiesData,
+    isLoading,
+    isError,
+  } = useProperties({ items: 3, featured: true });
   const { data: statusesData } = useStatuses();
-  console.log('propertiesData', propertiesData);
+  console.log("propertiesData", propertiesData);
   if (isLoading) {
     return (
       <section className="py-24 bg-white">
@@ -33,7 +36,9 @@ export function FeaturedProperties() {
             <h2 className="text-4xl md:text-5xl font-serif text-stone-900 mb-8">
               {t("properliaBriefTitle")}
             </h2>
-            <div className="text-stone-600">Unable to load properties at this time.</div>
+            <div className="text-stone-600">
+              Unable to load properties at this time.
+            </div>
           </div>
         </div>
       </section>
@@ -43,8 +48,21 @@ export function FeaturedProperties() {
   const properties = propertiesData.data.map((property) => ({
     id: property.id,
     title: property.title,
-    property_type: (locale === 'es' ? property?.property_type?.es_name : property?.property_type?.name) ?? 'Unknown',
-    status: (locale === 'es' ? property?.status?.es_name : property?.status?.name) ?? 'Unknown',
+    property_type: property?.property_type ?? {
+      id: "",
+      name: "Unknown",
+      es_name: "Desconocido",
+    },
+    status: property?.status ?? {
+      id: "",
+      name: "Unknown",
+      es_name: "Desconocido",
+    },
+    listing_types: property?.listing_type ?? {
+      id: "",
+      name: "Unknown",
+      es_name: "Desconocido",
+    },
     images: property.images.map((img) => img.url),
     landArea: property.land_area ?? 0,
     builtArea: property.built_area ?? 0,
@@ -52,21 +70,16 @@ export function FeaturedProperties() {
     rooms: property.rooms,
     bathrooms: property.bathrooms,
     slug: property.id,
+    half_bathrooms: property.half_bathrooms,
   }));
-
-  console.log('properties', properties);
 
   return (
     <section className="py-24 bg-white">
-      <div className="max-w-4xl mx-auto px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto lg:px-8">
         <div className="text-center">
-          <h2 className="text-4xl md:text-5xl font-serif text-stone-900 mb-8">
-            {t("properliaBriefTitle")}
-          </h2>
-
-          <div className="space-y-6 text-stone-700 font-light text-lg leading-relaxed">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-stone-700 font-light text-lg leading-relaxed">
             {properties.map((property) => (
-              <ResidentialCard key={property.id} {...property} />
+              <PropertyCard key={property.id} {...property} />
             ))}
           </div>
 

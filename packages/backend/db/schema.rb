@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_01_09_222924) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_15_033741) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -51,6 +51,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_09_222924) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["singleton_guard"], name: "index_general_infos_on_singleton_guard", unique: true
+  end
+
+  create_table "leads_and_lead_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "listing_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

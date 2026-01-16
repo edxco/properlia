@@ -18,12 +18,19 @@ type PropertyFilters = {
   property_type_id?: string;
   page?: number;
   items?: number;
+  include_suspended?: boolean;
 };
 
 export const useProperties = (params?: PropertyFilters) => {
+  // Dashboard should always include suspended properties
+  const queryParams = {
+    ...params,
+    include_suspended: params?.include_suspended !== undefined ? params.include_suspended : true,
+  };
+
   return useQuery({
-    queryKey: ['properties', params],
-    queryFn: () => propertyApi.getAll(params),
+    queryKey: ['properties', queryParams],
+    queryFn: () => propertyApi.getAll(queryParams),
   });
 };
 

@@ -2,21 +2,23 @@
 import { Home, Menu, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import ProperliaLogo from "@/public/properlia.png";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { useT } from "@properlia/shared/components/TranslationProvider";
+import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
 
 export function Navigation() {
   const t = useT();
+  const locale = useLocale();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-stone-100">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <div className="flex items-center space-x-2">
+          <Link href={`/${locale}`} className="flex items-center space-x-2">
             <Image src={ProperliaLogo} alt="Properlia logo" width={200} />
-          </div>
+          </Link>
 
           <div className="hidden md:flex items-center space-x-8">
             <a

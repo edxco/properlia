@@ -1,56 +1,31 @@
-import { notFound } from 'next/navigation';
-import { propertyApi } from '@properlia/shared/services/properties/api';
+'use client';
+
+import { useParams } from 'next/navigation';
+import { useProperty } from '@/src/services/properties/queries';
 import { PropertyDetail } from '@properlia/shared';
 
-interface PropertyPageProps {
-  params: {
-    id: string;
-    locale: string;
-  };
-}
+export default function Page() {
+  const params = useParams();
+  const id = params?.id as string;
+  const locale = params?.locale as string;
 
-export default async function PropertyPage({ params }: PropertyPageProps) {
-  const { id, locale } = params;
+  const { data: property, isLoading, isError } = useProperty(id);
 
-  try {
-    const property = await propertyApi.getById(id);
-
-    if (!property) {
-      notFound();
-    }
-
-    return <PropertyDetail property={property} locale={locale} />;
-  } catch (error) {
-    console.error('Error fetching property:', error);
-    notFound();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-stone-600">Loading property...</div>
+      </div>
+    );
   }
-}
 
-export async function generateMetadata({ params }: PropertyPageProps) {
-  const { id } = params;
-
-  try {
-    const property = await propertyApi.getById(id);
-
-    if (!property) {
-      return {
-        title: 'Property Not Found',
-      };
-    }
-
-    const formattedPrice = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(property.price);
-
-    return {
-      title: `${property.title} - ${formattedPrice}`,
-      description: property.description || `${property.title} for sale`,
-    };
-  } catch (error) {
-    return {
-      title: 'Property Not Found',
-    };
+  if (isError || !property) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-600">Property not found</div>
+      </div>
+    );
   }
+
+  return <PropertyDetail property={property} locale={locale} />;
 }

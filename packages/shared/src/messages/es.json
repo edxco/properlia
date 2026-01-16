@@ -56,6 +56,7 @@
 
   "featuredProperties": "Propiedades destacadas",
   "viewFullDetails": "Ver Detalles Completos",
+  "viewDetails": "Ver detalles",
   "contactMe": "contact me",
   "generateInfoInSpanish": "¿PDF en español?",
 
@@ -97,7 +98,16 @@
   "land": "terreno",
   "rooms": "recamaras",
   "baths": "baños",
-
+  "moreFilters": "más filtros",
+  "minPrice": "$ minimo",
+  "maxPrice": "$ máximo",
+  "showing": "Mostrando",
+  "of": "de",
+  "in": "en",
+  "clear": "Limpiar",
+  "clearFilters": "Limpiar filtros",
+  "noPropertiesFoundLooking": "No se encontraron propiedades para",
+  "showingAllProperties": "Mostrando todas las propiedades",
 
   "title": "Titulo",
   "subtitle": "Crea y administra tus listados de propiedades",

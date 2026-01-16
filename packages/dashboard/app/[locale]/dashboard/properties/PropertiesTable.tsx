@@ -13,6 +13,7 @@ import {
 } from "@properlia/shared";
 import PropertyActionsDropdown from "./PropertyActionsDropdown";
 import FactSheetModal from "./FactSheetModal";
+import { Star } from "lucide-react";
 
 interface PropertiesTableProps {
   properties: Property[];
@@ -133,9 +134,7 @@ export default function PropertiesTable({
                             property.status_id &&
                             getBadge(property.status, locale)}
                           {property.featured && (
-                            <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                              Featured
-                            </span>
+                            <Star className="ml-2 w-5 h-5 fill-amber-400 text-amber-400" />
                           )}
                         </div>
                         <div className="text-right">

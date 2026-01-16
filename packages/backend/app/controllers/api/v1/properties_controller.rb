@@ -10,6 +10,13 @@ module Api
       def index
         properties = Property.all
 
+        # Exclude suspended properties by default (unless include_suspended=true)
+        # Suspended status ID: 7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64
+        unless ActiveModel::Type::Boolean.new.cast(params[:include_suspended])
+          suspended_status_id = '7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64'
+          properties = properties.where.not(status_id: suspended_status_id)
+        end
+
         # Filter by featured
         if params[:featured].present?
           properties = properties.where(featured: ActiveModel::Type::Boolean.new.cast(params[:featured]))

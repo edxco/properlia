@@ -2,7 +2,7 @@
 module Api
   module V1
     class GeneralInfosController < ApplicationController
-      before_action :authenticate_user!
+      before_action :authenticate_user!, only: [:update]
 
       # GET /api/v1/general_info
       def show

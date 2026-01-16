@@ -1,2 +1,4 @@
 export { PillLink } from './pillLink';
-export { ResidentialCard } from './residentialCard';
+export { PropertyCard } from './propertyCard';
+export { PropertyCardCompact } from './propertyCardCompact';
+export { PropertyLabelStats } from './PropertyLabelStats';

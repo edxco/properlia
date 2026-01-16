@@ -13,6 +13,7 @@ type PropertyQueryParams = {
   property_type_id?: string;
   page?: number;
   items?: number;
+  include_suspended?: boolean;
 };
 
 const buildAuthHeaders = (token?: string) => {
@@ -63,6 +64,7 @@ export const propertyApi = {
     if (params?.featured !== undefined) query.set('featured', String(params.featured));
     if (params?.status_id) query.set('status_id', params.status_id);
     if (params?.property_type_id) query.set('property_type_id', params.property_type_id);
+    if (params?.include_suspended !== undefined) query.set('include_suspended', String(params.include_suspended));
 
     const search = query.toString();
     const endpoint = search ? `/properties?${search}` : '/properties';

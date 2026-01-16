@@ -9,6 +9,7 @@ type PropertyFilters = {
   property_type_id?: string;
   page?: number;
   items?: number;
+  include_suspended?: boolean;
 };
 
 // Query hook for fetching all properties

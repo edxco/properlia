@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,40 +13,59 @@ import {
   Bath,
   Car,
 } from "lucide-react";
-import { useT } from "@properlia/shared/components/TranslationProvider";
+import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
+import { getBadge, BadgeItem } from "@properlia/shared/lib/getBadge";
+import { ListingType } from "@properlia/shared";
+import { PropertyLabelStats } from "./PropertyLabelStats";
+import { useGeneralInfo } from "@/src/services/general-info/queries";
 
-interface ResidentialCardProps {
+interface PropertyCardProps {
   id: string;
   title: string;
-  property_type: string;
+  property_type: BadgeItem;
   images: string[];
   landArea: number;
   builtArea: number;
   price: number;
-  status: string;
+  status: BadgeItem;
+  listing_types: ListingType;
   rooms: number;
   bathrooms: number;
+  half_bathrooms: number;
   slug?: string;
 }
 
-export const ResidentialCard = ({
+export const PropertyCard = ({
   id,
   title,
   property_type,
   images,
   landArea,
   status,
+  listing_types,
   builtArea,
   price,
   rooms,
   bathrooms,
+  half_bathrooms,
   slug,
-}: ResidentialCardProps) => {
+}: PropertyCardProps) => {
   const t = useT();
+  const locale = useLocale();
+  const pathname = usePathname();
+  const { data: generalInfo, isLoading, isError } = useGeneralInfo();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Construct the full property URL for WhatsApp sharing
+  const propertyUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}${pathname}/properties/${slug || id}`
+    : '';
+    
+  const whatsappMessage = `Hola! Me interesa esta propiedad:\n${title}\n${property_type.es_name} en ${listing_types.es_name}\n${propertyUrl}`;
+  const whatsappLink = `https://wa.me/${generalInfo?.whatsapp}?text=${encodeURIComponent(whatsappMessage)}`;
 
   // Autoplay carousel
   useEffect(() => {
@@ -88,7 +108,7 @@ export const ResidentialCard = ({
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
       <div
-        className="relative h-64 bg-gray-200 group"
+        className="relative h-48 bg-gray-200 group"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -109,6 +129,13 @@ export const ResidentialCard = ({
             }
           />
         ))}
+
+        {/* Badges overlay on top left */}
+        <div className="absolute top-3 left-3 flex gap-2 flex-wrap z-10">
+          {getBadge(listing_types, locale)}
+          {getBadge(property_type, locale)}
+        </div>
+
         {images.length > 1 && (
           <>
             <button
@@ -151,65 +178,11 @@ export const ResidentialCard = ({
       </div>
 
       <div className="p-5">
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-xl text-left font-semibold text-gray-800 line-clamp-2">
-            {title}
-          </div>
-          <div className="flex justify-between items-center mb-4">
-            <div className="bg-primary border font-bold rounded-md px-3 font-sans py-1 text-[10px] uppercase m-0 flex justify-center items-center text-white">
-              {status}
-            </div>
-            <div className="bg-primary border font-bold rounded-md px-3 font-sans py-1 text-[10px] uppercase m-0 flex justify-center items-center text-white">
-              {property_type}
-            </div>
-          </div>
+        <div className="text-md text-left font-semibold text-gray-800 line-clamp-1 mb-4">
+          {title}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Home className="w-4 h-4 flex-shrink-0" />
-            <div className="text-sm">
-              <span className="font-medium text-gray-900">
-                {landArea.toLocaleString()}
-              </span>
-              <span className="text-xs ml-1">m² {t("land")}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-gray-600">
-            <Ruler className="w-4 h-4 flex-shrink-0" />
-            <div className="text-sm">
-              <span className="font-medium text-gray-900">
-                {builtArea.toLocaleString()}
-              </span>
-              <span className="text-xs ml-1">m² {t("built")}</span>
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Bed className="w-4 h-4 flex-shrink-0" />
-            <div className="text-sm">
-              <span className="font-medium text-gray-900">{rooms}</span>
-              <span className="text-xs ml-1">{t("rooms")}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-gray-600">
-            <Bath className="w-4 h-4 flex-shrink-0" />
-            <div className="text-sm">
-              <span className="font-medium text-gray-900">{bathrooms}</span>
-              <span className="text-xs ml-1">{t("baths")}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Car className="w-4 h-4 flex-shrink-0" />
-            <div className="text-sm">
-              <span className="font-medium text-gray-900">{rooms}</span>
-              <span className="text-xs ml-1">{t("car")}</span>
-            </div>
-          </div>
-        </div>
+        <PropertyLabelStats landArea={landArea} builtArea={builtArea} rooms={rooms} bathrooms={bathrooms} half_bathrooms={half_bathrooms}/>
 
         <div className="flex items-center gap-2 mb-4 pt-3 border-t border-gray-100">
           <span className="text-2xl font-bold text-gray-900">
@@ -220,13 +193,13 @@ export const ResidentialCard = ({
         <div className="flex gap-x-5 flex-col md:flex-row">
           <Link
             href={`/properties/${slug || id}`}
-            className="block w-full text-center py-2.5 px-4 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-md transition-colors duration-200"
+            className="block w-full text-center py-1 px-4 bg-primary hover:bg-gray-800 text-white font-light text-sm rounded-sm transition-colors duration-200"
           >
-            {capitalizeEachWord(t("contactMe"))}
+            {capitalizeEachWord(t("viewDetails"))}
           </Link>
           <Link
-            href={`/properties/${slug || id}`}
-            className="block w-full text-center py-2.5 px-4 bg-green-500 hover:bg-green-800 text-white font-medium rounded-md transition-colors duration-200"
+            href={whatsappLink}
+            className="block w-full text-center py-1 px-4 bg-green-500 hover:bg-green-800 text-white font-light text-sm rounded-sm transition-colors duration-200"
           >
             Whatsapp
           </Link>
