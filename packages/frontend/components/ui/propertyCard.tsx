@@ -4,21 +4,17 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  Ruler,
-  Bed,
-  Bath,
-  Car,
-} from "lucide-react";
-import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
+  useT,
+  useLocale,
+} from "@properlia/shared/components/TranslationProvider";
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
 import { getBadge, BadgeItem } from "@properlia/shared/lib/getBadge";
 import { ListingType } from "@properlia/shared";
 import { PropertyLabelStats } from "./PropertyLabelStats";
 import { useGeneralInfo } from "@/src/services/general-info/queries";
+import { PropertyStatsGrid } from "./PropertyStatsGrid";
 
 interface PropertyCardProps {
   id: string;
@@ -34,6 +30,7 @@ interface PropertyCardProps {
   bathrooms: number;
   half_bathrooms: number;
   slug?: string;
+  compact?: boolean;
 }
 
 export const PropertyCard = ({
@@ -50,6 +47,7 @@ export const PropertyCard = ({
   bathrooms,
   half_bathrooms,
   slug,
+  compact = false,
 }: PropertyCardProps) => {
   const t = useT();
   const locale = useLocale();
@@ -60,12 +58,15 @@ export const PropertyCard = ({
   const [isHovered, setIsHovered] = useState(false);
 
   // Construct the full property URL for WhatsApp sharing
-  const propertyUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}${pathname}/properties/${slug || id}`
-    : '';
-    
+  const propertyUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}${pathname}/properties/${slug || id}`
+      : "";
+
   const whatsappMessage = `Hola! Me interesa esta propiedad:\n${title}\n${property_type.es_name} en ${listing_types.es_name}\n${propertyUrl}`;
-  const whatsappLink = `https://wa.me/${generalInfo?.whatsapp}?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappLink = `https://wa.me/${
+    generalInfo?.whatsapp
+  }?text=${encodeURIComponent(whatsappMessage)}`;
 
   // Autoplay carousel
   useEffect(() => {
@@ -182,7 +183,23 @@ export const PropertyCard = ({
           {title}
         </div>
 
-        <PropertyLabelStats landArea={landArea} builtArea={builtArea} rooms={rooms} bathrooms={bathrooms} half_bathrooms={half_bathrooms}/>
+        {compact ? (
+          <PropertyStatsGrid
+            landArea={landArea}
+            builtArea={builtArea}
+            rooms={rooms}
+            bathrooms={bathrooms}
+            half_bathrooms={half_bathrooms}
+          />
+        ) : (
+          <PropertyLabelStats
+            landArea={landArea}
+            builtArea={builtArea}
+            rooms={rooms}
+            bathrooms={bathrooms}
+            half_bathrooms={half_bathrooms}
+          />
+        )}
 
         <div className="flex items-center gap-2 mb-4 pt-3 border-t border-gray-100">
           <span className="text-2xl font-bold text-gray-900">

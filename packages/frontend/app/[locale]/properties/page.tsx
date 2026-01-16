@@ -8,6 +8,7 @@ import { NoResultsAlert } from "@/components/alerts/NoResultsAlert";
 import { useProperties } from "@/src/services/properties/queries";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import { Property } from "@properlia/shared/types";
+import { PropertyCard } from "@/components/ui";
 
 interface Filters {
   rooms?: number;
@@ -25,7 +26,11 @@ interface Filters {
 export default function PropertiesPage() {
   const t = useT();
   const searchParams = useSearchParams();
-  const { data: propertiesData, isLoading, isError } = useProperties({ items: 100 });
+  const {
+    data: propertiesData,
+    isLoading,
+    isError,
+  } = useProperties({ items: 100 });
 
   const [filters, setFilters] = useState<Filters>({});
 
@@ -71,7 +76,7 @@ export default function PropertiesPage() {
         const query = filters.searchQuery.toLowerCase().trim();
 
         // Check if query matches "City, State" format
-        const cityStateParts = query.split(',').map(p => p.trim());
+        const cityStateParts = query.split(",").map((p) => p.trim());
         const isCityStateFormat = cityStateParts.length === 2;
 
         if (isCityStateFormat) {
@@ -94,15 +99,18 @@ export default function PropertiesPage() {
       // Listing type filter (rent/buy)
       if (filters.listingType) {
         const listingTypeName = property.listing_type?.name?.toLowerCase();
-        if (filters.listingType === "rent" && listingTypeName !== "rent") return false;
-        if (filters.listingType === "buy" && listingTypeName !== "sale") return false;
+        if (filters.listingType === "rent" && listingTypeName !== "rent")
+          return false;
+        if (filters.listingType === "buy" && listingTypeName !== "sale")
+          return false;
       }
 
       // Rooms filter
       if (filters.rooms && property.rooms < filters.rooms) return false;
 
       // Bathrooms filter
-      if (filters.bathrooms && property.bathrooms < filters.bathrooms) return false;
+      if (filters.bathrooms && property.bathrooms < filters.bathrooms)
+        return false;
 
       // City filter
       if (filters.city && property.city !== filters.city) return false;
@@ -115,15 +123,23 @@ export default function PropertiesPage() {
       if (filters.priceMax && property.price > filters.priceMax) return false;
 
       // Land area range filter
-      if (filters.landAreaMin && (property.land_area || 0) < filters.landAreaMin) return false;
-      if (filters.landAreaMax && (property.land_area || 0) > filters.landAreaMax) return false;
+      if (
+        filters.landAreaMin &&
+        (property.land_area || 0) < filters.landAreaMin
+      )
+        return false;
+      if (
+        filters.landAreaMax &&
+        (property.land_area || 0) > filters.landAreaMax
+      )
+        return false;
 
       return true;
     });
   }, [propertiesData, filters]);
 
   const handleFilterChange = (key: keyof Filters, value: any) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value || undefined,
     }));
@@ -133,68 +149,100 @@ export default function PropertiesPage() {
     setFilters({});
   };
 
-  const activeFilterCount = Object.values(filters).filter(v => v !== undefined).length;
-  const advancedFilterCount = [filters.city, filters.state, filters.landAreaMin, filters.landAreaMax].filter(v => v !== undefined).length;
+  const activeFilterCount = Object.values(filters).filter(
+    (v) => v !== undefined
+  ).length;
+  const advancedFilterCount = [
+    filters.city,
+    filters.state,
+    filters.landAreaMin,
+    filters.landAreaMax,
+  ].filter((v) => v !== undefined).length;
 
   const hasNoResults = filteredProperties.length === 0 && activeFilterCount > 0;
-  const propertiesToDisplay = hasNoResults ? (propertiesData?.data || []) : filteredProperties;
+  const propertiesToDisplay = hasNoResults
+    ? propertiesData?.data || []
+    : filteredProperties;
 
   return (
     <section className="py-12 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        {/* Primary Filters Bar */}
+        <PropertyFiltersBar
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onClearFilters={clearFilters}
+          activeFilterCount={activeFilterCount}
+          advancedFilterCount={advancedFilterCount}
+          currentCount={filteredProperties.length}
+          totalCount={propertiesData?.data.length || 0}
+          cities={cities}
+          states={states}
+        />
 
-          {/* Primary Filters Bar */}
-          <PropertyFiltersBar
+        {/* No Results Alert */}
+        {hasNoResults && (
+          <NoResultsAlert
             filters={filters}
-            onFilterChange={handleFilterChange}
             onClearFilters={clearFilters}
-            activeFilterCount={activeFilterCount}
-            advancedFilterCount={advancedFilterCount}
-            currentCount={filteredProperties.length}
-            totalCount={propertiesData?.data.length || 0}
-            cities={cities}
-            states={states}
+            autoDismissSeconds={10}
           />
+        )}
 
-          {/* No Results Alert */}
-          {hasNoResults && (
-            <NoResultsAlert
-              filters={filters}
-              onClearFilters={clearFilters}
-              autoDismissSeconds={10}
-            />
-          )}
-
-          {/* Properties Grid */}
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="text-stone-600">{t("loading") || "Loading properties"}...</div>
+        {/* Properties Grid */}
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="text-stone-600">
+              {t("loading") || "Loading properties"}...
             </div>
-          ) : isError ? (
-            <div className="text-center py-12">
-              <div className="text-red-600">{t("errorLoading") || "Error loading properties"}</div>
+          </div>
+        ) : isError ? (
+          <div className="text-center py-12">
+            <div className="text-red-600">
+              {t("errorLoading") || "Error loading properties"}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {propertiesToDisplay.map((property: Property) => (
-                <PropertyCardCompact
-                  key={property.id}
-                  id={property.id}
-                  title={property.title}
-                  property_type={property?.property_type ?? { id: '', name: 'Unknown', es_name: 'Desconocido' }}
-                  status={property?.status ?? { id: '', name: 'Unknown', es_name: 'Desconocido' }}
-                  listing_types={property?.listing_type ?? { id: '', name: 'Unknown', es_name: 'Desconocido' }}
-                  images={property.images.map((img) => img.url)}
-                  landArea={property.land_area ?? 0}
-                  builtArea={property.built_area ?? 0}
-                  price={property.price}
-                  rooms={property.rooms}
-                  bathrooms={property.bathrooms}
-                  slug={property.id}
-                />
-              ))}
-            </div>
-          )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {propertiesToDisplay.map((property: Property) => (
+              <PropertyCard
+                key={property.id}
+                id={property.id}
+                title={property.title}
+                property_type={
+                  property?.property_type ?? {
+                    id: "",
+                    name: "Unknown",
+                    es_name: "Desconocido",
+                  }
+                }
+                status={
+                  property?.status ?? {
+                    id: "",
+                    name: "Unknown",
+                    es_name: "Desconocido",
+                  }
+                }
+                listing_types={
+                  property?.listing_type ?? {
+                    id: "",
+                    name: "Unknown",
+                    es_name: "Desconocido",
+                  }
+                }
+                images={property.images.map((img) => img.url)}
+                landArea={property.land_area ?? 0}
+                builtArea={property.built_area ?? 0}
+                price={property.price}
+                rooms={property.rooms}
+                bathrooms={property.bathrooms}
+                slug={property.id}
+                compact={true}
+                half_bathrooms={property.half_bathrooms}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
