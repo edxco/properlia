@@ -32,6 +32,18 @@ Rails.application.routes.draw do
       resources :statuses
       resources :listing_types
 
+      resources :leads, only: %i[index show create update] do
+        collection do
+          post 'public', to: 'leads#public_create'
+        end
+        member do
+          post 'change_status'
+          post 'assign'
+          post 'record_contact'
+        end
+        resources :events, controller: 'lead_events', only: %i[index show create]
+      end
+
       # General info endpoint
       get 'general_info', to: 'general_infos#show'
       put 'general_info', to: 'general_infos#update'

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_01_15_033741) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_16_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -53,9 +53,68 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_15_033741) do
     t.index ["singleton_guard"], name: "index_general_infos_on_singleton_guard", unique: true
   end
 
-  create_table "leads_and_lead_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "lead_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "lead_id", null: false
+    t.string "event_type", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.uuid "created_by_user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["event_type", "created_at"], name: "index_lead_events_on_type_created_at"
+    t.index ["lead_id", "created_at"], name: "index_lead_events_on_lead_created_at"
+  end
+
+  create_table "leads", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "full_name", null: false
+    t.string "email"
+    t.string "phone"
+    t.string "email_normalized"
+    t.string "phone_e164"
+    t.string "source", null: false
+    t.jsonb "source_detail", default: {}, null: false
+    t.uuid "property_id"
+    t.string "utm_source"
+    t.string "utm_medium"
+    t.string "utm_campaign"
+    t.string "utm_content"
+    t.string "utm_term"
+    t.text "referrer_url"
+    t.text "landing_url"
+    t.integer "status", default: 0, null: false
+    t.integer "interest_operation", null: false
+    t.string "interest_property_type"
+    t.decimal "min_budget"
+    t.decimal "max_budget"
+    t.integer "score", default: 0, null: false
+    t.text "notes"
+    t.uuid "assigned_to_user_id"
+    t.uuid "created_by_user_id"
+    t.datetime "next_follow_up_at"
+    t.datetime "last_contacted_at"
+    t.integer "contact_attempts", default: 0, null: false
+    t.boolean "consent_marketing", default: false, null: false
+    t.datetime "consent_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.date "desired_date"
+    t.string "neighborhood"
+    t.string "city"
+    t.string "state"
+    t.uuid "property_type_id"
+    t.index ["assigned_to_user_id", "status"], name: "index_leads_on_assigned_status"
+    t.index ["city"], name: "index_leads_on_city"
+    t.index ["email_normalized"], name: "index_leads_unique_email_normalized", unique: true, where: "(email_normalized IS NOT NULL)"
+    t.index ["interest_operation"], name: "index_leads_on_interest_operation"
+    t.index ["next_follow_up_at"], name: "index_leads_on_next_follow_up_at"
+    t.index ["phone_e164"], name: "index_leads_unique_phone_e164", unique: true, where: "(phone_e164 IS NOT NULL)"
+    t.index ["property_id"], name: "index_leads_on_property_id"
+    t.index ["property_type_id"], name: "index_leads_on_property_type_id"
+    t.index ["state"], name: "index_leads_on_state"
+    t.index ["status", "created_at"], name: "index_leads_on_status_created_at"
+    t.index ["utm_campaign"], name: "index_leads_on_utm_campaign"
+    t.check_constraint "(min_budget IS NULL OR min_budget >= 0::numeric) AND (max_budget IS NULL OR max_budget >= 0::numeric)", name: "leads_budget_non_negative"
+    t.check_constraint "email_normalized IS NOT NULL OR phone_e164 IS NOT NULL", name: "leads_require_email_or_phone"
+    t.check_constraint "min_budget IS NULL OR max_budget IS NULL OR min_budget <= max_budget", name: "leads_budget_range_ok"
   end
 
   create_table "listing_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -147,6 +206,12 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_15_033741) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "lead_events", "leads"
+  add_foreign_key "lead_events", "users", column: "created_by_user_id"
+  add_foreign_key "leads", "properties"
+  add_foreign_key "leads", "property_types"
+  add_foreign_key "leads", "users", column: "assigned_to_user_id"
+  add_foreign_key "leads", "users", column: "created_by_user_id"
   add_foreign_key "properties", "listing_types"
   add_foreign_key "properties", "property_types"
   add_foreign_key "properties", "statuses"
