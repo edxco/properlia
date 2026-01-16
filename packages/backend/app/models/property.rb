@@ -5,6 +5,7 @@ class Property < ApplicationRecord
   belongs_to :listing_type
   has_many_attached :images
   has_many_attached :videos
+  has_many :leads, dependent: :nullify
 
   # Validations
   validates :title, :address, :price, :property_type, presence: true
