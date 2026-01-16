@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { PropertyCardCompact } from "@/components/ui/propertyCardCompact";
 import { PropertyFiltersBar } from "@/components/filters/PropertyFiltersBar";
 import { NoResultsAlert } from "@/components/alerts/NoResultsAlert";
 import { useProperties } from "@/src/services/properties/queries";
