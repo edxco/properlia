@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_01_16_200000) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_20_021235) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -168,6 +168,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_16_200000) do
     t.check_constraint "parking_spaces >= 0", name: "properties_parking_spaces_non_negative"
     t.check_constraint "price >= 0::numeric", name: "properties_price_non_negative"
     t.check_constraint "rooms >= 0", name: "properties_rooms_non_negative"
+  end
+
+  create_table "property_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.string "slug", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_property_categories_on_slug", unique: true
   end
 
   create_table "property_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
