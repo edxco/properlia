@@ -8,10 +8,10 @@ module Api
 
       # GET /api/v1/property_types
       def index
-        @pagy, @property_types = pagy(PropertyType.all.order(created_at: :asc))
+        @pagy, @property_types = pagy(PropertyType.includes(:property_categories).order(created_at: :asc))
 
         render json: {
-          data: @property_types,
+          data: @property_types.map { |pt| property_type_json(pt) },
           metadata: {
             count: @pagy.count,
             page:  @pagy.page,
@@ -24,7 +24,7 @@ module Api
 
       # GET /api/v1/property_types/:id
       def show
-        render json: @property_type
+        render json: property_type_json(@property_type)
       end
 
       # POST /api/v1/property_types
@@ -69,6 +69,24 @@ module Api
 
       def property_type_params
         params.require(:property_type).permit(:name, :es_name)
+      end
+
+      def property_type_json(property_type)
+        {
+          id: property_type.id,
+          name: property_type.name,
+          es_name: property_type.es_name,
+          created_at: property_type.created_at,
+          updated_at: property_type.updated_at,
+          property_categories: property_type.property_categories.map do |cat|
+            {
+              id: cat.id,
+              name: cat.name,
+              es_name: cat.es_name,
+              slug: cat.slug
+            }
+          end
+        }
       end
     end
   end

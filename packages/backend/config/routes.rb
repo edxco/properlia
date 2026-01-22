@@ -29,6 +29,7 @@ Rails.application.routes.draw do
       end
 
       resources :property_types
+      resources :property_features, only: %i[index create destroy]
       resources :statuses
       resources :listing_types
 

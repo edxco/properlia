@@ -119,7 +119,7 @@ module Api
 
       def property_params
         permitted_columns = Property.column_names.map(&:to_sym) - %i[id created_at updated_at images]
-        params.require(:property).permit(*permitted_columns, images: [], videos: [])
+        params.require(:property).permit(*permitted_columns, images: [], videos: [], property_category_ids: [], property_feature_ids: [])
       end
 
       def property_json(property)
@@ -145,6 +145,12 @@ module Api
             name: property.listing_type.name,
             es_name: property.listing_type.es_name
           } : nil,
+          'property_categories' => property.property_categories.map do |cat|
+            { id: cat.id, name: cat.name, es_name: cat.es_name, slug: cat.slug }
+          end,
+          'property_features' => property.property_features.map do |feature|
+            { id: feature.id, name: feature.name, es_name: feature.es_name, slug: feature.slug }
+          end,
           'images' => property.images.attached? ? property.images.map { |i| { id: i.id, url: url_for(i), filename: i.filename.to_s, content_type: i.content_type } } : [],
           'videos' => property.videos.attached? ? property.videos.map { |v| { id: v.id, url: url_for(v), filename: v.filename.to_s, content_type: v.content_type } } : []
         )
