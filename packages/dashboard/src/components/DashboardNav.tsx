@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Building2, ChevronDown, FileText, Users } from 'lucide-react';
+import { Home, Building2, ChevronDown, FileText, Users, Sparkles } from 'lucide-react';
 import { useT } from '@properlia/shared/components/TranslationProvider';
 import { useState, useRef, useEffect } from 'react';
 
@@ -32,6 +32,11 @@ export function DashboardNav({ locale }: DashboardNavProps) {
       href: `${localePrefix}/dashboard/general-information`,
       labelKey: 'generalInformation',
       icon: FileText,
+    },
+    {
+      href: `${localePrefix}/dashboard/property-features`,
+      labelKey: 'propertyFeatures',
+      icon: Sparkles,
     },
   ];
 

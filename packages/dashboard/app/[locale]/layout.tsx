@@ -4,6 +4,8 @@ import "@properlia/shared/styles/globals.css";
 import { enMessages as en, esMessages as es } from "@properlia/shared";
 import { QueryProvider } from "@/src/providers/QueryProvider";
 import { AuthProvider } from "@/src/contexts/AuthContext";
+import { ToastProvider } from "@/src/contexts/ToastContext";
+import { ToastContainer } from "@/src/components/Toast";
 import { TranslationProvider } from "@properlia/shared/components/TranslationProvider";
 
 export const metadata: Metadata = {
@@ -41,7 +43,10 @@ export default async function RootLayout({
         <QueryProvider>
           <AuthProvider>
             <TranslationProvider dictionary={dict} locale={normalizedLocale}>
-              {children}
+              <ToastProvider>
+                {children}
+                <ToastContainer />
+              </ToastProvider>
             </TranslationProvider>
           </AuthProvider>
         </QueryProvider>
