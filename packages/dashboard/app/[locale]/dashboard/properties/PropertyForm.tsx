@@ -20,6 +20,7 @@ import {
 import { usePropertyTypes } from "@/src/services/property-types/queries";
 import { useStatuses } from "@/src/services/statuses/queries";
 import { useListingTypes } from "@/src/services/listing-types/queries";
+import { usePropertyFeatures } from "@/src/services/property-features/queries";
 import {
   useLocale,
   useT,
@@ -46,6 +47,8 @@ type FormState = {
   description: string;
   featured: boolean;
   exclusive_listing: boolean;
+  property_category_ids: string[];
+  property_feature_ids: string[];
   images: File[];
   videos: File[];
 };
@@ -70,6 +73,8 @@ const emptyForm: FormState = {
   description: "",
   featured: false,
   exclusive_listing: true,
+  property_category_ids: [],
+  property_feature_ids: [],
   images: [],
   videos: [],
 };
@@ -93,6 +98,7 @@ export default function PropertyForm({
   const { data: propertyTypes } = usePropertyTypes();
   const { data: statuses } = useStatuses();
   const { data: listingTypes } = useListingTypes();
+  const { data: propertyFeatures } = usePropertyFeatures();
   const { mutateAsync: createProperty, isPending: creating } =
     useCreateProperty();
   const { mutateAsync: updateProperty, isPending: updating } =
@@ -102,6 +108,18 @@ export default function PropertyForm({
 
   useEffect(() => {
     if (editingProperty) {
+      // Get existing category IDs from the property
+      let categoryIds = editingProperty.property_categories?.map((c) => c.id) ?? [];
+
+      // If no categories assigned, auto-assign if property type has exactly one category
+      if (categoryIds.length === 0 && editingProperty.property_type_id && propertyTypes) {
+        const propertyType = propertyTypes.find((pt) => pt.id === editingProperty.property_type_id);
+        const availableCategories = propertyType?.property_categories ?? [];
+        if (availableCategories.length === 1) {
+          categoryIds = [availableCategories[0].id];
+        }
+      }
+
       setForm({
         title: editingProperty.title ?? "",
         address: editingProperty.address ?? "",
@@ -122,17 +140,19 @@ export default function PropertyForm({
         description: editingProperty.description ?? "",
         featured: editingProperty.featured ?? false,
         exclusive_listing: editingProperty.exclusive_listing ?? true,
+        property_category_ids: categoryIds,
+        property_feature_ids: editingProperty.property_features?.map((f) => f.id) ?? [],
         images: [],
         videos: [],
       });
     } else {
       setForm(emptyForm);
     }
-  }, [editingProperty]);
+  }, [editingProperty, propertyTypes]);
 
   const handleChange = (
     field: keyof FormState,
-    value: string | boolean | File[]
+    value: string | boolean | File[] | string[]
   ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -323,6 +343,8 @@ export default function PropertyForm({
       description: form.description || undefined,
       featured: form.featured,
       exclusive_listing: form.exclusive_listing,
+      property_category_ids: form.property_category_ids.length > 0 ? form.property_category_ids : undefined,
+      property_feature_ids: form.property_feature_ids.length > 0 ? form.property_feature_ids : undefined,
       images: form.images.length > 0 ? form.images : undefined,
       videos: form.videos.length > 0 ? form.videos : undefined,
     };
@@ -348,6 +370,16 @@ export default function PropertyForm({
 
     if (!form.price || Number.isNaN(payload.price) || payload.price <= 0) {
       setFormError("Price must be greater than 0.");
+      return;
+    }
+
+    // Validate property categories for property types with multiple categories (e.g., land)
+    const selectedPropertyType = propertyTypes?.find(
+      (pt) => pt.id === form.property_type_id
+    );
+    const availableCategories = selectedPropertyType?.property_categories ?? [];
+    if (availableCategories.length > 1 && form.property_category_ids.length === 0) {
+      setFormError("Please select at least one property category.");
       return;
     }
 
@@ -405,9 +437,25 @@ export default function PropertyForm({
           </label>
           <select
             value={form.property_type_id}
-            onChange={(event) =>
-              handleChange("property_type_id", event.target.value)
-            }
+            onChange={(event) => {
+              const newPropertyTypeId = event.target.value;
+              handleChange("property_type_id", newPropertyTypeId);
+              // Update property categories when property type changes
+              const newPropertyType = propertyTypes?.find(
+                (pt) => pt.id === newPropertyTypeId
+              );
+              const newCategories = newPropertyType?.property_categories ?? [];
+              if (newCategories.length === 1) {
+                // Auto-assign the single category
+                handleChange("property_category_ids", [newCategories[0].id]);
+              } else if (newCategories.length > 1) {
+                // Clear categories if new type has multiple categories (user must select)
+                handleChange("property_category_ids", []);
+              } else {
+                // No categories available
+                handleChange("property_category_ids", []);
+              }
+            }}
             className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
             required
           >
@@ -421,6 +469,53 @@ export default function PropertyForm({
             ))}
           </select>
         </div>
+
+        {/* Property Categories - shown only when land is selected */}
+        {(() => {
+          const selectedPropertyType = propertyTypes?.find(
+            (pt) => pt.id === form.property_type_id
+          );
+          const categories = selectedPropertyType?.property_categories ?? [];
+
+          if (categories.length > 1) {
+            return (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t("propertyCategory")} <span className="text-red-600">*</span>
+                </label>
+                <div className="space-y-2">
+                  {categories.map((category) => (
+                    <label
+                      key={category.id}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.property_category_ids.includes(category.id)}
+                        onChange={(e) => {
+                          const newIds = e.target.checked
+                            ? [...form.property_category_ids, category.id]
+                            : form.property_category_ids.filter(
+                                (id) => id !== category.id
+                              );
+                          handleChange("property_category_ids", newIds);
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">
+                        {capitalizeFirstWord(
+                          locale === "es" ? category.es_name : category.name
+                        )}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })()}
+
         <div>
           <label className="block text-sm font-medium text-gray-700">
             {capitalizeFirstWord(t("listingType"))}{" "}
@@ -711,6 +806,69 @@ export default function PropertyForm({
             placeholder={t("keyHighlightsForThisListing")}
             required
           />
+        </div>
+
+        {/* Property Features */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("propertyFeatures")}
+          </label>
+          <select
+            value=""
+            onChange={(event) => {
+              const selectedId = event.target.value;
+              if (selectedId && !form.property_feature_ids.includes(selectedId)) {
+                handleChange("property_feature_ids", [
+                  ...form.property_feature_ids,
+                  selectedId,
+                ]);
+              }
+            }}
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+          >
+            <option value="">{t("select")}</option>
+            {propertyFeatures
+              ?.filter((feature) => !form.property_feature_ids.includes(feature.id))
+              .map((feature) => (
+                <option key={feature.id} value={feature.id}>
+                  {capitalizeFirstWord(
+                    locale === "es" ? feature.es_name : feature.name
+                  )}
+                </option>
+              ))}
+          </select>
+
+          {/* Selected Features Pills */}
+          {form.property_feature_ids.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {form.property_feature_ids.map((featureId) => {
+                const feature = propertyFeatures?.find((f) => f.id === featureId);
+                if (!feature) return null;
+                return (
+                  <span
+                    key={featureId}
+                    className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
+                  >
+                    {capitalizeFirstWord(
+                      locale === "es" ? feature.es_name : feature.name
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleChange(
+                          "property_feature_ids",
+                          form.property_feature_ids.filter((id) => id !== featureId)
+                        )
+                      }
+                      className="ml-1 text-blue-600 hover:text-blue-800"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Images Upload */}
