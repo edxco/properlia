@@ -21,6 +21,28 @@ export interface Attachment {
   content_type: string;
 }
 
+export interface PropertyCategory {
+  id: string;
+  name: string;
+  es_name: string;
+  slug: string;
+}
+
+export interface PropertyFeature {
+  id: string;
+  name: string;
+  es_name: string;
+  slug: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PropertyFeaturePayload {
+  name: string;
+  es_name: string;
+  slug: string;
+}
+
 export interface Property {
   id: string;
   featured: boolean;
@@ -46,13 +68,17 @@ export interface Property {
   property_type?: CommonEntity | null;
   status?: CommonEntity | null;
   listing_type?: CommonEntity | null;
+  property_categories?: PropertyCategory[];
+  property_features?: PropertyFeature[];
   images: Attachment[];
   videos: Attachment[];
   created_at?: string;
   updated_at?: string;
 }
 
-export interface PropertyType extends CommonEntity {}
+export interface PropertyType extends CommonEntity {
+  property_categories?: PropertyCategory[];
+}
 
 export interface Status extends CommonEntity {}
 
@@ -79,6 +105,8 @@ export interface PropertyPayload {
   property_type_id: string;
   status_id?: string;
   listing_type_id: string;
+  property_category_ids?: string[];
+  property_feature_ids?: string[];
   images?: File[];
   videos?: File[];
 }
