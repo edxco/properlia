@@ -209,6 +209,8 @@ export default function PropertiesClient() {
                 slug={property.id}
                 compact={true}
                 half_bathrooms={property.half_bathrooms}
+                property_features={property.property_features}
+                property_categories={property.property_categories}
               />
             ))}
           </div>
