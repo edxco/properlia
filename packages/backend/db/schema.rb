@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_01_20_021235) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_20_132948) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -170,6 +170,20 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_20_021235) do
     t.check_constraint "rooms >= 0", name: "properties_rooms_non_negative"
   end
 
+  create_table "properties_property_categories", id: false, force: :cascade do |t|
+    t.uuid "property_id", null: false
+    t.uuid "property_category_id", null: false
+    t.index ["property_category_id"], name: "idx_props_prop_cats_on_category"
+    t.index ["property_id", "property_category_id"], name: "idx_props_prop_cats_unique", unique: true
+  end
+
+  create_table "properties_property_features", id: false, force: :cascade do |t|
+    t.uuid "property_id", null: false
+    t.uuid "property_feature_id", null: false
+    t.index ["property_feature_id"], name: "idx_props_prop_features_on_feature"
+    t.index ["property_id", "property_feature_id"], name: "idx_props_prop_features_unique", unique: true
+  end
+
   create_table "property_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "es_name", null: false
@@ -177,6 +191,24 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_20_021235) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_property_categories_on_slug", unique: true
+  end
+
+  create_table "property_categories_property_types", id: false, force: :cascade do |t|
+    t.uuid "property_category_id", null: false
+    t.uuid "property_type_id", null: false
+    t.index ["property_category_id", "property_type_id"], name: "idx_prop_cat_prop_type_unique", unique: true
+    t.index ["property_type_id"], name: "idx_prop_cat_prop_type_on_type"
+  end
+
+  create_table "property_features", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.string "slug", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["es_name"], name: "index_property_features_on_es_name", unique: true
+    t.index ["name"], name: "index_property_features_on_name", unique: true
+    t.index ["slug"], name: "index_property_features_on_slug", unique: true
   end
 
   create_table "property_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -224,4 +256,10 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_20_021235) do
   add_foreign_key "properties", "listing_types"
   add_foreign_key "properties", "property_types"
   add_foreign_key "properties", "statuses"
+  add_foreign_key "properties_property_categories", "properties"
+  add_foreign_key "properties_property_categories", "property_categories"
+  add_foreign_key "properties_property_features", "properties"
+  add_foreign_key "properties_property_features", "property_features"
+  add_foreign_key "property_categories_property_types", "property_categories"
+  add_foreign_key "property_categories_property_types", "property_types"
 end
