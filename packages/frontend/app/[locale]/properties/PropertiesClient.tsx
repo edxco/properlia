@@ -25,14 +25,9 @@ interface Filters {
 export default function PropertiesClient() {
   const t = useT();
   const searchParams = useSearchParams();
-  const {
-    data: propertiesData,
-    isLoading,
-    isError,
-  } = useProperties({ items: 100 });
-
   const [filters, setFilters] = useState<Filters>({});
 
+  // Initialize filters from URL params
   useEffect(() => {
     const search = searchParams.get("search");
     const type = searchParams.get("type");
@@ -45,6 +40,27 @@ export default function PropertiesClient() {
       }));
     }
   }, [searchParams]);
+
+  // Build API query params from filters
+  const apiParams = useMemo(() => {
+    const params: Record<string, any> = { items: 100 };
+
+    if (filters.searchQuery) params.search = filters.searchQuery;
+    if (filters.city) params.city = filters.city;
+    if (filters.state) params.state = filters.state;
+    if (filters.priceMin) params.price_min = filters.priceMin;
+    if (filters.priceMax) params.price_max = filters.priceMax;
+    if (filters.rooms) params.rooms_min = filters.rooms;
+    if (filters.bathrooms) params.bathrooms_min = filters.bathrooms;
+
+    return params;
+  }, [filters]);
+
+  const {
+    data: propertiesData,
+    isLoading,
+    isError,
+  } = useProperties(apiParams);
 
   const { cities, states } = useMemo(() => {
     if (!propertiesData?.data) return { cities: [], states: [] };
@@ -63,28 +79,12 @@ export default function PropertiesClient() {
     };
   }, [propertiesData]);
 
+  // Client-side filtering for fields not yet supported by backend
   const filteredProperties = useMemo(() => {
     if (!propertiesData?.data) return [];
 
     return propertiesData.data.filter((property: Property) => {
-      if (filters.searchQuery) {
-        const query = filters.searchQuery.toLowerCase().trim();
-        const cityStateParts = query.split(",").map((p) => p.trim());
-        const isCityStateFormat = cityStateParts.length === 2;
-
-        if (isCityStateFormat) {
-          const [searchCity, searchState] = cityStateParts;
-          const matchesCity = property.city?.toLowerCase() === searchCity;
-          const matchesState = property.state?.toLowerCase() === searchState;
-          if (!(matchesCity && matchesState)) return false;
-        } else {
-          const matchesTitle = property.title?.toLowerCase().includes(query);
-          const matchesCity = property.city?.toLowerCase().includes(query);
-          const matchesState = property.state?.toLowerCase().includes(query);
-          if (!matchesTitle && !matchesCity && !matchesState) return false;
-        }
-      }
-
+      // Listing type filter (client-side until backend supports name-based filtering)
       if (filters.listingType) {
         const listingTypeName = property.listing_type?.name?.toLowerCase();
         if (filters.listingType === "rent" && listingTypeName !== "rent")
@@ -93,14 +93,7 @@ export default function PropertiesClient() {
           return false;
       }
 
-      if (filters.rooms && property.rooms < filters.rooms) return false;
-      if (filters.bathrooms && property.bathrooms < filters.bathrooms)
-        return false;
-      if (filters.city && property.city !== filters.city) return false;
-      if (filters.state && property.state !== filters.state) return false;
-      if (filters.priceMin && property.price < filters.priceMin) return false;
-      if (filters.priceMax && property.price > filters.priceMax) return false;
-
+      // Land area filters (not yet in backend)
       if (
         filters.landAreaMin &&
         (property.land_area || 0) < filters.landAreaMin
