@@ -1,54 +1,37 @@
 "use client";
 
-import { Search } from "lucide-react";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 import { capitalizeEachWord } from "@/lib/utils/index";
 import { PillLink } from "@/components/ui";
-import sellIcon from "@/public/sell.svg";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
-import { useProperties } from "@/src/services/properties/queries";
-import { Property } from "@properlia/shared/types";
+import {
+  useT,
+  useLocale,
+} from "@properlia/shared/components/TranslationProvider";
+
+type ListingType = "rent" | "buy";
+type PropertyCategory = "all" | "commercial" | "residential" | "industrial";
 
 export function Hero() {
   const t = useT();
   const locale = useLocale();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"rent" | "buy">("rent");
+  const [activeTab, setActiveTab] = useState<ListingType>("buy");
+  const [activeCategory, setActiveCategory] = useState<PropertyCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Fetch properties to get location data
-  const { data: propertiesData } = useProperties({ items: 100 });
-
-  // Get unique cities and states for autocomplete
-  const locations = useMemo(() => {
-    if (!propertiesData?.data) return [];
-
-    const locationsSet = new Set<string>();
-
-    propertiesData.data.forEach((prop: Property) => {
-      if (prop.city) locationsSet.add(prop.city);
-      if (prop.state) locationsSet.add(prop.state);
-      // Also add combined "City, State" format
-      if (prop.city && prop.state) {
-        locationsSet.add(`${prop.city}, ${prop.state}`);
-      }
-    });
-
-    return Array.from(locationsSet).sort();
-  }, [propertiesData]);
-
-  // Filter suggestions based on search query
-  const suggestions = useMemo(() => {
-    if (!searchQuery || searchQuery.length < 2) return [];
-
-    const query = searchQuery.toLowerCase();
-    return locations
-      .filter((location) => location.toLowerCase().includes(query))
-      .slice(0, 5); // Limit to 5 suggestions
-  }, [searchQuery, locations]);
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) {
+      params.set("search", searchQuery.trim());
+    }
+    params.set("type", activeTab);
+    if (activeCategory !== "all") {
+      params.set("category", activeCategory);
+    }
+    router.push(`/${locale}/properties?${params.toString()}`);
+  };
 
   return (
     <div className="relative py-50">
@@ -83,94 +66,120 @@ export function Hero() {
                 loop
               />
             </h1>
-            <h2 className="text-3xl text-white mb-6">
-              {t("residentialCommercialIndustrial")}
+            <h2 className="text-3xl text-white mb-6 inline-block leading-11">
+              <span className="bg-slate-800/50 px-px">
+                {t("residentialCommercialIndustrial")}
+              </span>
             </h2>
 
-            <div>
-              <div className="block bg-white/95 gap-50 px-5 pb-0 pt-4 rounded-t-sm md:inline-block border-b border-transparent">
-                <div className="flex justify-around gap-x-10 mb-4 border-stone-200">
+            {/* Search Card */}
+            <div className="bg-white/95 backdrop-blur-sm p-6 rounded-lg max-w-3xl">
+              <div className="flex flex-col gap-5">
+                {/* Property Type Filter */}
+                <div className="flex gap-4">
                   <button
-                    onClick={() => setActiveTab("rent")}
-                    className={`pb-1 text-base font-semibold transition-colors cursor-pointer ${
-                      activeTab === "rent"
-                        ? "text-primary border-b-3 border-primary"
-                        : "text-stone-500 hover:text-stone-800"
+                    onClick={() => setActiveCategory("all")}
+                    className={`text-sm cursor-pointer transition-colors ${
+                      activeCategory === "all"
+                        ? "text-stone-800 border-b-2 border-primary pb-0.5"
+                        : "text-stone-400 hover:text-stone-600"
                     }`}
                   >
-                    {capitalizeEachWord(t("rent"))}
+                    {capitalizeEachWord(t("all"))}
                   </button>
                   <button
-                    onClick={() => setActiveTab("buy")}
-                    className={`pb-1 text-base font-semibold transition-colors cursor-pointer ${
-                      activeTab === "buy"
-                        ? "text-primary border-b-3 border-primary"
-                        : "text-stone-500 hover:text-stone-800"
+                    onClick={() => setActiveCategory("residential")}
+                    className={`text-sm cursor-pointer transition-colors ${
+                      activeCategory === "residential"
+                        ? "text-stone-800 border-b-2 border-primary pb-0.5"
+                        : "text-stone-400 hover:text-stone-600"
                     }`}
                   >
-                    {capitalizeEachWord(t("buy"))}
+                    {capitalizeEachWord(t("residential"))}
+                  </button>
+                  <button
+                    onClick={() => setActiveCategory("commercial")}
+                    className={`text-sm cursor-pointer transition-colors ${
+                      activeCategory === "commercial"
+                        ? "text-stone-800 border-b-2 border-primary pb-0.5"
+                        : "text-stone-400 hover:text-stone-600"
+                    }`}
+                  >
+                    {capitalizeEachWord(t("commercial"))}
+                  </button>
+                  <button
+                    onClick={() => setActiveCategory("industrial")}
+                    className={`text-sm cursor-pointer transition-colors ${
+                      activeCategory === "industrial"
+                        ? "text-stone-800 border-b-2 border-primary pb-0.5"
+                        : "text-stone-400 hover:text-stone-600"
+                    }`}
+                  >
+                    {capitalizeEachWord(t("industrial"))}
                   </button>
                 </div>
-              </div>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setShowSuggestions(false);
-                  router.push(`/${locale}/properties?search=${encodeURIComponent(searchQuery)}&type=${activeTab}`);
-                }}
-                className="flex flex-col md:flex-row gap-3 bg-white/95 p-4 backdrop-blur-sm border-b rounded-b-sm "
-              >
-                <div className="flex-[2] relative">
+                {/* Location Search Input */}
+                <div className="relative">
+                  <svg
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={() => {
-                      // Delay to allow clicking on suggestions
-                      setTimeout(() => setShowSuggestions(false), 200);
-                    }}
-                    placeholder={t("searchByCityOrLocation")}
-                    className="w-full px-4 py-3 border border-stone-200 text-sm focus:outline-none focus:border-stone-400 rounded-sm"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    placeholder="Ciudad, colonia o zona"
+                    className="w-full h-12 pl-10 pr-4 bg-stone-100 rounded-md text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
-
-                  {/* Autocomplete Suggestions */}
-                  {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-sm shadow-lg z-50 max-h-60 overflow-y-auto">
-                      {suggestions.map((suggestion, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => {
-                            setSearchQuery(suggestion);
-                            setShowSuggestions(false);
-                          }}
-                          className="w-full px-4 py-2.5 text-left text-sm hover:bg-stone-50 transition-colors border-b border-stone-100 last:border-b-0"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Search className="w-4 h-4 text-stone-400" />
-                            <span className="text-stone-700">{suggestion}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
+                {/* Intent Selector (Comprar / Rentar) */}
+                <div className="bg-stone-100 p-1 rounded-md inline-flex">
+                  <button
+                    onClick={() => setActiveTab("buy")}
+                    className={`flex-1 px-5 py-2 text-sm font-medium rounded transition-colors cursor-pointer ${
+                      activeTab === "buy"
+                        ? "bg-primary text-white"
+                        : "text-stone-500 hover:text-stone-700"
+                    }`}
+                  >
+                    Comprar
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("rent")}
+                    className={`flex-1 px-5 py-2 text-sm font-medium rounded transition-colors cursor-pointer ${
+                      activeTab === "rent"
+                        ? "bg-primary text-white"
+                        : "text-stone-500 hover:text-stone-700"
+                    }`}
+                  >
+                    Rentar
+                  </button>
+                </div>
+
+                {/* Primary CTA */}
                 <button
-                  type="submit"
-                  className="bg-primary text-white px-8 py-3 hover:bg-primary transition-colors flex items-center justify-center gap-2 rounded-sm cursor-pointer"
+                  onClick={handleSearch}
+                  className="w-full h-12 bg-primary text-white font-medium rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
                 >
-                  <Search className="w-5 h-5" />
-                  <span className="text-sm tracking-wide font-medium">
-                    {capitalizeEachWord(t("search"))}
-                  </span>
+                  Buscar propiedades
                 </button>
-              </form>
+
+                {/* Micro-trust copy */}
+                <p className="text-xs text-stone-400 text-center">
+                  Acompañamiento experto en cada paso
+                </p>
+              </div>
             </div>
 
             <PillLink
