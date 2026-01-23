@@ -20,6 +20,8 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-70: var(--primary-70);
+  --color-properlia-gray: var(--properlia-gray);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -64,6 +66,8 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.4332 0.1378 261.28);
+  --properlia-gray: oklab(32.847% 0.00454 -0.00044);
+  --primary-70: oklch(20.798% 0.05125 261.594);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
