@@ -146,9 +146,16 @@ export default function PropertyForm({
         videos: [],
       });
     } else {
-      setForm(emptyForm);
+      // Set default status to "active" when creating a new property
+      const activeStatus = statuses?.find(
+        (s) => s.name.toLowerCase() === "active"
+      );
+      setForm({
+        ...emptyForm,
+        status_id: activeStatus?.id ?? "",
+      });
     }
-  }, [editingProperty, propertyTypes]);
+  }, [editingProperty, propertyTypes, statuses]);
 
   const handleChange = (
     field: keyof FormState,
@@ -470,14 +477,15 @@ export default function PropertyForm({
           </select>
         </div>
 
-        {/* Property Categories - shown only when land is selected */}
+        {/* Property Categories - shown only when land is selected and not editing */}
         {(() => {
           const selectedPropertyType = propertyTypes?.find(
             (pt) => pt.id === form.property_type_id
           );
           const categories = selectedPropertyType?.property_categories ?? [];
 
-          if (categories.length > 1) {
+          // Hide category selection when editing a land property
+          if (categories.length > 1 && !editingProperty) {
             return (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
