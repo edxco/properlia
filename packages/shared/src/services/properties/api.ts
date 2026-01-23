@@ -11,9 +11,22 @@ type PropertyQueryParams = {
   featured?: boolean;
   status_id?: string;
   property_type_id?: string;
+  listing_type_id?: string;
   page?: number;
   items?: number;
   include_suspended?: boolean;
+  // Location filters
+  city?: string;
+  state?: string;
+  neighborhood?: string;
+  // Price range filters
+  price_min?: number;
+  price_max?: number;
+  // Room filters
+  rooms_min?: number;
+  bathrooms_min?: number;
+  // Text search
+  search?: string;
 };
 
 const buildAuthHeaders = (token?: string) => {
@@ -64,10 +77,23 @@ export const propertyApi = {
     if (params?.featured !== undefined) query.set('featured', String(params.featured));
     if (params?.status_id) query.set('status_id', params.status_id);
     if (params?.property_type_id) query.set('property_type_id', params.property_type_id);
+    if (params?.listing_type_id) query.set('listing_type_id', params.listing_type_id);
     if (params?.include_suspended !== undefined) query.set('include_suspended', String(params.include_suspended));
+    // Location filters
+    if (params?.city) query.set('city', params.city);
+    if (params?.state) query.set('state', params.state);
+    if (params?.neighborhood) query.set('neighborhood', params.neighborhood);
+    // Price range filters
+    if (params?.price_min !== undefined) query.set('price_min', String(params.price_min));
+    if (params?.price_max !== undefined) query.set('price_max', String(params.price_max));
+    // Room filters
+    if (params?.rooms_min !== undefined) query.set('rooms_min', String(params.rooms_min));
+    if (params?.bathrooms_min !== undefined) query.set('bathrooms_min', String(params.bathrooms_min));
+    // Text search
+    if (params?.search) query.set('search', params.search);
 
-    const search = query.toString();
-    const endpoint = search ? `/properties?${search}` : '/properties';
+    const queryString = query.toString();
+    const endpoint = queryString ? `/properties?${queryString}` : '/properties';
 
     return apiClient.get<PaginatedResponse<Property>>(endpoint);
   },

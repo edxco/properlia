@@ -7,9 +7,22 @@ type PropertyFilters = {
   featured?: boolean;
   status_id?: string;
   property_type_id?: string;
+  listing_type_id?: string;
   page?: number;
   items?: number;
   include_suspended?: boolean;
+  // Location filters
+  city?: string;
+  state?: string;
+  neighborhood?: string;
+  // Price range filters
+  price_min?: number;
+  price_max?: number;
+  // Room filters
+  rooms_min?: number;
+  bathrooms_min?: number;
+  // Text search
+  search?: string;
 };
 
 // Query hook for fetching all properties

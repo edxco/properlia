@@ -34,6 +34,51 @@ module Api
           properties = properties.where(property_type_id: params[:property_type_id])
         end
 
+        # Filter by listing_type_id (sale, rent, pre-sale)
+        if params[:listing_type_id].present?
+          properties = properties.where(listing_type_id: params[:listing_type_id])
+        end
+
+        # Location filters (case-insensitive partial match)
+        if params[:city].present?
+          properties = properties.where('LOWER(city) LIKE ?', "%#{params[:city].downcase}%")
+        end
+
+        if params[:state].present?
+          properties = properties.where('LOWER(state) LIKE ?', "%#{params[:state].downcase}%")
+        end
+
+        if params[:neighborhood].present?
+          properties = properties.where('LOWER(neighborhood) LIKE ?', "%#{params[:neighborhood].downcase}%")
+        end
+
+        # Price range filters
+        if params[:price_min].present?
+          properties = properties.where('price >= ?', params[:price_min].to_f)
+        end
+
+        if params[:price_max].present?
+          properties = properties.where('price <= ?', params[:price_max].to_f)
+        end
+
+        # Room and bathroom filters (minimum values)
+        if params[:rooms_min].present?
+          properties = properties.where('rooms >= ?', params[:rooms_min].to_i)
+        end
+
+        if params[:bathrooms_min].present?
+          properties = properties.where('bathrooms >= ?', params[:bathrooms_min].to_i)
+        end
+
+        # Text search on title, description, address, city, state, and neighborhood
+        if params[:search].present?
+          search_term = "%#{params[:search].downcase}%"
+          properties = properties.where(
+            'LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(address) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(neighborhood) LIKE ?',
+            search_term, search_term, search_term, search_term, search_term, search_term
+          )
+        end
+
         @pagy, @properties = pagy(properties.order(created_at: :desc))
 
         render json: {
