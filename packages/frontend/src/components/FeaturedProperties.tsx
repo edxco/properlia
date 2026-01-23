@@ -84,15 +84,6 @@ export function FeaturedProperties() {
               <PropertyCard key={property.id} {...property} />
             ))}
           </div>
-
-          <div className="mt-12 flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-stone-900 text-white px-8 py-3.5 hover:bg-stone-800 transition-colors text-sm tracking-wider">
-              Learn More About Us
-            </button>
-            <button className="border border-stone-900 text-stone-900 px-8 py-3.5 hover:bg-stone-50 transition-colors text-sm tracking-wider">
-              Schedule a Consultation
-            </button>
-          </div>
         </div>
       </div>
     </section>
