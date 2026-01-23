@@ -51,13 +51,14 @@
   "phone": "Teléfono",
   "email": "Correo Electrónico",
 
-  "properliaBriefTitle": "Tu Socio Confiable en Bienes Raíces",
+  "properliaBriefTitle": "Promovemos propiedades con procesos, tecnología y acompañamiento experto.",
   "properliaBriefDescription": "En Properlia, conectamos a compradores exigentes con propiedades excepcionales en Puebla y México. Nuestra experiencia, basada en años de acompañar a inversionistas, familias y desarrolladores, nos permite entender a profundidad el mercado y ofrecer un servicio verdaderamente personalizado.",
   "properliaBriefDescription2": "Creemos que encontrar la propiedad ideal va más allá de metros cuadrados: se trata de descubrir un estilo de vida que refleje tu visión, tu tranquilidad y tus objetivos patrimoniales. Desde opciones residenciales y comerciales hasta propiedades industriales y oportunidades de inversión, te guiamos con transparencia, confianza y un compromiso absoluto con tus intereses.",
 
   "featuredProperties": "Propiedades destacadas",
   "viewFullDetails": "Ver Detalles Completos",
   "viewDetails": "Ver detalles",
+  "sendProperty": "Enviar propiedad",
   "contactMe": "contact me",
   "generateInfoInSpanish": "¿PDF en español?",
 
@@ -174,5 +175,17 @@
   "property": "Propiedad",
   "contacts": "contactos",
   "interest": "Interés",
-  "page": "Página"
+  "page": "Página",
+
+  "residential": "Residencial",
+  "commercial": "Comercial",
+  "industrial": "Industrial",
+  "lookingToBuy": "Busco Comprar",
+  "lookingToSell": "Busco Vender",
+  "lookingToInvest": "Busco Invertir",
+  "allRightsReserved": "Todos los derechos reservados.",
+  "builtWithLove": "Construido y programado con amor por The Code Taco",
+  "termsAndConditions": "Términos y Condiciones",
+  "privacyNotice": "Aviso de Privacidad",
+  "sitemap": "Mapa de Sitio"
 }
