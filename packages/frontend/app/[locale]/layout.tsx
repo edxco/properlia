@@ -5,6 +5,7 @@ import { enMessages as en, esMessages as es } from "@properlia/shared";
 import { QueryProvider } from "@/src/providers/QueryProvider";
 import { TranslationProvider } from "@properlia/shared/components/TranslationProvider";
 import { Navigation } from "@/src/components/Navigation";
+import { Footer } from "@/src/components/Footer";
 
 export const metadata: Metadata = {
   title: "Properlia",
@@ -44,6 +45,7 @@ export default async function RootLayout({
             <main className="pt-20">
               {children}
             </main>
+            <Footer />
           </TranslationProvider>
         </QueryProvider>
       </body>
