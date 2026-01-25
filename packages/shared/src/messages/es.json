@@ -187,5 +187,10 @@
   "builtWithLove": "Construido y programado con amor por The Code Taco",
   "termsAndConditions": "Términos y Condiciones",
   "privacyNotice": "Aviso de Privacidad",
-  "sitemap": "Mapa de Sitio"
+  "sitemap": "Mapa de Sitio",
+
+  "bannerSearchTitle": "¿Buscas algo en específico?",
+  "bannerSearchDescription": "¿No encuentras tu propiedad ideal? Tenemos un proceso único de representación exclusiva para acompañarte profesionalmente en la compra de tu casa",
+  "bannerGuidanceTitle": "¿Es tu primera compra?",
+  "bannerGuidanceDescription": "Te acompañamos en todo el proceso — desde opciones de financiamiento hasta el cierre, te guiamos en cada paso."
 }

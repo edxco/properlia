@@ -187,5 +187,10 @@
   "builtWithLove": "Built and coded with love by The Code Taco",
   "termsAndConditions": "Terms and Conditions",
   "privacyNotice": "Privacy Notice",
-  "sitemap": "Sitemap"
+  "sitemap": "Sitemap",
+
+  "bannerSearchTitle": "Looking for something specific?",
+  "bannerSearchDescription": "Can't find your ideal property? We have a unique exclusive representation process to professionally guide you through the purchase of your home.",
+  "bannerGuidanceTitle": "New to buying property?",
+  "bannerGuidanceDescription": "We've got you covered — from financing options to closing, we'll guide you every step of the way."
 }
