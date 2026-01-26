@@ -1,4 +1,16 @@
 services:
+  nginx:
+    image: ${NGINX_IMAGE:-properlia-nginx:latest}
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - dashboard
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
   db:
     image: postgres:15
     volumes:
@@ -21,8 +33,8 @@ services:
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
     volumes:
       - storage_data:/app/storage
-    ports:
-      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
+    expose:
+      - "3000"
     environment:
       PORT: ${BACKEND_PORT:-3000}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
@@ -58,8 +70,8 @@ services:
 
   frontend:
     image: ${FRONTEND_IMAGE:-properlia-frontend:latest}
-    ports:
-      - "${FRONTEND_PORT:-3001}:3001"
+    expose:
+      - "3001"
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
@@ -71,8 +83,8 @@ services:
 
   dashboard:
     image: ${DASHBOARD_IMAGE:-properlia-dashboard:latest}
-    ports:
-      - "${DASHBOARD_PORT:-3002}:3002"
+    expose:
+      - "3002"
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
