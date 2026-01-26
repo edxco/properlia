@@ -33,7 +33,7 @@ export const PropertyMainDetails: React.FC<PropertyMainDetailsProps> = ({
           <div className={styles.detailItem}>
             <div>
               <img
-                src={home_area.src || home_area}
+                src={home_area.src}
                 alt="Built Area"
                 width={32}
                 height={32}
@@ -54,7 +54,7 @@ export const PropertyMainDetails: React.FC<PropertyMainDetailsProps> = ({
           <div className={styles.detailItem}>
             <div>
               <img
-                src={land_area.src || land_area}
+                src={land_area.src}
                 alt="Land Area"
                 width={32}
                 height={32}
@@ -75,7 +75,7 @@ export const PropertyMainDetails: React.FC<PropertyMainDetailsProps> = ({
           <div className={styles.detailItem}>
             <div>
               <img
-                src={bed.src || bed}
+                src={bed.src}
                 alt="Rooms"
                 width={32}
                 height={32}
@@ -94,7 +94,7 @@ export const PropertyMainDetails: React.FC<PropertyMainDetailsProps> = ({
           <div className={styles.detailItem}>
             <div>
               <img
-                src={shower.src || shower}
+                src={shower.src}
                 alt="Full Bathroom"
                 width={32}
                 height={32}
@@ -113,7 +113,7 @@ export const PropertyMainDetails: React.FC<PropertyMainDetailsProps> = ({
           <div className={styles.detailItem}>
             <div>
               <img
-                src={toilet.src || toilet}
+                src={toilet.src}
                 alt="Half Bathroom"
                 width={32}
                 height={32}
@@ -132,7 +132,7 @@ export const PropertyMainDetails: React.FC<PropertyMainDetailsProps> = ({
           <div className={styles.detailItem}>
             <div>
               <img
-                src={parking.src || parking}
+                src={parking.src}
                 alt="Parking spaces"
                 width={32}
                 height={32}
