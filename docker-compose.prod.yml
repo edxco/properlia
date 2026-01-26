@@ -43,6 +43,8 @@ services:
       DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
       # CORS Origins
       CORS_ORIGINS: ${CORS_ORIGINS}
+      # Host URL for Active Storage URLs
+      HOST_URL: ${HOST_URL}
       # Resend Configuration
       RESEND_API_KEY: ${RESEND_API_KEY}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
