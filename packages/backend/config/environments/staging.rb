@@ -4,6 +4,12 @@ Rails.application.configure do
   puts "Loading STAGING environment"
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Set default URL options for Active Storage and other URL helpers
+  # HOST_URL should be set to the API URL (e.g., "http://YOUR_IP:3000")
+  if ENV['HOST_URL'].present?
+    routes.default_url_options[:host] = ENV['HOST_URL']
+  end
+
   # Code is not reloaded between requests.
   config.cache_classes = true
 
