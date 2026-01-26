@@ -18,7 +18,7 @@ interface RequestOptions extends RequestInit {
   requiresAuth?: boolean;
 }
 
-export const apiClient = {
+class ApiClient {
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { requiresAuth = false, ...fetchOptions } = options;
 
@@ -64,7 +64,7 @@ export const apiClient = {
     }
 
     return {} as T;
-  },
+  }
 
   async requestWithToken<T>(endpoint: string, options: RequestOptions = {}): Promise<{ data: T; token?: string }> {
     const { requiresAuth = false, ...fetchOptions } = options;
@@ -117,11 +117,11 @@ export const apiClient = {
     }
 
     return { data, token };
-  },
+  }
 
   get<T>(endpoint: string, requiresAuth = false): Promise<T> {
     return this.request<T>(endpoint, { method: 'GET', requiresAuth });
-  },
+  }
 
   post<T>(endpoint: string, data?: unknown, requiresAuth = true): Promise<T> {
     return this.request<T>(endpoint, {
@@ -129,7 +129,7 @@ export const apiClient = {
       body: JSON.stringify(data),
       requiresAuth,
     });
-  },
+  }
 
   put<T>(endpoint: string, data?: unknown, requiresAuth = true): Promise<T> {
     return this.request<T>(endpoint, {
@@ -137,7 +137,7 @@ export const apiClient = {
       body: JSON.stringify(data),
       requiresAuth,
     });
-  },
+  }
 
   patch<T>(endpoint: string, data?: unknown, requiresAuth = true): Promise<T> {
     return this.request<T>(endpoint, {
@@ -145,14 +145,14 @@ export const apiClient = {
       body: JSON.stringify(data),
       requiresAuth,
     });
-  },
+  }
 
   delete<T>(endpoint: string, requiresAuth = true): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'DELETE',
       requiresAuth,
     });
-  },
+  }
 
   async uploadFormData<T>(endpoint: string, formData: FormData, requiresAuth = true): Promise<T> {
     const headers: Record<string, string> = {};
@@ -182,5 +182,7 @@ export const apiClient = {
     }
 
     return response.json();
-  },
-};
+  }
+}
+
+export const apiClient = new ApiClient();
