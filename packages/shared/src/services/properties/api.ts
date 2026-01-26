@@ -59,6 +59,12 @@ const buildFormData = (payload: Partial<PropertyPayload>) => {
       return;
     }
 
+    // Handle array fields (e.g., property_category_ids, property_feature_ids)
+    if (Array.isArray(value)) {
+      value.forEach((item) => formData.append(`property[${key}][]`, item.toString()));
+      return;
+    }
+
     formData.append(`property[${key}]`, value.toString());
   });
 
