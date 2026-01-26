@@ -10,6 +10,7 @@ env:
   BACKEND_IMAGE_NAME: properlia-backend
   FRONTEND_IMAGE_NAME: properlia-frontend
   DASHBOARD_IMAGE_NAME: properlia-dashboard
+  NGINX_IMAGE_NAME: properlia-nginx
   DOCKER_BUILDKIT: 1
 
 jobs:
@@ -102,9 +103,11 @@ jobs:
           BACKEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:backend-${GITHUB_REF_NAME}-${SHA_SHORT}"
           FRONTEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:frontend-${GITHUB_REF_NAME}-${SHA_SHORT}"
           DASHBOARD_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:dashboard-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          NGINX_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:nginx-${GITHUB_REF_NAME}-${SHA_SHORT}"
           echo "BACKEND_IMAGE_URI=$BACKEND_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "FRONTEND_IMAGE_URI=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "DASHBOARD_IMAGE_URI=$DASHBOARD_IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "NGINX_IMAGE_URI=$NGINX_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_OUTPUT
 
       # --- Build & push images to ECR ---
@@ -147,6 +150,17 @@ jobs:
             ${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}
           cache-from: type=gha,scope=dashboard
           cache-to: type=gha,mode=max,scope=dashboard
+
+      - name: Build and push nginx image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./nginx
+          file: ./nginx/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.NGINX_IMAGE_URI }}
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,mode=max,scope=nginx
 
       # Map SG per branch
       - name: Map SG per env
@@ -284,6 +298,7 @@ jobs:
             export BACKEND_IMAGE="${{ steps.vars.outputs.BACKEND_IMAGE_URI }}"
             export FRONTEND_IMAGE="${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}"
             export DASHBOARD_IMAGE="${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}"
+            export NGINX_IMAGE="${{ steps.vars.outputs.NGINX_IMAGE_URI }}"
             export BACKEND_PORT="${{ steps.envmap.outputs.BACKEND_PORT }}"
             export FRONTEND_PORT="${{ steps.envmap.outputs.FRONTEND_PORT }}"
             export ENV_FILE="${{ steps.envmap.outputs.ENV_FILE }}"
@@ -293,6 +308,7 @@ jobs:
             echo "Using BACKEND_IMAGE=$BACKEND_IMAGE"
             echo "Using FRONTEND_IMAGE=$FRONTEND_IMAGE"
             echo "Using DASHBOARD_IMAGE=$DASHBOARD_IMAGE"
+            echo "Using NGINX_IMAGE=$NGINX_IMAGE"
             echo "Using COMPOSE_FILE=$COMPOSE_FILE"
             echo "Using ENV_FILE=$ENV_FILE"
 
@@ -341,6 +357,7 @@ jobs:
             docker pull "$BACKEND_IMAGE"
             docker pull "$FRONTEND_IMAGE"
             docker pull "$DASHBOARD_IMAGE"
+            docker pull "$NGINX_IMAGE"
 
             # Add AWS credentials and image URIs to env file for the containers to use
             echo "Adding AWS credentials and image URIs to env file..."
@@ -351,6 +368,7 @@ jobs:
             sed -i '/^BACKEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^FRONTEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^DASHBOARD_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^NGINX_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             # Add new credentials and image URIs
             echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> "$ENV_FILE"
             echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> "$ENV_FILE"
@@ -358,6 +376,7 @@ jobs:
             echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$ENV_FILE"
             echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$ENV_FILE"
             echo "DASHBOARD_IMAGE=$DASHBOARD_IMAGE" >> "$ENV_FILE"
+            echo "NGINX_IMAGE=$NGINX_IMAGE" >> "$ENV_FILE"
 
             echo "Starting services with Docker Compose..."
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
@@ -406,6 +425,9 @@ jobs:
 
             echo -e "\n=== Frontend Logs (last 100 lines) ==="
             docker compose -f "$COMPOSE_FILE" logs --tail=100 frontend
+
+            echo -e "\n=== Nginx Logs (last 100 lines) ==="
+            docker compose -f "$COMPOSE_FILE" logs --tail=100 nginx
 
             echo -e "\n=== Backend Environment Check ==="
             docker compose -f "$COMPOSE_FILE" exec -T backend env | grep -E "(RAILS_ENV|DATABASE_URL|AWS_)" | sed 's/=.*/=***/' || true
