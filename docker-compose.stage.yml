@@ -3,6 +3,9 @@ services:
     image: ${NGINX_IMAGE:-properlia-nginx:latest}
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/ssl/cloudflare:/etc/ssl/cloudflare:ro
     depends_on:
       - frontend
       - dashboard
