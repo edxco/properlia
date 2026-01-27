@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || "",
   transpilePackages: ["@properlia/shared"],
   env: {
     NEXT_PUBLIC_API_URL:
@@ -24,6 +25,16 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "*.amazonaws.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "properlia.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.properlia.com",
         pathname: "/**",
       },
     ],
