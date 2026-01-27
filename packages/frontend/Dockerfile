@@ -21,9 +21,11 @@ RUN npm ci --build-from-source
 FROM node:20-slim AS builder
 WORKDIR /monorepo
 
-# Build argument - MUST be set during docker build
+# Build arguments - MUST be set during docker build
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_GA_ID
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
 
 # Copy dependencies
 COPY --from=deps /monorepo/node_modules ./node_modules

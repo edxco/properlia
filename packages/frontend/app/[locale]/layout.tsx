@@ -6,6 +6,7 @@ import { QueryProvider } from "@/src/providers/QueryProvider";
 import { TranslationProvider } from "@properlia/shared/components/TranslationProvider";
 import { Navigation } from "@/src/components/Navigation";
 import { Footer } from "@/src/components/Footer";
+import { GoogleAnalytics } from "@/src/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: "Properlia",
@@ -39,6 +40,7 @@ export default async function RootLayout({
   return (
     <html lang={normalizedLocale}>
       <body>
+        <GoogleAnalytics />
         <QueryProvider>
           <TranslationProvider dictionary={dict} locale={normalizedLocale}>
             <Navigation />
