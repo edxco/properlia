@@ -1,7 +1,11 @@
 // Base API client configuration
-console.log('API Client initialized', process.env.NEXT_PUBLIC_API_URL);
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+// Use internal URL for server-side requests (SSR), public URL for client-side
+const isServer = typeof window === 'undefined';
+const INTERNAL_API_URL = process.env.INTERNAL_API_URL || 'http://backend:3000/api/v1';
+const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = isServer ? INTERNAL_API_URL : PUBLIC_API_URL;
 const API_ROOT_URL = API_BASE_URL.replace(/\/api\/v1$/, '');
+console.log('API Client initialized', API_BASE_URL);
 
 export class ApiError extends Error {
   constructor(
