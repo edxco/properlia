@@ -1,0 +1,3 @@
+# Disallow all robots from indexing the dashboard
+User-agent: *
+Disallow: /

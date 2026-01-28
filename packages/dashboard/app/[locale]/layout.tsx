@@ -9,8 +9,16 @@ import { ToastContainer } from "@/src/components/Toast";
 import { TranslationProvider } from "@properlia/shared/components/TranslationProvider";
 
 export const metadata: Metadata = {
-  title: "Properlia",
+  title: "Properlia Dashboard",
   description: "Real Estate Management Platform",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 const SUPPORTED_LOCALES = ["es", "en"] as const;
