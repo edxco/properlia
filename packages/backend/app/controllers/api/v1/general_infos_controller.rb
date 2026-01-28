@@ -12,7 +12,12 @@ module Api
           render json: {
             phone: general_info.phone,
             whatsapp: general_info.whatsapp,
-            email_to: general_info.email_to
+            email_to: general_info.email_to,
+            instagram: general_info.instagram,
+            tiktok: general_info.tiktok,
+            linkedin: general_info.linkedin,
+            facebook: general_info.facebook,
+            email_contact: general_info.email_contact
           }
         else
           render json: { error: 'General info not found' }, status: :not_found
@@ -27,7 +32,12 @@ module Api
           render json: {
             phone: general_info.phone,
             whatsapp: general_info.whatsapp,
-            email_to: general_info.email_to
+            email_to: general_info.email_to,
+            instagram: general_info.instagram,
+            tiktok: general_info.tiktok,
+            linkedin: general_info.linkedin,
+            facebook: general_info.facebook,
+            email_contact: general_info.email_contact
           }
         else
           render json: { errors: general_info.errors.full_messages }, status: :unprocessable_entity
@@ -37,7 +47,7 @@ module Api
       private
 
       def general_info_params
-        params.require(:general_info).permit(:phone, :whatsapp, :email_to)
+        params.require(:general_info).permit(:phone, :whatsapp, :email_to, :instagram, :tiktok, :linkedin, :facebook, :email_contact)
       end
     end
   end

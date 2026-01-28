@@ -9,6 +9,7 @@ class GeneralInfo < ApplicationRecord
   validates :phone, presence: true
   validates :whatsapp, presence: true
   validates :email_to, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email_contact, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :singleton_guard, inclusion: { in: [0] }
 
   # Class method to get the singleton instance
