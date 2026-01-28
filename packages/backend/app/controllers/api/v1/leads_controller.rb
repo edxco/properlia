@@ -142,7 +142,7 @@ module Api
       def public_lead_params
         params.require(:lead).permit(
           :full_name, :email, :phone, :source, :property_type_id,
-          :interest_operation, :max_budget, :notes,
+          :interest_operation, :max_budget, :notes, :interest_property_type,
           :desired_date, :neighborhood, :city, :state,
           :consent_marketing,
           source_detail: {},
@@ -165,6 +165,10 @@ module Api
           max_budget: lead.max_budget,
           score: lead.score,
           notes: lead.notes,
+          city: lead.city,
+          state: lead.state,
+          neighborhood: lead.neighborhood,
+          desired_date: lead.desired_date,
           assigned_to_user_id: lead.assigned_to_user_id,
           next_follow_up_at: lead.next_follow_up_at,
           last_contacted_at: lead.last_contacted_at,
