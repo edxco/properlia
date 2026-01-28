@@ -112,6 +112,12 @@ jobs:
           echo "NGINX_IMAGE_URI=$NGINX_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_OUTPUT
 
+          # Create cache-busting keys based on build args (hash ensures cache invalidates when env vars change)
+          FRONTEND_CACHE_KEY=$(echo "${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}${{ steps.envmap.outputs.NEXT_PUBLIC_GA_ID }}" | sha256sum | cut -c1-8)
+          DASHBOARD_CACHE_KEY=$(echo "${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}" | sha256sum | cut -c1-8)
+          echo "FRONTEND_CACHE_KEY=$FRONTEND_CACHE_KEY" >> $GITHUB_OUTPUT
+          echo "DASHBOARD_CACHE_KEY=$DASHBOARD_CACHE_KEY" >> $GITHUB_OUTPUT
+
       # --- Build & push images to ECR ---
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -138,8 +144,8 @@ jobs:
             NEXT_PUBLIC_GA_ID=${{ steps.envmap.outputs.NEXT_PUBLIC_GA_ID }}
           tags: |
             ${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}
-          cache-from: type=gha,scope=frontend
-          cache-to: type=gha,mode=max,scope=frontend
+          cache-from: type=gha,scope=frontend-${{ steps.vars.outputs.FRONTEND_CACHE_KEY }}
+          cache-to: type=gha,mode=max,scope=frontend-${{ steps.vars.outputs.FRONTEND_CACHE_KEY }}
 
       - name: Build and push dashboard image
         uses: docker/build-push-action@v6
@@ -151,8 +157,8 @@ jobs:
             NEXT_PUBLIC_API_URL=${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}
           tags: |
             ${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}
-          cache-from: type=gha,scope=dashboard
-          cache-to: type=gha,mode=max,scope=dashboard
+          cache-from: type=gha,scope=dashboard-${{ steps.vars.outputs.DASHBOARD_CACHE_KEY }}
+          cache-to: type=gha,mode=max,scope=dashboard-${{ steps.vars.outputs.DASHBOARD_CACHE_KEY }}
 
       - name: Build and push nginx image
         uses: docker/build-push-action@v6
