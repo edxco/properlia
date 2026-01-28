@@ -69,6 +69,50 @@ class EmailService
       send_email(params)
     end
 
+    # Send consultation form email to admin
+    # @param lead [Lead] The lead object from the form submission
+    # @param form_type [String] Type of form: 'buyer' or 'seller'
+    # @return [Hash] Resend API response or error
+    def send_consultation_admin_email(lead:, form_type:)
+      validate_resend_configured!
+      general_info = GeneralInfo.instance
+
+      subject = form_type == 'buyer' ? 'Nueva Consulta de Comprador' : 'Nueva Consulta de Vendedor'
+      html_content = form_type == 'buyer' ? buyer_consultation_admin_html(lead: lead) : seller_consultation_admin_html(lead: lead)
+
+      params = {
+        from: ENV.fetch('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
+        to: general_info.email_to,
+        subject: subject,
+        html: html_content,
+        reply_to: lead.email
+      }
+
+      send_email(params)
+    end
+
+    # Send consultation confirmation email to user
+    # @param lead [Lead] The lead object from the form submission
+    # @param form_type [String] Type of form: 'buyer' or 'seller'
+    # @return [Hash] Resend API response or error
+    def send_consultation_confirmation_email(lead:, form_type:)
+      validate_resend_configured!
+      return { success: false, error: 'No email provided' } unless lead.email.present?
+
+      general_info = GeneralInfo.instance
+      subject = form_type == 'buyer' ? 'Gracias por tu interés - Properlia' : 'Gracias por contactarnos - Properlia'
+      html_content = form_type == 'buyer' ? buyer_consultation_confirmation_html(lead: lead, general_info: general_info) : seller_consultation_confirmation_html(lead: lead, general_info: general_info)
+
+      params = {
+        from: ENV.fetch('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
+        to: lead.email,
+        subject: subject,
+        html: html_content
+      }
+
+      send_email(params)
+    end
+
     # Send property confirmation email after creation
     # @param property [Property] The property object
     # @return [Hash] Resend API response or error
@@ -390,6 +434,337 @@ class EmailService
     # Helper method to format numbers with delimiter
     def number_with_delimiter(number, delimiter: ',')
       number.to_s.reverse.gsub(/(\d{3})(?=\d)/, "\\1#{delimiter}").reverse
+    end
+
+    # HTML template for buyer consultation admin email
+    def buyer_consultation_admin_html(lead:)
+      budget_display = lead.max_budget.present? ? "$#{number_with_delimiter(lead.max_budget)}" : 'No especificado'
+      location_parts = [lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?)
+      location_display = location_parts.any? ? location_parts.join(', ') : 'No especificado'
+      desired_date_display = lead.desired_date.present? ? lead.desired_date.strftime('%d/%m/%Y') : 'No especificado'
+      source_detail = lead.source_detail || {}
+
+      <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #214c9b; color: white; padding: 20px; text-align: center; }
+              .content { background-color: #f9fafb; padding: 30px; }
+              .section-title { color: #214c9b; font-size: 16px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #214c9b; padding-bottom: 5px; }
+              .field { margin-bottom: 15px; }
+              .label { font-weight: bold; color: #374151; font-size: 14px; }
+              .value { margin-top: 3px; color: #1f2937; }
+              .highlight { background-color: #dbeafe; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+              .notes { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #e5e7eb; white-space: pre-wrap; }
+              .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Nueva Consulta de Comprador</h1>
+              </div>
+              <div class="content">
+                <div class="highlight">
+                  <div class="label">Tipo de Operación:</div>
+                  <div class="value" style="font-size: 18px; font-weight: bold;">Compra</div>
+                </div>
+
+                <div class="section-title">Información de Contacto</div>
+                <div class="field">
+                  <div class="label">Nombre:</div>
+                  <div class="value">#{lead.full_name}</div>
+                </div>
+                <div class="field">
+                  <div class="label">Email:</div>
+                  <div class="value">#{lead.email || 'No proporcionado'}</div>
+                </div>
+                <div class="field">
+                  <div class="label">Teléfono:</div>
+                  <div class="value">#{lead.phone.present? ? lead.phone : 'No proporcionado'}</div>
+                </div>
+
+                <div class="section-title">Detalles del Interés</div>
+                #{lead.interest_property_type.present? ? "<div class=\"field\"><div class=\"label\">Tipo de Propiedad:</div><div class=\"value\">#{lead.interest_property_type}</div></div>" : ''}
+                <div class="field">
+                  <div class="label">Presupuesto Máximo:</div>
+                  <div class="value">#{budget_display}</div>
+                </div>
+                <div class="field">
+                  <div class="label">Ubicación de Interés:</div>
+                  <div class="value">#{location_display}</div>
+                </div>
+                <div class="field">
+                  <div class="label">Fecha Deseada:</div>
+                  <div class="value">#{desired_date_display}</div>
+                </div>
+
+                <div class="section-title">Información del Comprador</div>
+                #{source_detail['purchase_goal'].present? ? "<div class=\"field\"><div class=\"label\">Objetivo de Compra:</div><div class=\"value\">#{source_detail['purchase_goal']}</div></div>" : ''}
+                #{source_detail['payment_method'].present? ? "<div class=\"field\"><div class=\"label\">Método de Pago:</div><div class=\"value\">#{source_detail['payment_method']}</div></div>" : ''}
+                #{source_detail['essential_criteria'].present? ? "<div class=\"field\"><div class=\"label\">Criterios Esenciales:</div><div class=\"value\">#{source_detail['essential_criteria']}</div></div>" : ''}
+                #{source_detail['decision_timeframe'].present? ? "<div class=\"field\"><div class=\"label\">Plazo de Decisión:</div><div class=\"value\">#{format_timeframe(source_detail['decision_timeframe'])}</div></div>" : ''}
+                #{source_detail['alignment_answer'].present? ? "<div class=\"field\"><div class=\"label\">Alineación:</div><div class=\"value\">#{source_detail['alignment_answer'] == 'yes' ? 'Sí' : 'En evaluación'}</div></div>" : ''}
+
+                #{lead.notes.present? ? "<div class=\"section-title\">Notas Adicionales</div><div class=\"notes\">#{lead.notes.gsub("\n", '<br>')}</div>" : ''}
+
+                <div class="footer">
+                  <p>Lead ID: #{lead.id} | Fuente: #{lead.source}</p>
+                  <p>Fecha de registro: #{lead.created_at.strftime('%d/%m/%Y %H:%M')}</p>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      HTML
+    end
+
+    # HTML template for seller consultation admin email
+    def seller_consultation_admin_html(lead:)
+      budget_display = lead.max_budget.present? ? "$#{number_with_delimiter(lead.max_budget)}" : 'No especificado'
+      location_parts = [lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?)
+      location_display = location_parts.any? ? location_parts.join(', ') : 'No especificado'
+      desired_date_display = lead.desired_date.present? ? lead.desired_date.strftime('%d/%m/%Y') : 'No especificado'
+
+      <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #214c9b; color: white; padding: 20px; text-align: center; }
+              .content { background-color: #f9fafb; padding: 30px; }
+              .section-title { color: #214c9b; font-size: 16px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #214c9b; padding-bottom: 5px; }
+              .field { margin-bottom: 15px; }
+              .label { font-weight: bold; color: #374151; font-size: 14px; }
+              .value { margin-top: 3px; color: #1f2937; }
+              .highlight { background-color: #fef3c7; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+              .notes { background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #e5e7eb; white-space: pre-wrap; }
+              .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Nueva Consulta de Vendedor</h1>
+              </div>
+              <div class="content">
+                <div class="highlight">
+                  <div class="label">Tipo de Operación:</div>
+                  <div class="value" style="font-size: 18px; font-weight: bold;">Venta</div>
+                </div>
+
+                <div class="section-title">Información de Contacto</div>
+                <div class="field">
+                  <div class="label">Nombre:</div>
+                  <div class="value">#{lead.full_name}</div>
+                </div>
+                <div class="field">
+                  <div class="label">Email:</div>
+                  <div class="value">#{lead.email || 'No proporcionado'}</div>
+                </div>
+                <div class="field">
+                  <div class="label">Teléfono:</div>
+                  <div class="value">#{lead.phone.present? ? lead.phone : 'No proporcionado'}</div>
+                </div>
+
+                <div class="section-title">Detalles de la Propiedad</div>
+                <div class="field">
+                  <div class="label">Precio Esperado:</div>
+                  <div class="value">#{budget_display}</div>
+                </div>
+                <div class="field">
+                  <div class="label">Ubicación:</div>
+                  <div class="value">#{location_display}</div>
+                </div>
+                <div class="field">
+                  <div class="label">Fecha Deseada de Venta:</div>
+                  <div class="value">#{desired_date_display}</div>
+                </div>
+
+                #{lead.notes.present? ? "<div class=\"section-title\">Descripción de la Propiedad</div><div class=\"notes\">#{lead.notes.gsub("\n", '<br>')}</div>" : ''}
+
+                <div class="footer">
+                  <p>Lead ID: #{lead.id} | Fuente: #{lead.source}</p>
+                  <p>Fecha de registro: #{lead.created_at.strftime('%d/%m/%Y %H:%M')}</p>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      HTML
+    end
+
+    # HTML template for buyer confirmation email to user
+    def buyer_consultation_confirmation_html(lead:, general_info:)
+      <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #214c9b; color: white; padding: 30px; text-align: center; }
+              .content { background-color: #f9fafb; padding: 40px; }
+              .message { font-size: 16px; margin-bottom: 30px; }
+              .summary { background-color: white; padding: 20px; border-radius: 5px; border: 1px solid #e5e7eb; margin-bottom: 30px; }
+              .summary-title { font-weight: bold; color: #214c9b; margin-bottom: 15px; }
+              .summary-item { margin-bottom: 10px; }
+              .summary-label { color: #6b7280; font-size: 14px; }
+              .summary-value { color: #1f2937; }
+              .contact-section { background-color: #dbeafe; padding: 20px; border-radius: 5px; text-align: center; }
+              .contact-title { font-weight: bold; color: #214c9b; margin-bottom: 10px; }
+              .contact-info { margin: 5px 0; }
+              .cta-button {
+                display: inline-block;
+                background-color: #214c9b;
+                color: white !important;
+                padding: 12px 30px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 20px;
+                font-weight: bold;
+              }
+              .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Gracias por tu Interés</h1>
+              </div>
+              <div class="content">
+                <p style="font-size: 18px;">Hola #{lead.full_name},</p>
+                <p class="message">Hemos recibido tu información y un asesor se pondrá en contacto contigo pronto para ayudarte a encontrar la propiedad ideal.</p>
+
+                <div class="summary">
+                  <div class="summary-title">Resumen de tu solicitud:</div>
+                  <div class="summary-item">
+                    <span class="summary-label">Operación:</span>
+                    <span class="summary-value">Compra</span>
+                  </div>
+                  #{lead.max_budget.present? ? "<div class=\"summary-item\"><span class=\"summary-label\">Presupuesto:</span> <span class=\"summary-value\">$#{number_with_delimiter(lead.max_budget)}</span></div>" : ''}
+                  #{[lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?).any? ? "<div class=\"summary-item\"><span class=\"summary-label\">Ubicación:</span> <span class=\"summary-value\">#{[lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?).join(', ')}</span></div>" : ''}
+                </div>
+
+                <div class="contact-section">
+                  <div class="contact-title">¿Tienes preguntas?</div>
+                  <p>No dudes en contactarnos:</p>
+                  #{general_info.phone.present? ? "<div class=\"contact-info\">Tel: #{general_info.phone}</div>" : ''}
+                  #{general_info.whatsapp.present? ? "<div class=\"contact-info\">WhatsApp: #{general_info.whatsapp}</div>" : ''}
+                  <div class="contact-info">Email: #{general_info.email_to}</div>
+                </div>
+
+                <div style="text-align: center;">
+                  <a href="#{ENV.fetch('FRONTEND_URL', 'http://localhost:3001')}" class="cta-button">
+                    Explorar Propiedades
+                  </a>
+                </div>
+
+                <div class="footer">
+                  <p>Este es un correo automático de confirmación.</p>
+                  <p>Properlia - Tu socio en bienes raíces</p>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      HTML
+    end
+
+    # HTML template for seller confirmation email to user
+    def seller_consultation_confirmation_html(lead:, general_info:)
+      <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #214c9b; color: white; padding: 30px; text-align: center; }
+              .content { background-color: #f9fafb; padding: 40px; }
+              .message { font-size: 16px; margin-bottom: 30px; }
+              .summary { background-color: white; padding: 20px; border-radius: 5px; border: 1px solid #e5e7eb; margin-bottom: 30px; }
+              .summary-title { font-weight: bold; color: #214c9b; margin-bottom: 15px; }
+              .summary-item { margin-bottom: 10px; }
+              .summary-label { color: #6b7280; font-size: 14px; }
+              .summary-value { color: #1f2937; }
+              .contact-section { background-color: #fef3c7; padding: 20px; border-radius: 5px; text-align: center; }
+              .contact-title { font-weight: bold; color: #92400e; margin-bottom: 10px; }
+              .contact-info { margin: 5px 0; }
+              .cta-button {
+                display: inline-block;
+                background-color: #214c9b;
+                color: white !important;
+                padding: 12px 30px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 20px;
+                font-weight: bold;
+              }
+              .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Gracias por Contactarnos</h1>
+              </div>
+              <div class="content">
+                <p style="font-size: 18px;">Hola #{lead.full_name},</p>
+                <p class="message">Hemos recibido tu información y un asesor se pondrá en contacto contigo pronto para ayudarte con la venta de tu propiedad.</p>
+
+                <div class="summary">
+                  <div class="summary-title">Resumen de tu solicitud:</div>
+                  <div class="summary-item">
+                    <span class="summary-label">Operación:</span>
+                    <span class="summary-value">Venta</span>
+                  </div>
+                  #{lead.max_budget.present? ? "<div class=\"summary-item\"><span class=\"summary-label\">Precio Esperado:</span> <span class=\"summary-value\">$#{number_with_delimiter(lead.max_budget)}</span></div>" : ''}
+                  #{[lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?).any? ? "<div class=\"summary-item\"><span class=\"summary-label\">Ubicación:</span> <span class=\"summary-value\">#{[lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?).join(', ')}</span></div>" : ''}
+                </div>
+
+                <div class="contact-section">
+                  <div class="contact-title">¿Tienes preguntas?</div>
+                  <p>No dudes en contactarnos:</p>
+                  #{general_info.phone.present? ? "<div class=\"contact-info\">Tel: #{general_info.phone}</div>" : ''}
+                  #{general_info.whatsapp.present? ? "<div class=\"contact-info\">WhatsApp: #{general_info.whatsapp}</div>" : ''}
+                  <div class="contact-info">Email: #{general_info.email_to}</div>
+                </div>
+
+                <div style="text-align: center;">
+                  <a href="#{ENV.fetch('FRONTEND_URL', 'http://localhost:3001')}" class="cta-button">
+                    Ver Nuestros Servicios
+                  </a>
+                </div>
+
+                <div class="footer">
+                  <p>Este es un correo automático de confirmación.</p>
+                  <p>Properlia - Tu socio en bienes raíces</p>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      HTML
+    end
+
+    # Helper to format timeframe
+    def format_timeframe(timeframe)
+      case timeframe
+      when '0-3' then '0-3 meses'
+      when '3-6' then '3-6 meses'
+      when '6-12' then '6-12 meses'
+      else timeframe
+      end
     end
   end
 end

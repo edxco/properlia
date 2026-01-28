@@ -114,6 +114,10 @@ module Api
 
         if lead.save
           lead.record_event!('created', metadata: { source: lead.source })
+
+          # Send consultation emails for buyer/seller forms
+          send_consultation_emails(lead) if %w[buyer_form seller_form].include?(lead.source)
+
           render json: { message: 'Lead created successfully', id: lead.id }, status: :created
         else
           render json: { errors: lead.errors.full_messages }, status: :unprocessable_entity
@@ -148,6 +152,26 @@ module Api
           source_detail: {},
           images: []
         )
+      end
+
+      def send_consultation_emails(lead)
+        form_type = lead.source == 'buyer_form' ? 'buyer' : 'seller'
+
+        # Send email to admin (general_info.email_to)
+        Thread.new do
+          EmailService.send_consultation_admin_email(lead: lead, form_type: form_type)
+        rescue StandardError => e
+          Rails.logger.error "Failed to send consultation admin email: #{e.message}"
+        end
+
+        # Send confirmation email to user (if email provided)
+        if lead.email.present?
+          Thread.new do
+            EmailService.send_consultation_confirmation_email(lead: lead, form_type: form_type)
+          rescue StandardError => e
+            Rails.logger.error "Failed to send consultation confirmation email: #{e.message}"
+          end
+        end
       end
 
       def lead_json(lead, include_events: false)
