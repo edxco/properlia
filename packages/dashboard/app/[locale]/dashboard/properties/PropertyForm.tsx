@@ -26,7 +26,7 @@ import {
   useT,
 } from "@properlia/shared/components/TranslationProvider";
 import { PriceInput } from "@properlia/shared/components";
-import { capitalizeFirstWord } from "@properlia/shared";
+import { capitalizeFirstWord, getAbsoluteImageUrl } from "@properlia/shared";
 
 type FormState = {
   title: string;
@@ -885,7 +885,7 @@ export default function PropertyForm({
                 {editingProperty.images.map((img) => (
                   <div key={img.id} className="relative group">
                     <img
-                      src={img.url}
+                      src={getAbsoluteImageUrl(img.url)}
                       alt={img.filename}
                       className="w-full h-20 object-cover rounded border border-gray-200"
                     />

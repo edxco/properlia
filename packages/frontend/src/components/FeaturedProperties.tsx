@@ -3,6 +3,7 @@ import { PropertyCard } from "@/components/ui";
 import { useProperties } from "../services/properties/queries";
 import { useStatuses } from "../services/status/queries";
 import { useT } from "@properlia/shared/components/TranslationProvider";
+import { getAbsoluteImageUrl } from "@properlia/shared";
 
 export function FeaturedProperties() {
   const t = useT();
@@ -63,7 +64,7 @@ export function FeaturedProperties() {
       name: "Unknown",
       es_name: "Desconocido",
     },
-    images: property.images.map((img) => img.url),
+    images: property.images.map((img) => getAbsoluteImageUrl(img.url)),
     landArea: property.land_area ?? 0,
     builtArea: property.built_area ?? 0,
     price: property.price,

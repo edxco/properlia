@@ -7,6 +7,7 @@ import { NoResultsAlert } from "@/components/alerts/NoResultsAlert";
 import { useProperties } from "@/src/services/properties/queries";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import { Property } from "@properlia/shared/types";
+import { getAbsoluteImageUrl } from "@properlia/shared";
 import { PropertyCard, Banner } from "@/components/ui";
 
 interface Filters {
@@ -214,7 +215,7 @@ export default function PropertiesClient() {
                     es_name: "Desconocido",
                   }
                 }
-                images={property.images.map((img) => img.url)}
+                images={property.images.map((img) => getAbsoluteImageUrl(img.url))}
                 landArea={property.land_area ?? 0}
                 builtArea={property.built_area ?? 0}
                 price={property.price}

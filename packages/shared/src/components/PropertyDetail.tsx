@@ -5,6 +5,7 @@ import type { Property } from "../types";
 import { Breadcrumbs, type BreadcrumbItem } from "./Breadcrumbs";
 import { ImageCarousel, type CarouselImage } from "./ImageCarousel";
 import { PropertyDetailsGrid } from "./PropertyDetailsGrid";
+import { getAbsoluteImageUrl } from "../lib/api-client";
 import styles from "./styles/PropertyDetail.module.css";
 
 interface PropertyDetailProps {
@@ -49,7 +50,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({
   // Convert property images to carousel format
   const carouselImages: CarouselImage[] =
     property.images?.map((img) => ({
-      url: img.url,
+      url: getAbsoluteImageUrl(img.url),
       filename: img.filename,
     })) || [];
 

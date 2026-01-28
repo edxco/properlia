@@ -190,3 +190,17 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
+
+/**
+ * Converts a relative image URL to an absolute URL using the API root.
+ * Handles Active Storage URLs like /rails/active_storage/blobs/...
+ */
+export function getAbsoluteImageUrl(url: string): string {
+  if (!url) return '';
+  // Already absolute URL
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Relative URL - prepend API root
+  return `${API_ROOT_URL}${url}`;
+}
