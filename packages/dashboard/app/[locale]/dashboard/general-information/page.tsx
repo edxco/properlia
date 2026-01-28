@@ -12,12 +12,22 @@ type FormState = {
   phone: string;
   whatsapp: string;
   email_to: string;
+  instagram: string;
+  tiktok: string;
+  linkedin: string;
+  facebook: string;
+  email_contact: string;
 };
 
 const emptyForm: FormState = {
   phone: "",
   whatsapp: "",
   email_to: "",
+  instagram: "",
+  tiktok: "",
+  linkedin: "",
+  facebook: "",
+  email_contact: "",
 };
 
 export default function GeneralInformationPage() {
@@ -36,11 +46,17 @@ export default function GeneralInformationPage() {
         phone: generalInfo.phone ?? "",
         whatsapp: generalInfo.whatsapp ?? "",
         email_to: generalInfo.email_to ?? "",
+        instagram: generalInfo.instagram ?? "",
+        tiktok: generalInfo.tiktok ?? "",
+        linkedin: generalInfo.linkedin ?? "",
+        facebook: generalInfo.facebook ?? "",
+        email_contact: generalInfo.email_contact ?? "",
       });
     }
   }, [generalInfo]);
 
   const handleChange = (field: keyof FormState, value: string) => {
+    console.log(field, value);
     setForm((prev) => ({ ...prev, [field]: value }));
     setFormError(null);
     setSuccessMessage(null);
@@ -63,11 +79,22 @@ export default function GeneralInformationPage() {
       return;
     }
 
+    // Validate email_contact if provided
+    if (form.email_contact.trim() && !emailRegex.test(form.email_contact)) {
+      setFormError("Please enter a valid contact email address.");
+      return;
+    }
+
     try {
       await updateGeneralInfo({
         phone: form.phone.trim(),
         whatsapp: form.whatsapp.trim(),
         email_to: form.email_to.trim(),
+        instagram: form.instagram.trim() || null,
+        tiktok: form.tiktok.trim() || null,
+        linkedin: form.linkedin.trim() || null,
+        facebook: form.facebook.trim() || null,
+        email_contact: form.email_contact.trim() || null,
       });
       setSuccessMessage("General information updated successfully!");
     } catch (mutationError: any) {
@@ -177,9 +204,106 @@ export default function GeneralInformationPage() {
                   </p>
                 </div>
 
+                <div className="pt-6 border-t border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                    Social Media & Contact (Optional)
+                  </h3>
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Contact Email (Footer)
+                      </label>
+                      <input
+                        type="email"
+                        value={form.email_contact}
+                        onChange={(event) =>
+                          handleChange("email_contact", event.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="info@example.com"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Email displayed in the website footer
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Instagram
+                      </label>
+                      <input
+                        type="url"
+                        value={form.instagram}
+                        onChange={(event) =>
+                          handleChange("instagram", event.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="https://instagram.com/yourprofile"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Instagram displayed in the website footer
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Facebook
+                      </label>
+                      <input
+                        type="url"
+                        value={form.facebook}
+                        onChange={(event) =>
+                          handleChange("facebook", event.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="https://facebook.com/yourpage"
+                      />
+                       <p className="mt-1 text-xs text-gray-500">
+                        Facebook displayed in the website footer
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        LinkedIn
+                      </label>
+                      <input
+                        type="url"
+                        value={form.linkedin}
+                        onChange={(event) =>
+                          handleChange("linkedin", event.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="https://linkedin.com/company/yourcompany"
+                      />
+                       <p className="mt-1 text-xs text-gray-500">
+                        LinkedIn displayed in the website footer
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        TikTok
+                      </label>
+                      <input
+                        type="url"
+                        value={form.tiktok}
+                        onChange={(event) =>
+                          handleChange("tiktok", event.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="https://tiktok.com/@yourprofile"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        LinkedIn displayed in the website footer
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <p className="text-sm text-gray-500">
-                    All fields are required
+                    Phone, WhatsApp, and Email are required
                   </p>
                   <button
                     type="submit"
