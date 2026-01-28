@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useT } from "@properlia/shared/components/TranslationProvider";
-import { formatPriceInput, parsePriceInput } from "@properlia/shared";
+import { PriceInput } from "@properlia/shared/components";
+import { parsePriceInput } from "@properlia/shared";
 import { useCreatePublicLead } from "@/src/services/leads/mutations";
 import { CreatePublicLeadDto } from "@properlia/shared/services/leads/api";
 import {
@@ -95,15 +96,6 @@ export default function BuyerConsultationClient() {
 
     if (errors[name as keyof FormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handlePriceChange = (value: string) => {
-    const formatted = formatPriceInput(value);
-    setFormData((prev) => ({ ...prev, max_budget: formatted }));
-
-    if (errors.max_budget) {
-      setErrors((prev) => ({ ...prev, max_budget: undefined }));
     }
   };
 
@@ -209,21 +201,18 @@ export default function BuyerConsultationClient() {
 
   if (isSuccess) {
     return (
-      <section className="py-20 bg-stone-50 min-h-screen">
+      <section className="py-16 bg-gray-50 min-h-screen">
         <div className="max-w-2xl mx-auto px-6 lg:px-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-12 text-center">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-3xl font-light text-stone-900 mb-4 tracking-tight">
+            <h2 className="text-2xl font-semibold text-stone-900 mb-4">
               {t("formSuccess")}
             </h2>
-            <p className="text-stone-500 mb-8 max-w-md mx-auto">
-              We will review your requirements and contact you within 24 hours.
-            </p>
             <button
               onClick={() => setIsSuccess(false)}
-              className="px-8 py-4 bg-stone-900 text-white hover:bg-stone-800 transition-all duration-300 font-medium tracking-wide"
+              className="mt-6 px-6 py-3 bg-stone-900 text-white hover:bg-stone-800 transition-colors"
             >
               {t("buyerSubmitButton")}
             </button>
@@ -234,67 +223,64 @@ export default function BuyerConsultationClient() {
   }
 
   return (
-    <section className="py-20 bg-stone-50 min-h-screen">
+    <section className="py-16 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-light text-stone-900 mb-6 tracking-tight">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-stone-900 mb-4">
             {t("buyerPageTitle")}
           </h1>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto font-light">
+          <p className="text-lg text-stone-600 max-w-2xl mx-auto">
             {t("buyerPageSubtitle")}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
-          {/* Form - Takes more space */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-10 md:p-12">
-              <h2 className="text-2xl font-light text-stone-900 mb-10 tracking-tight">
-                {t("buyerFormTitle")}
-              </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Form */}
+          <div className="bg-white rounded-lg shadow-sm p-8">
+            <h2 className="text-2xl font-semibold text-stone-900 mb-6">
+              {t("buyerFormTitle")}
+            </h2>
 
-              {errors.general && (
-                <div className="mb-8 p-5 bg-red-50 border border-red-100 rounded-xl text-red-700 text-sm">
-                  {errors.general}
-                </div>
-              )}
+            {errors.general && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded text-red-700">
+                {errors.general}
+              </div>
+            )}
 
-              <form onSubmit={handleSubmit} className="space-y-10">
-                {/* Full Name */}
-                <div>
-                  <label
-                    htmlFor="full_name"
-                    className="block text-sm font-medium text-stone-700 mb-3"
-                  >
-                    {t("buyerFullName")} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="full_name"
-                    name="full_name"
-                    value={formData.full_name || ""}
-                    onChange={handleChange}
-                    placeholder={t("enterFullName")}
-                    className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 ${
-                      errors.full_name
-                        ? "border-red-400 bg-red-50/50"
-                        : "border-stone-200 bg-white"
-                    }`}
-                  />
-                  {errors.full_name && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.full_name}
-                    </p>
-                  )}
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Full Name */}
+              <div>
+                <label
+                  htmlFor="full_name"
+                  className="block text-sm font-medium text-stone-700 mb-1"
+                >
+                  {t("buyerFullName")} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="full_name"
+                  name="full_name"
+                  value={formData.full_name || ""}
+                  onChange={handleChange}
+                  placeholder={t("enterFullName")}
+                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
+                    errors.full_name ? "border-red-500" : "border-stone-200"
+                  }`}
+                />
+                {errors.full_name && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.full_name}
+                  </p>
+                )}
+              </div>
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* Email */}
+              {/* Email & Phone */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-stone-700 mb-3"
+                    className="block text-sm font-medium text-stone-700 mb-1"
                   >
                     {t("buyerEmail")} <span className="text-red-500">*</span>
                   </label>
@@ -305,376 +291,345 @@ export default function BuyerConsultationClient() {
                     value={formData.email || ""}
                     onChange={handleChange}
                     placeholder={t("enterEmail")}
-                    className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 ${
-                      errors.email
-                        ? "border-red-400 bg-red-50/50"
-                        : "border-stone-200 bg-white"
+                    className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
+                      errors.email ? "border-red-500" : "border-stone-200"
                     }`}
                   />
                   {errors.email && (
-                    <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                   )}
                 </div>
-                {/* Phone */}
                 <div>
                   <label
                     htmlFor="phone"
-                    className="block text-sm font-medium text-stone-700 mb-3"
+                    className="block text-sm font-medium text-stone-700 mb-1"
                   >
-                    {t("phone")} <span className="text-red-500">*</span>
+                    {t("phone")}
                   </label>
                   <input
-                    type="phone"
+                    type="tel"
                     id="phone"
                     name="phone"
                     value={formData.phone || ""}
                     onChange={handleChange}
                     placeholder={t("enterPhone")}
-                    className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 ${
-                      errors.phone
-                        ? "border-red-400 bg-red-50/50"
-                        : "border-stone-200 bg-white"
-                    }`}
+                    className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
                   />
-                  {errors.email && (
-                    <p className="mt-2 text-sm text-red-600">{errors.email}</p>
-                  )}
                 </div>
-                </div>
+              </div>
 
-                {/* Property Type */}
-                <div>
-                  <label
-                    htmlFor="property_type"
-                    className="block text-sm font-medium text-stone-700 mb-3"
-                  >
-                    {t("buyerPropertyType")}{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="property_type"
-                    name="property_type"
-                    value={formData.property_type || ""}
-                    onChange={handleChange}
-                    className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 appearance-none bg-white cursor-pointer ${
-                      errors.property_type
-                        ? "border-red-400 bg-red-50/50"
-                        : "border-stone-200"
-                    }`}
-                  >
-                    <option value="">{t("select")}</option>
-                    <option value="residential">
-                      {t("buyerPropertyTypeResidential")}
-                    </option>
-                    <option value="commercial">
-                      {t("buyerPropertyTypeCommercial")}
-                    </option>
-                    <option value="industrial">
-                      {t("buyerPropertyTypeIndustrial")}
-                    </option>
-                  </select>
-                  {errors.property_type && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.property_type}
-                    </p>
-                  )}
-                </div>
-
-                {/* Purchase Goal */}
-                <div>
-                  <label
-                    htmlFor="purchase_goal"
-                    className="block text-sm font-medium text-stone-700 mb-3"
-                  >
-                    {t("buyerPurchaseGoal")}{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="purchase_goal"
-                    name="purchase_goal"
-                    value={formData.purchase_goal || ""}
-                    onChange={handleChange}
-                    className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 appearance-none bg-white cursor-pointer ${
-                      errors.purchase_goal
-                        ? "border-red-400 bg-red-50/50"
-                        : "border-stone-200"
-                    }`}
-                  >
-                    <option value="">{t("select")}</option>
-                    <option value="living">{t("buyerGoalLiving")}</option>
-                    <option value="investment">
-                      {t("buyerGoalInvestment")}
-                    </option>
-                    <option value="cash_flow">{t("buyerGoalCashFlow")}</option>
-                    <option value="business">{t("buyerGoalBusiness")}</option>
-                  </select>
-                  {errors.purchase_goal && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.purchase_goal}
-                    </p>
-                  )}
-                </div>
-
-                {/* Max Budget & Payment Method - Two columns on desktop */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Max Budget */}
-                  <div>
-                    <label
-                      htmlFor="max_budget"
-                      className="block text-sm font-medium text-stone-700 mb-3"
-                    >
-                      {t("buyerMaxBudget")}{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="max_budget"
-                      name="max_budget"
-                      inputMode="decimal"
-                      value={formData.max_budget || ""}
-                      onChange={(e) => handlePriceChange(e.target.value)}
-                      placeholder={t("buyerMaxBudgetPlaceholder")}
-                      className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 ${
-                        errors.max_budget
-                          ? "border-red-400 bg-red-50/50"
-                          : "border-stone-200 bg-white"
-                      }`}
-                    />
-                    {errors.max_budget && (
-                      <p className="mt-2 text-sm text-red-600">
-                        {errors.max_budget}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Payment Method */}
-                  <div>
-                    <label
-                      htmlFor="payment_method"
-                      className="block text-sm font-medium text-stone-700 mb-3"
-                    >
-                      {t("buyerPaymentMethod")}{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="payment_method"
-                      name="payment_method"
-                      value={formData.payment_method || ""}
-                      onChange={handleChange}
-                      placeholder={t("buyerPaymentMethodPlaceholder")}
-                      className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 ${
-                        errors.payment_method
-                          ? "border-red-400 bg-red-50/50"
-                          : "border-stone-200 bg-white"
-                      }`}
-                    />
-                    {errors.payment_method && (
-                      <p className="mt-2 text-sm text-red-600">
-                        {errors.payment_method}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Desired Location - Neighborhood, City, State */}
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-3">
-                    {t("buyerDesiredLocation")}
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                      type="text"
-                      id="neighborhood"
-                      name="neighborhood"
-                      value={formData.neighborhood || ""}
-                      onChange={handleChange}
-                      placeholder={t("neighborhood")}
-                      className="w-full px-5 py-4 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 bg-white"
-                    />
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={formData.city || ""}
-                      onChange={handleChange}
-                      placeholder={t("city")}
-                      className="w-full px-5 py-4 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 bg-white"
-                    />
-                    <input
-                      type="text"
-                      id="state"
-                      name="state"
-                      value={formData.state || ""}
-                      onChange={handleChange}
-                      placeholder={t("state")}
-                      className="w-full px-5 py-4 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 bg-white"
-                    />
-                  </div>
-                </div>
-
-                {/* Essential Criteria */}
-                <div>
-                  <label
-                    htmlFor="essential_criteria"
-                    className="block text-sm font-medium text-stone-700 mb-2"
-                  >
-                    {t("buyerEssentialCriteria")}{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-stone-400 mb-3 font-light">
-                    {t("buyerEssentialCriteriaHelper")}
-                  </p>
-                  <textarea
-                    id="essential_criteria"
-                    name="essential_criteria"
-                    rows={4}
-                    value={formData.essential_criteria || ""}
-                    onChange={handleChange}
-                    placeholder={t("buyerEssentialCriteriaPlaceholder")}
-                    className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 resize-none ${
-                      errors.essential_criteria
-                        ? "border-red-400 bg-red-50/50"
-                        : "border-stone-200 bg-white"
-                    }`}
-                  />
-                  {errors.essential_criteria && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.essential_criteria}
-                    </p>
-                  )}
-                </div>
-
-                {/* Decision Timeframe */}
-                <div>
-                  <label
-                    htmlFor="decision_timeframe"
-                    className="block text-sm font-medium text-stone-700 mb-3"
-                  >
-                    {t("buyerDecisionTimeframe")}{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="decision_timeframe"
-                    name="decision_timeframe"
-                    value={formData.decision_timeframe || ""}
-                    onChange={handleChange}
-                    className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 appearance-none bg-white cursor-pointer ${
-                      errors.decision_timeframe
-                        ? "border-red-400 bg-red-50/50"
-                        : "border-stone-200"
-                    }`}
-                  >
-                    <option value="">{t("select")}</option>
-                    <option value="0-3">{t("buyerTimeframe0to3")}</option>
-                    <option value="3-6">{t("buyerTimeframe3to6")}</option>
-                    <option value="6-12">{t("buyerTimeframe6to12")}</option>
-                  </select>
-                  {errors.decision_timeframe && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.decision_timeframe}
-                    </p>
-                  )}
-                </div>
-
-                {/* Alignment Question */}
-                <div>
-                  <label
-                    htmlFor="alignment_answer"
-                    className="block text-sm font-medium text-stone-700 mb-3"
-                  >
-                    {t("buyerAlignmentQuestion")}{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="alignment_answer"
-                    name="alignment_answer"
-                    value={formData.alignment_answer || ""}
-                    onChange={handleChange}
-                    className={`w-full px-5 py-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-900 transition-all duration-200 appearance-none bg-white cursor-pointer ${
-                      errors.alignment_answer
-                        ? "border-red-400 bg-red-50/50"
-                        : "border-stone-200"
-                    }`}
-                  >
-                    <option value="">{t("select")}</option>
-                    <option value="yes">{t("buyerAlignmentYes")}</option>
-                    <option value="evaluating">
-                      {t("buyerAlignmentEvaluating")}
-                    </option>
-                  </select>
-                  {errors.alignment_answer && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.alignment_answer}
-                    </p>
-                  )}
-                </div>
-
-                {/* Consent Marketing */}
-                <div className="flex items-start pt-2">
-                  <input
-                    type="checkbox"
-                    id="consent_marketing"
-                    name="consent_marketing"
-                    checked={formData.consent_marketing || false}
-                    onChange={handleChange}
-                    className="mt-1 h-5 w-5 text-stone-900 focus:ring-stone-900 border-stone-300 rounded cursor-pointer"
-                  />
-                  <label
-                    htmlFor="consent_marketing"
-                    className="ml-4 text-sm text-stone-500 font-light cursor-pointer"
-                  >
-                    {t("consentMarketing")}
-                  </label>
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={createLead.isPending}
-                  className="w-full bg-stone-900 text-white py-5 px-8 hover:bg-stone-800 transition-all duration-300 disabled:bg-stone-300 disabled:cursor-not-allowed font-medium tracking-wide text-sm uppercase mt-4"
+              {/* Property Type */}
+              <div>
+                <label
+                  htmlFor="property_type"
+                  className="block text-sm font-medium text-stone-700 mb-1"
                 >
-                  {createLead.isPending
-                    ? t("submitting")
-                    : t("buyerSubmitButton")}
-                </button>
-              </form>
-            </div>
+                  {t("buyerPropertyType")} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="property_type"
+                  name="property_type"
+                  value={formData.property_type || ""}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
+                    errors.property_type ? "border-red-500" : "border-stone-200"
+                  }`}
+                >
+                  <option value="">{t("select")}</option>
+                  <option value="residential">
+                    {t("buyerPropertyTypeResidential")}
+                  </option>
+                  <option value="commercial">
+                    {t("buyerPropertyTypeCommercial")}
+                  </option>
+                  <option value="industrial">
+                    {t("buyerPropertyTypeIndustrial")}
+                  </option>
+                </select>
+                {errors.property_type && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.property_type}
+                  </p>
+                )}
+              </div>
+
+              {/* Purchase Goal */}
+              <div>
+                <label
+                  htmlFor="purchase_goal"
+                  className="block text-sm font-medium text-stone-700 mb-1"
+                >
+                  {t("buyerPurchaseGoal")} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="purchase_goal"
+                  name="purchase_goal"
+                  value={formData.purchase_goal || ""}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
+                    errors.purchase_goal ? "border-red-500" : "border-stone-200"
+                  }`}
+                >
+                  <option value="">{t("select")}</option>
+                  <option value="living">{t("buyerGoalLiving")}</option>
+                  <option value="investment">{t("buyerGoalInvestment")}</option>
+                  <option value="cash_flow">{t("buyerGoalCashFlow")}</option>
+                  <option value="business">{t("buyerGoalBusiness")}</option>
+                </select>
+                {errors.purchase_goal && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.purchase_goal}
+                  </p>
+                )}
+              </div>
+
+              {/* Max Budget & Payment Method */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="max_budget"
+                    className="block text-sm font-medium text-stone-700 mb-1"
+                  >
+                    {t("buyerMaxBudget")} <span className="text-red-500">*</span>
+                  </label>
+                  <PriceInput
+                    id="max_budget"
+                    name="max_budget"
+                    value={formData.max_budget || ""}
+                    onChange={(formatted) => {
+                      setFormData((prev) => ({ ...prev, max_budget: formatted }));
+                      if (errors.max_budget) {
+                        setErrors((prev) => ({ ...prev, max_budget: undefined }));
+                      }
+                    }}
+                    placeholder={t("buyerMaxBudgetPlaceholder")}
+                    className={`w-full pl-8 pr-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
+                      errors.max_budget ? "border-red-500" : "border-stone-200"
+                    }`}
+                    symbolClassName="text-stone-500"
+                    hasError={!!errors.max_budget}
+                  />
+                  {errors.max_budget && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.max_budget}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="payment_method"
+                    className="block text-sm font-medium text-stone-700 mb-1"
+                  >
+                    {t("buyerPaymentMethod")} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="payment_method"
+                    name="payment_method"
+                    value={formData.payment_method || ""}
+                    onChange={handleChange}
+                    placeholder={t("buyerPaymentMethodPlaceholder")}
+                    className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
+                      errors.payment_method ? "border-red-500" : "border-stone-200"
+                    }`}
+                  />
+                  {errors.payment_method && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.payment_method}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label
+                    htmlFor="neighborhood"
+                    className="block text-sm font-medium text-stone-700 mb-1"
+                  >
+                    {t("neighborhood")}
+                  </label>
+                  <input
+                    type="text"
+                    id="neighborhood"
+                    name="neighborhood"
+                    value={formData.neighborhood || ""}
+                    onChange={handleChange}
+                    placeholder={t("neighborhood")}
+                    className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-medium text-stone-700 mb-1"
+                  >
+                    {t("city")}
+                  </label>
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={formData.city || ""}
+                    onChange={handleChange}
+                    placeholder={t("city")}
+                    className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="block text-sm font-medium text-stone-700 mb-1"
+                  >
+                    {t("state")}
+                  </label>
+                  <input
+                    type="text"
+                    id="state"
+                    name="state"
+                    value={formData.state || ""}
+                    onChange={handleChange}
+                    placeholder={t("state")}
+                    className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
+                  />
+                </div>
+              </div>
+
+              {/* Essential Criteria */}
+              <div>
+                <label
+                  htmlFor="essential_criteria"
+                  className="block text-sm font-medium text-stone-700 mb-1"
+                >
+                  {t("buyerEssentialCriteria")} <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-stone-400 mb-2">
+                  {t("buyerEssentialCriteriaHelper")}
+                </p>
+                <textarea
+                  id="essential_criteria"
+                  name="essential_criteria"
+                  rows={4}
+                  value={formData.essential_criteria || ""}
+                  onChange={handleChange}
+                  placeholder={t("buyerEssentialCriteriaPlaceholder")}
+                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 resize-none ${
+                    errors.essential_criteria ? "border-red-500" : "border-stone-200"
+                  }`}
+                />
+                {errors.essential_criteria && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.essential_criteria}
+                  </p>
+                )}
+              </div>
+
+              {/* Decision Timeframe */}
+              <div>
+                <label
+                  htmlFor="decision_timeframe"
+                  className="block text-sm font-medium text-stone-700 mb-1"
+                >
+                  {t("buyerDecisionTimeframe")} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="decision_timeframe"
+                  name="decision_timeframe"
+                  value={formData.decision_timeframe || ""}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
+                    errors.decision_timeframe ? "border-red-500" : "border-stone-200"
+                  }`}
+                >
+                  <option value="">{t("select")}</option>
+                  <option value="0-3">{t("buyerTimeframe0to3")}</option>
+                  <option value="3-6">{t("buyerTimeframe3to6")}</option>
+                  <option value="6-12">{t("buyerTimeframe6to12")}</option>
+                </select>
+                {errors.decision_timeframe && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.decision_timeframe}
+                  </p>
+                )}
+              </div>
+
+              {/* Alignment Question */}
+              <div>
+                <label
+                  htmlFor="alignment_answer"
+                  className="block text-sm font-medium text-stone-700 mb-1"
+                >
+                  {t("buyerAlignmentQuestion")} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="alignment_answer"
+                  name="alignment_answer"
+                  value={formData.alignment_answer || ""}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
+                    errors.alignment_answer ? "border-red-500" : "border-stone-200"
+                  }`}
+                >
+                  <option value="">{t("select")}</option>
+                  <option value="yes">{t("buyerAlignmentYes")}</option>
+                  <option value="evaluating">{t("buyerAlignmentEvaluating")}</option>
+                </select>
+                {errors.alignment_answer && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.alignment_answer}
+                  </p>
+                )}
+              </div>
+
+              {/* Consent Marketing */}
+              <div className="flex items-start">
+                <input
+                  type="checkbox"
+                  id="consent_marketing"
+                  name="consent_marketing"
+                  checked={formData.consent_marketing || false}
+                  onChange={handleChange}
+                  className="mt-1 h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300 rounded"
+                />
+                <label
+                  htmlFor="consent_marketing"
+                  className="ml-3 text-sm text-stone-600"
+                >
+                  {t("consentMarketing")}
+                </label>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={createLead.isPending}
+                className="w-full bg-stone-900 text-white py-4 px-6 hover:bg-stone-800 transition-colors disabled:bg-stone-400 disabled:cursor-not-allowed font-medium"
+              >
+                {createLead.isPending ? t("submitting") : t("buyerSubmitButton")}
+              </button>
+            </form>
           </div>
 
           {/* Benefits Section */}
-          <div className="lg:col-span-2">
-            <div className="sticky top-8">
-              <h2 className="text-2xl font-light text-stone-900 mb-10 tracking-tight">
-                {t("whyChooseUs")}
-              </h2>
-              <div className="space-y-8">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start gap-5 group">
-                    <div className="flex-shrink-0 w-14 h-14 bg-stone-100 rounded-2xl flex items-center justify-center group-hover:bg-stone-200 transition-colors duration-300">
-                      <benefit.icon className="w-6 h-6 text-stone-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-stone-900 mb-2">
-                        {benefit.title}
-                      </h3>
-                      <p className="text-stone-500 font-light leading-relaxed">
-                        {benefit.description}
-                      </p>
-                    </div>
+          <div>
+            <h2 className="text-2xl font-semibold text-stone-900 mb-8">
+              {t("whyChooseUs")}
+            </h2>
+            <div className="space-y-6">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-stone-100 rounded-lg flex items-center justify-center">
+                    <benefit.icon className="w-6 h-6 text-stone-700" />
                   </div>
-                ))}
-              </div>
-
-              {/* Trust Indicator */}
-              <div className="mt-12 pt-8 border-t border-stone-200">
-                <p className="text-xs text-stone-400 uppercase tracking-widest mb-3">
-                  Trusted by
-                </p>
-                <p className="text-stone-600 font-light">
-                  Families, investors, and developers across Puebla and Mexico
-                </p>
-              </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-stone-900 mb-1">
+                      {benefit.title}
+                    </h3>
+                    <p className="text-stone-600">{benefit.description}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

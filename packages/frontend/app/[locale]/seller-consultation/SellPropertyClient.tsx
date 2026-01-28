@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
+import { PriceInput } from "@properlia/shared/components";
+import { parsePriceInput } from "@properlia/shared";
 import { usePropertyTypes } from "@/src/services/property-types/queries";
 import { useCreatePublicLead } from "@/src/services/leads/mutations";
 import { CreatePublicLeadDto } from "@properlia/shared/services/leads/api";
@@ -96,7 +98,10 @@ export default function SellPropertyClient() {
     if (formData.phone.trim()) leadData.phone = formData.phone;
     if (formData.property_type_id) leadData.property_type_id = formData.property_type_id;
     if (formData.desired_date) leadData.desired_date = formData.desired_date;
-    if (formData.max_budget) leadData.max_budget = parseFloat(formData.max_budget);
+    if (formData.max_budget) {
+      const parsedBudget = parsePriceInput(formData.max_budget);
+      if (!isNaN(parsedBudget)) leadData.max_budget = parsedBudget;
+    }
     if (formData.neighborhood.trim()) leadData.neighborhood = formData.neighborhood;
     if (formData.city.trim()) leadData.city = formData.city;
     if (formData.state.trim()) leadData.state = formData.state;
@@ -290,20 +295,17 @@ export default function SellPropertyClient() {
                 <label htmlFor="max_budget" className="block text-sm font-medium text-stone-700 mb-1">
                   {t("maxBudget")}
                 </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 text-sm">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    id="max_budget"
-                    name="max_budget"
-                    value={formData.max_budget}
-                    onChange={handleChange}
-                    placeholder={t("enterMaxBudget")}
-                    className="w-full pl-8 pr-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
-                  />
-                </div>
+                <PriceInput
+                  id="max_budget"
+                  name="max_budget"
+                  value={formData.max_budget}
+                  onChange={(formatted) =>
+                    setFormData((prev) => ({ ...prev, max_budget: formatted }))
+                  }
+                  placeholder={t("enterMaxBudget")}
+                  className="w-full pl-8 pr-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
+                  symbolClassName="text-stone-500"
+                />
               </div>
 
               {/* Location */}

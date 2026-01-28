@@ -25,7 +25,8 @@ import {
   useLocale,
   useT,
 } from "@properlia/shared/components/TranslationProvider";
-import { capitalizeFirstWord, formatPriceInput } from "@properlia/shared";
+import { PriceInput } from "@properlia/shared/components";
+import { capitalizeFirstWord } from "@properlia/shared";
 
 type FormState = {
   title: string;
@@ -162,11 +163,6 @@ export default function PropertyForm({
     value: string | boolean | File[] | string[]
   ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handlePriceChange = (value: string) => {
-    const formatted = formatPriceInput(value);
-    setForm((prev) => ({ ...prev, price: formatted }));
   };
 
   // Convert WebP image to PNG
@@ -667,19 +663,14 @@ export default function PropertyForm({
             <label className="block text-sm font-medium text-gray-700">
               {t("price")} <span className="text-red-600">*</span>
             </label>
-            <div className="relative mt-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
-                $
-              </span>
-              <input
-                type="text"
-                value={form.price}
-                onChange={(event) => handlePriceChange(event.target.value)}
-                className="w-full rounded-md border border-gray-300 pl-7 pr-3 py-2 text-sm"
-                placeholder="5,000,000"
-                required
-              />
-            </div>
+            <PriceInput
+              value={form.price}
+              onChange={(formatted) => handleChange("price", formatted)}
+              wrapperClassName="mt-1"
+              className="w-full rounded-md border border-gray-300 pl-7 pr-3 py-2 text-sm"
+              placeholder="5,000,000"
+              required
+            />
           </div>
         </div>
 
