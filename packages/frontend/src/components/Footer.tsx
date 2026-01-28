@@ -3,10 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import ProperliaLogo from "@/public/properlia.png";
+import { Mail, Smartphone, MessageCircle } from "lucide-react";
 import {
   useT,
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
+import { useGeneralInfo } from "@/src/services/general-info/queries";
 
 const LinkedinIcon = () => (
   <svg
@@ -52,10 +54,15 @@ const TiktokIcon = () => (
   </svg>
 );
 
+const formatPhone = (number: string) => {
+  return number.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+};
+
 export function Footer() {
   const t = useT();
   const locale = useLocale();
   const currentYear = new Date().getFullYear();
+  const { data: generalInfo } = useGeneralInfo();
 
   return (
     <footer className="text-white flex flex-col">
@@ -76,42 +83,50 @@ export function Footer() {
                 {t("properliaBriefTitle")}
               </p>
               <div className="flex gap-4 pt-2">
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn"
-                  className="text-white/50 hover:text-white transition-colors"
-                >
-                  <LinkedinIcon />
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="text-white/50 hover:text-white transition-colors"
-                >
-                  <InstagramIcon />
-                </a>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="text-white/50 hover:text-white transition-colors"
-                >
-                  <FacebookIcon />
-                </a>
-                <a
-                  href="https://tiktok.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="TikTok"
-                  className="text-white/50 hover:text-white transition-colors"
-                >
-                  <TiktokIcon />
-                </a>
+                {generalInfo?.linkedin && (
+                  <a
+                    href={generalInfo.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn"
+                    className="text-white/50 hover:text-white transition-colors"
+                  >
+                    <LinkedinIcon />
+                  </a>
+                )}
+                {generalInfo?.instagram && (
+                  <a
+                    href={generalInfo.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="text-white/50 hover:text-white transition-colors"
+                  >
+                    <InstagramIcon />
+                  </a>
+                )}
+                {generalInfo?.facebook && (
+                  <a
+                    href={generalInfo.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                    className="text-white/50 hover:text-white transition-colors"
+                  >
+                    <FacebookIcon />
+                  </a>
+                )}
+                {generalInfo?.tiktok && (
+                  <a
+                    href={generalInfo.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="TikTok"
+                    className="text-white/50 hover:text-white transition-colors"
+                  >
+                    <TiktokIcon />
+                  </a>
+                )}
               </div>
             </div>
 
@@ -181,14 +196,39 @@ export function Footer() {
             <div className="text-right">
               <h3 className="font-semibold text-lg mb-4">{t("contact")}</h3>
               <address className="not-italic space-y-2 text-sm text-white/80">
-                <p>
-                  <a
-                    href="mailto:info@properlia.com"
-                    className="hover:text-white transition-colors"
-                  >
-                    info@properlia.com
-                  </a>
-                </p>
+                {generalInfo?.whatsapp && (
+                  <p>
+                    <a
+                      href={`mailto:${generalInfo.whatsapp}`}
+                      className="flex justify-end content-center items-center hover:text-white transition-colors"
+                    >
+                      {formatPhone(generalInfo.whatsapp)}
+                      <MessageCircle className="h-4 w-4 ml-2" />
+                    </a>
+                  </p>
+                )}
+                {generalInfo?.phone && (
+                  <p>
+                    <a
+                      href={`tel:${generalInfo.phone}`}
+                      className="flex justify-end content-center items-center hover:text-white transition-colors"
+                    >
+                      {formatPhone(generalInfo.phone)}
+                      <Smartphone className="h-4 w-4 ml-2" />
+                    </a>
+                  </p>
+                )}
+                {generalInfo?.email_contact && (
+                  <p>
+                    <a
+                      href={`mailto:${generalInfo.email_contact}`}
+                      className="flex justify-end content-center items-center text-xs hover:text-white transition-colors"
+                    >
+                      {generalInfo.email_contact}
+                      <Mail className="h-4 w-4 ml-2" />
+                    </a>
+                  </p>
+                )}
               </address>
             </div>
           </div>
