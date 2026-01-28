@@ -38,8 +38,8 @@ export default async function RootLayout({
   const dict = dictionaries[normalizedLocale];
 
   return (
-    <html lang={normalizedLocale}>
-      <body>
+    <html lang={normalizedLocale} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <GoogleAnalytics />
         <QueryProvider>
           <TranslationProvider dictionary={dict} locale={normalizedLocale}>
