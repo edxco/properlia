@@ -3,6 +3,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import ProperliaLogo from "@/public/properlia.png";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
@@ -10,7 +11,27 @@ import { useT, useLocale } from "@properlia/shared/components/TranslationProvide
 export function Navigation() {
   const t = useT();
   const locale = useLocale();
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const isActive = (path: string) => {
+    const fullPath = `/${locale}${path}`;
+    return pathname === fullPath || pathname.startsWith(`${fullPath}/`);
+  };
+
+  const linkClass = (path: string) =>
+    `transition-colors text-sm tracking-wide font-medium ${
+      isActive(path)
+        ? "text-primary font-semibold border-b-2 border-stone-900 pb-0.5"
+        : "text-stone-600 hover:text-stone-900"
+    }`;
+
+  const mobileLinkClass = (path: string) =>
+    `block text-sm tracking-wide font-medium ${
+      isActive(path)
+        ? "text-stone-900"
+        : "text-stone-700 hover:text-stone-900"
+    }`;
 
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-stone-100">
@@ -21,33 +42,18 @@ export function Navigation() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            <Link
-              href={`/${locale}/properties`}
-              className="text-stone-700 uppercase hover:text-stone-900 transition-colors text-sm tracking-wide"
-            >
+            <Link href={`/${locale}/properties`} className={linkClass("/properties")}>
+              {t("properties")}
+            </Link>
+            <Link href={`/${locale}/buyer-consultation`} className={linkClass("/buyer-consultation")}>
               {t("imABuyer")}
             </Link>
-            <Link
-              href={`/${locale}/sell`}
-              className="text-stone-700 uppercase hover:text-stone-900 transition-colors text-sm tracking-wide"
-            >
+            <Link href={`/${locale}/seller-consultation`} className={linkClass("/seller-consultation")}>
               {t("imASeller")}
             </Link>
-            <a
-              href="#about"
-              className="text-stone-700 uppercase hover:text-stone-900 transition-colors text-sm tracking-wide"
-            >
+            <Link href={`/${locale}/services`} className={linkClass("/services")}>
               {t("services")}
-            </a>
-            <a
-              href="#contact"
-              className="text-stone-700 uppercase hover:text-stone-900 transition-colors text-sm tracking-wide"
-            >
-              {t("contact")}
-            </a>
-            <button className="bg-stone-900 text-white px-6 py-2.5 text-sm tracking-wide hover:bg-stone-800 transition-colors">
-              WHATSAPP
-            </button>
+            </Link>
             <LanguageSwitcher />
           </div>
 
@@ -69,33 +75,35 @@ export function Navigation() {
           <div className="px-6 py-6 space-y-4">
             <Link
               href={`/${locale}/properties`}
-              className="block text-stone-700 hover:text-stone-900 text-sm tracking-wide"
+              className={mobileLinkClass("/properties")}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {t("properties")}
+            </Link>
+            <Link
+              href={`/${locale}/buyer-consultation`}
+              className={mobileLinkClass("/buyer-consultation")}
               onClick={() => setIsMenuOpen(false)}
             >
               {t("imABuyer")}
             </Link>
             <Link
-              href={`/${locale}/sell`}
-              className="block text-stone-700 hover:text-stone-900 text-sm tracking-wide"
+              href={`/${locale}/seller-consultation`}
+              className={mobileLinkClass("/seller-consultation")}
               onClick={() => setIsMenuOpen(false)}
             >
               {t("imASeller")}
             </Link>
-            <a
-              href="#about"
-              className="block text-stone-700 hover:text-stone-900 text-sm tracking-wide"
+            <Link
+              href={`/${locale}/services`}
+              className={mobileLinkClass("/services")}
+              onClick={() => setIsMenuOpen(false)}
             >
               {t("services")}
-            </a>
-            <a
-              href="#contact"
-              className="block text-stone-700 hover:text-stone-900 text-sm tracking-wide"
-            >
-              {t("contact")}
-            </a>
-            <button className="w-full bg-stone-900 text-white px-6 py-2.5 text-sm tracking-wide hover:bg-stone-800 transition-colors">
-              WHATSAPP
-            </button>
+            </Link>
+            <div className="pt-2">
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
       )}

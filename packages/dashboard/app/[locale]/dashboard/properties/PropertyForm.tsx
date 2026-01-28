@@ -25,7 +25,7 @@ import {
   useLocale,
   useT,
 } from "@properlia/shared/components/TranslationProvider";
-import { capitalizeFirstWord } from "@properlia/shared";
+import { capitalizeFirstWord, formatPriceInput } from "@properlia/shared";
 
 type FormState = {
   title: string;
@@ -165,14 +165,7 @@ export default function PropertyForm({
   };
 
   const handlePriceChange = (value: string) => {
-    // Remove non-numeric characters except decimal point
-    const numericValue = value.replace(/[^\d.]/g, "");
-    // Split into integer and decimal parts
-    const parts = numericValue.split(".");
-    // Format integer part with commas
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    // Rejoin with decimal part if it exists
-    const formatted = parts.length > 1 ? parts.slice(0, 2).join(".") : parts[0];
+    const formatted = formatPriceInput(value);
     setForm((prev) => ({ ...prev, price: formatted }));
   };
 
@@ -674,14 +667,19 @@ export default function PropertyForm({
             <label className="block text-sm font-medium text-gray-700">
               {t("price")} <span className="text-red-600">*</span>
             </label>
-            <input
-              type="text"
-              value={form.price}
-              onChange={(event) => handlePriceChange(event.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder="5,000,000"
-              required
-            />
+            <div className="relative mt-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                $
+              </span>
+              <input
+                type="text"
+                value={form.price}
+                onChange={(event) => handlePriceChange(event.target.value)}
+                className="w-full rounded-md border border-gray-300 pl-7 pr-3 py-2 text-sm"
+                placeholder="5,000,000"
+                required
+              />
+            </div>
           </div>
         </div>
 

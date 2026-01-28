@@ -90,6 +90,7 @@ export interface CreatePublicLeadDto {
   state?: string;
   consent_marketing?: boolean;
   source_detail?: Record<string, unknown>;
+  interest_property_type?: string;
 }
 
 export interface CreateLeadResponse {

@@ -110,6 +110,7 @@
   "clearFilters": "Limpiar filtros",
   "noPropertiesFoundLooking": "No se encontraron propiedades para",
   "showingAllProperties": "Mostrando todas las propiedades",
+  "createdAt": "Creado el",
 
   "title": "Titulo",
   "subtitle": "Crea y administra tus listados de propiedades",
@@ -127,6 +128,7 @@
   "enterPhone": "Ingresa tu número de teléfono",
   "selectPropertyType": "Selecciona el tipo de propiedad",
   "desiredDate": "Fecha deseada para vender",
+  "desiredDateTo": "Fecha deseada para",
   "maxBudget": "Precio esperado",
   "enterMaxBudget": "Ingresa el precio esperado",
   "enterNeighborhood": "Ingresa la colonia",
@@ -176,6 +178,7 @@
   "contacts": "contactos",
   "interest": "Interés",
   "page": "Página",
+  "desiredLocation": "Ubicación deseada",
 
   "residential": "Residencial",
   "commercial": "Comercial",
@@ -192,5 +195,55 @@
   "bannerSearchTitle": "¿Buscas algo en específico?",
   "bannerSearchDescription": "¿No encuentras tu propiedad ideal? Tenemos un proceso único de representación exclusiva para acompañarte profesionalmente en la compra de tu casa",
   "bannerGuidanceTitle": "¿Es tu primera compra?",
-  "bannerGuidanceDescription": "Te acompañamos en todo el proceso — desde opciones de financiamiento hasta el cierre, te guiamos en cada paso."
+  "bannerGuidanceDescription": "Te acompañamos en todo el proceso — desde opciones de financiamiento hasta el cierre, te guiamos en cada paso.",
+
+  "buyerPageTitle": "Consulta Privada para Compradores",
+  "buyerPageSubtitle": "Permítenos conocer tus objetivos para encontrar la propiedad perfecta para ti.",
+  "buyerFormTitle": "Cuéntanos sobre tu búsqueda",
+
+  "buyerFullName": "Nombre completo",
+  "buyerEmail": "Correo electrónico",
+
+  "buyerPropertyType": "¿Qué tipo de propiedad estás buscando?",
+  "buyerPropertyTypeResidential": "Residencial",
+  "buyerPropertyTypeCommercial": "Comercial",
+  "buyerPropertyTypeIndustrial": "Industrial",
+
+  "buyerPurchaseGoal": "¿Cuál es el objetivo principal de esta compra?",
+  "buyerGoalLiving": "Vivir la propiedad",
+  "buyerGoalInvestment": "Inversión patrimonial",
+  "buyerGoalCashFlow": "Flujo de efectivo",
+  "buyerGoalBusiness": "Operación o expansión de negocio",
+
+  "buyerMaxBudget": "Presupuesto máximo",
+  "buyerMaxBudgetPlaceholder": "Ingresa tu presupuesto máximo",
+
+  "buyerDesiredLocation": "Ubicación deseada",
+
+  "buyerPaymentMethod": "Forma de pago",
+  "buyerPaymentMethodPlaceholder": "ej., Contado, Financiamiento, Mixto",
+
+  "buyerEssentialCriteria": "Criterios esenciales (no negociables)",
+  "buyerEssentialCriteriaHelper": "Menciona de 3 a 5 elementos obligatorios.",
+  "buyerEssentialCriteriaPlaceholder": "ej., Mínimo 3 recámaras, garage para 2 autos, cerca de escuelas...",
+
+  "buyerDecisionTimeframe": "¿En qué plazo te gustaría tomar una decisión?",
+  "buyerTimeframe0to3": "0–3 meses",
+  "buyerTimeframe3to6": "3–6 meses",
+  "buyerTimeframe6to12": "6–12 meses",
+
+  "buyerAlignmentQuestion": "¿Estás abierto/a a trabajar con un equipo que represente tus intereses?",
+  "buyerAlignmentYes": "Sí, busco representación profesional",
+  "buyerAlignmentEvaluating": "Estoy evaluándolo",
+
+  "buyerSubmitButton": "Solicitar consulta privada",
+
+  "buyerBenefit1Title": "Representación Exclusiva",
+  "buyerBenefit1Description": "Trabajamos exclusivamente para ti, negociando los mejores términos y protegiendo tus intereses.",
+  "buyerBenefit2Title": "Inteligencia de Mercado",
+  "buyerBenefit2Description": "Acceso a oportunidades fuera de mercado e información privilegiada antes de que se hagan públicas.",
+  "buyerBenefit3Title": "Soporte en Due Diligence",
+  "buyerBenefit3Description": "Análisis y verificación exhaustiva de propiedades para asegurar una inversión segura.",
+  "buyerBenefit4Title": "Acompañamiento Integral",
+  "buyerBenefit4Description": "Desde la búsqueda hasta el cierre, manejamos cada detalle para que te enfoques en tu decisión."
 }

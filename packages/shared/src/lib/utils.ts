@@ -56,3 +56,71 @@ export function formatLargeNumber(value: number, decimals: number = 1): string {
 
   return `${sign}${absValue.toLocaleString()}`;
 }
+
+/**
+ * Formats a price string with thousand separators (commas)
+ * @param value - The raw input string (may contain non-numeric characters)
+ * @returns Formatted string with commas as thousand separators
+ * @example
+ * formatPriceInput("1234567") // "1,234,567"
+ * formatPriceInput("1234567.89") // "1,234,567.89"
+ * formatPriceInput("$1,234") // "1,234"
+ * formatPriceInput("abc123") // "123"
+ */
+export function formatPriceInput(value: string): string {
+  // Remove non-numeric characters except decimal point
+  const numericValue = value.replace(/[^\d.]/g, "");
+
+  // Split into integer and decimal parts
+  const parts = numericValue.split(".");
+
+  // Format integer part with commas
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  // Rejoin with decimal part if it exists (limit to 2 decimal places)
+  if (parts.length > 1) {
+    // Limit decimal places to 2
+    parts[1] = parts[1].slice(0, 2);
+    return parts.slice(0, 2).join(".");
+  }
+
+  return parts[0];
+}
+
+/**
+ * Parses a formatted price string back to a number
+ * @param value - The formatted price string (may contain commas, currency symbols)
+ * @returns The numeric value, or NaN if invalid
+ * @example
+ * parsePriceInput("1,234,567") // 1234567
+ * parsePriceInput("$1,234.56") // 1234.56
+ * parsePriceInput("") // NaN
+ */
+export function parsePriceInput(value: string): number {
+  // Remove all non-numeric characters except decimal point
+  const cleanValue = value.replace(/[^\d.]/g, "");
+  return parseFloat(cleanValue);
+}
+
+/**
+ * Formats a number as a display price with currency symbol and thousand separators
+ * @param value - The numeric price value
+ * @param locale - The locale for formatting (default: "en-US")
+ * @param currency - The currency code (default: "USD")
+ * @returns Formatted currency string
+ * @example
+ * formatPriceDisplay(1234567) // "$1,234,567.00"
+ * formatPriceDisplay(1234567, "es-MX", "MXN") // "$1,234,567.00"
+ */
+export function formatPriceDisplay(
+  value: number,
+  locale: string = "en-US",
+  currency: string = "USD"
+): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}

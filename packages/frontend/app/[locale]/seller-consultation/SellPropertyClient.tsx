@@ -290,15 +290,20 @@ export default function SellPropertyClient() {
                 <label htmlFor="max_budget" className="block text-sm font-medium text-stone-700 mb-1">
                   {t("maxBudget")}
                 </label>
-                <input
-                  type="number"
-                  id="max_budget"
-                  name="max_budget"
-                  value={formData.max_budget}
-                  onChange={handleChange}
-                  placeholder={t("enterMaxBudget")}
-                  className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
-                />
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 text-sm">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    id="max_budget"
+                    name="max_budget"
+                    value={formData.max_budget}
+                    onChange={handleChange}
+                    placeholder={t("enterMaxBudget")}
+                    className="w-full pl-8 pr-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
+                  />
+                </div>
               </div>
 
               {/* Location */}

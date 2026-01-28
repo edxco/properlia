@@ -110,6 +110,7 @@
   "clearFilters": "Clear filters",
   "noPropertiesFoundLooking": "No properties were found to",
   "showingAllProperties": "Showing all properties",
+  "createdAt": "Created at",
 
   "title": "Title",
   "subtitle": "Create and manage your property listings",
@@ -127,6 +128,7 @@
   "enterPhone": "Enter your phone number",
   "selectPropertyType": "Select property type",
   "desiredDate": "Desired sale date",
+  "desiredDateTo": "Desired date to",
   "maxBudget": "Expected price",
   "enterMaxBudget": "Enter expected price",
   "enterNeighborhood": "Enter neighborhood",
@@ -176,6 +178,7 @@
   "contacts": "contacts",
   "interest": "Interest",
   "page": "Page",
+  "desiredLocation": "Desired location",
 
   "residential": "Residential",
   "commercial": "Commercial",
@@ -192,5 +195,55 @@
   "bannerSearchTitle": "Looking for something specific?",
   "bannerSearchDescription": "Can't find your ideal property? We have a unique exclusive representation process to professionally guide you through the purchase of your home.",
   "bannerGuidanceTitle": "New to buying property?",
-  "bannerGuidanceDescription": "We've got you covered — from financing options to closing, we'll guide you every step of the way."
+  "bannerGuidanceDescription": "We've got you covered — from financing options to closing, we'll guide you every step of the way.",
+
+  "buyerPageTitle": "Private Buyer Consultation",
+  "buyerPageSubtitle": "Let us understand your goals so we can find the perfect property for you.",
+  "buyerFormTitle": "Tell us about your search",
+
+  "buyerFullName": "Full name",
+  "buyerEmail": "Email address",
+
+  "buyerPropertyType": "What type of property are you looking for?",
+  "buyerPropertyTypeResidential": "Residential",
+  "buyerPropertyTypeCommercial": "Commercial",
+  "buyerPropertyTypeIndustrial": "Industrial",
+
+  "buyerPurchaseGoal": "What is the main goal of this purchase?",
+  "buyerGoalLiving": "Living in the property",
+  "buyerGoalInvestment": "Long-term investment",
+  "buyerGoalCashFlow": "Cash flow",
+  "buyerGoalBusiness": "Business operation or expansion",
+
+  "buyerMaxBudget": "Maximum budget",
+  "buyerMaxBudgetPlaceholder": "Enter your maximum budget",
+
+  "buyerDesiredLocation": "Desired location",
+
+  "buyerPaymentMethod": "Payment method",
+  "buyerPaymentMethodPlaceholder": "e.g., Cash, Financing, Mixed",
+
+  "buyerEssentialCriteria": "Essential criteria (non-negotiable)",
+  "buyerEssentialCriteriaHelper": "List 3–5 must-have requirements.",
+  "buyerEssentialCriteriaPlaceholder": "e.g., 3 bedrooms minimum, garage for 2 cars, near schools...",
+
+  "buyerDecisionTimeframe": "When would you like to make a decision?",
+  "buyerTimeframe0to3": "0–3 months",
+  "buyerTimeframe3to6": "3–6 months",
+  "buyerTimeframe6to12": "6–12 months",
+
+  "buyerAlignmentQuestion": "Are you open to working with a team that represents your interests?",
+  "buyerAlignmentYes": "Yes, I'm looking for professional representation",
+  "buyerAlignmentEvaluating": "I'm evaluating my options",
+
+  "buyerSubmitButton": "Request private consultation",
+
+  "buyerBenefit1Title": "Exclusive Representation",
+  "buyerBenefit1Description": "We work exclusively for you, negotiating the best terms and protecting your interests.",
+  "buyerBenefit2Title": "Market Intelligence",
+  "buyerBenefit2Description": "Access to off-market opportunities and deep market insights before they go public.",
+  "buyerBenefit3Title": "Due Diligence Support",
+  "buyerBenefit3Description": "Comprehensive property analysis and verification to ensure a secure investment.",
+  "buyerBenefit4Title": "End-to-End Guidance",
+  "buyerBenefit4Description": "From property search to closing, we handle every detail so you can focus on your decision."
 }
