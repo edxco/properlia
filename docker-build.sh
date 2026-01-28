@@ -28,6 +28,7 @@ fi
 
 # Default values
 API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000/api/v1}
+GA_ID=${NEXT_PUBLIC_GA_ID:-}
 BACKEND_TAG=${BACKEND_TAG:-properlia-backend:latest}
 FRONTEND_TAG=${FRONTEND_TAG:-properlia-frontend:latest}
 DASHBOARD_TAG=${DASHBOARD_TAG:-properlia-dashboard:latest}
@@ -37,6 +38,7 @@ echo "Building Properlia Docker Images"
 echo "========================================="
 echo "Environment: $ENV_FILE"
 echo "API URL: $API_URL"
+echo "GA ID: ${GA_ID:-<not set>}"
 echo "========================================="
 echo ""
 
@@ -55,6 +57,7 @@ docker build \
   -t $FRONTEND_TAG \
   -f packages/frontend/Dockerfile \
   --build-arg NEXT_PUBLIC_API_URL=$API_URL \
+  --build-arg NEXT_PUBLIC_GA_ID=$GA_ID \
   .
 echo "✅ Frontend built: $FRONTEND_TAG"
 echo ""
