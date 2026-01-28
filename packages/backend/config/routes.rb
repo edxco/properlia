@@ -18,7 +18,7 @@ Rails.application.routes.draw do
   # API routes
   namespace :api do
     namespace :v1 do
-      resources :properties, only: %i[index show create update] do
+      resources :properties, only: %i[index show create update destroy] do
         member do
           delete 'attachments/:attachment_id', to: 'properties#delete_attachment', as: 'delete_attachment'
         end

@@ -2,8 +2,8 @@
 module Api
   module V1
     class PropertiesController < ApplicationController
-      before_action :authenticate_user!, only: [:create, :update, :delete_attachment]
-      before_action :set_property, only: %i[show update delete_attachment]
+      before_action :authenticate_user!, only: %i[create update delete_attachment destroy]
+      before_action :set_property, only: %i[show update delete_attachment destroy]
       after_action { pagy_headers_merge(@pagy) if @pagy }
 
       # GET /api/v1/properties
@@ -30,45 +30,29 @@ module Api
         end
 
         # Filter by property_type_id
-        if params[:property_type_id].present?
-          properties = properties.where(property_type_id: params[:property_type_id])
-        end
+        properties = properties.where(property_type_id: params[:property_type_id]) if params[:property_type_id].present?
 
         # Filter by listing_type_id (sale, rent, pre-sale)
-        if params[:listing_type_id].present?
-          properties = properties.where(listing_type_id: params[:listing_type_id])
-        end
+        properties = properties.where(listing_type_id: params[:listing_type_id]) if params[:listing_type_id].present?
 
         # Location filters (case-insensitive partial match)
-        if params[:city].present?
-          properties = properties.where('LOWER(city) LIKE ?', "%#{params[:city].downcase}%")
-        end
+        properties = properties.where('LOWER(city) LIKE ?', "%#{params[:city].downcase}%") if params[:city].present?
 
-        if params[:state].present?
-          properties = properties.where('LOWER(state) LIKE ?', "%#{params[:state].downcase}%")
-        end
+        properties = properties.where('LOWER(state) LIKE ?', "%#{params[:state].downcase}%") if params[:state].present?
 
         if params[:neighborhood].present?
           properties = properties.where('LOWER(neighborhood) LIKE ?', "%#{params[:neighborhood].downcase}%")
         end
 
         # Price range filters
-        if params[:price_min].present?
-          properties = properties.where('price >= ?', params[:price_min].to_f)
-        end
+        properties = properties.where('price >= ?', params[:price_min].to_f) if params[:price_min].present?
 
-        if params[:price_max].present?
-          properties = properties.where('price <= ?', params[:price_max].to_f)
-        end
+        properties = properties.where('price <= ?', params[:price_max].to_f) if params[:price_max].present?
 
         # Room and bathroom filters (minimum values)
-        if params[:rooms_min].present?
-          properties = properties.where('rooms >= ?', params[:rooms_min].to_i)
-        end
+        properties = properties.where('rooms >= ?', params[:rooms_min].to_i) if params[:rooms_min].present?
 
-        if params[:bathrooms_min].present?
-          properties = properties.where('bathrooms >= ?', params[:bathrooms_min].to_i)
-        end
+        properties = properties.where('bathrooms >= ?', params[:bathrooms_min].to_i) if params[:bathrooms_min].present?
 
         # Text search on title, description, address, city, state, and neighborhood
         if params[:search].present?
@@ -85,10 +69,10 @@ module Api
           data: @properties.map { |property| property_json(property) },
           metadata: {
             count: @pagy.count,
-            page:  @pagy.page,
+            page: @pagy.page,
             pages: @pagy.pages,
-            next:  @pagy.next,
-            prev:  @pagy.prev
+            next: @pagy.next,
+            prev: @pagy.prev
           }
         }
       end
@@ -143,6 +127,15 @@ module Api
         end
       end
 
+      # DELETE /api/v1/properties/:id
+      def destroy
+        if @property.destroy
+          render json: { message: 'Property deleted successfully' }, status: :ok
+        else
+          render json: { errors: @property.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       # DELETE /api/v1/properties/:id/attachments/:attachment_id
       def delete_attachment
         attachment = @property.images.find_by(id: params[:attachment_id]) ||
@@ -164,7 +157,8 @@ module Api
 
       def property_params
         permitted_columns = Property.column_names.map(&:to_sym) - %i[id created_at updated_at images]
-        params.require(:property).permit(*permitted_columns, images: [], videos: [], property_category_ids: [], property_feature_ids: [])
+        params.require(:property).permit(*permitted_columns, images: [], videos: [], property_category_ids: [],
+                                                             property_feature_ids: [])
       end
 
       def property_json(property)
@@ -175,29 +169,49 @@ module Api
         base_attributes = base_attributes.except('address') unless property.exclusive_listing
 
         base_attributes.merge(
-          'property_type' => property.property_type ? {
-            id: property.property_type.id,
-            name: property.property_type.name,
-            es_name: property.property_type.es_name
-          } : nil,
-          'status' => property.status ? {
-            id: property.status.id,
-            name: property.status.name,
-            es_name: property.status.es_name,
-          } : nil,
-          'listing_type' => property.listing_type ? {
-            id: property.listing_type.id,
-            name: property.listing_type.name,
-            es_name: property.listing_type.es_name
-          } : nil,
+          'property_type' => if property.property_type
+                               {
+                                 id: property.property_type.id,
+                                 name: property.property_type.name,
+                                 es_name: property.property_type.es_name
+                               }
+                             end,
+          'status' => if property.status
+                        {
+                          id: property.status.id,
+                          name: property.status.name,
+                          es_name: property.status.es_name
+                        }
+                      end,
+          'listing_type' => if property.listing_type
+                              {
+                                id: property.listing_type.id,
+                                name: property.listing_type.name,
+                                es_name: property.listing_type.es_name
+                              }
+                            end,
           'property_categories' => property.property_categories.map do |cat|
             { id: cat.id, name: cat.name, es_name: cat.es_name, slug: cat.slug }
           end,
           'property_features' => property.property_features.map do |feature|
             { id: feature.id, name: feature.name, es_name: feature.es_name, slug: feature.slug }
           end,
-          'images' => property.images.attached? ? property.images.map { |i| { id: i.id, url: url_for(i), filename: i.filename.to_s, content_type: i.content_type } } : [],
-          'videos' => property.videos.attached? ? property.videos.map { |v| { id: v.id, url: url_for(v), filename: v.filename.to_s, content_type: v.content_type } } : []
+          'images' => if property.images.attached?
+                        property.images.map do |i|
+                          { id: i.id, url: url_for(i), filename: i.filename.to_s,
+                            content_type: i.content_type }
+                        end
+                      else
+                        []
+                      end,
+          'videos' => if property.videos.attached?
+                        property.videos.map do |v|
+                          { id: v.id, url: url_for(v), filename: v.filename.to_s,
+                            content_type: v.content_type }
+                        end
+                      else
+                        []
+                      end
         )
       end
     end
