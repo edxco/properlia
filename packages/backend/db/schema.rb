@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_01_20_132948) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_28_172754) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -50,6 +50,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_20_132948) do
     t.integer "singleton_guard", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "instagram"
+    t.string "tiktok"
+    t.string "linkedin"
+    t.string "facebook"
+    t.string "email_contact"
     t.index ["singleton_guard"], name: "index_general_infos_on_singleton_guard", unique: true
   end
 
