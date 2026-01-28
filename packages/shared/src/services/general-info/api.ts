@@ -4,12 +4,22 @@ export interface GeneralInfo {
   phone: string;
   whatsapp: string;
   email_to: string;
+  instagram?: string | null;
+  tiktok?: string | null;
+  linkedin?: string | null;
+  facebook?: string | null;
+  email_contact?: string | null;
 }
 
 export interface UpdateGeneralInfoDto {
   phone: string;
   whatsapp: string;
   email_to: string;
+  instagram?: string | null;
+  tiktok?: string | null;
+  linkedin?: string | null;
+  facebook?: string | null;
+  email_contact?: string | null;
 }
 
 export const generalInfoApi = {
