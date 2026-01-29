@@ -169,7 +169,7 @@ module Pdf
       rescue StandardError
         nil
       end
-      pdf.fill_color text_gray
+      pdf.fill_color brand_blue
       pdf.text_box @t[:title],
                    at: [41.67942810058594, ref_y.call(433.300048828125)],
                    width: (178.079345703125 - 41.67942810058594),
@@ -216,7 +216,7 @@ module Pdf
                    at: [403.57843017578125, ref_y.call(434.2475280761719)],
                    width: (568.602783203125 - 403.57843017578125),
                    height: (464.2475280761719 - 434.2475280761719),
-                   size: 24,
+                   size: 34,
                    overflow: :shrink_to_fit,
                    align: :right
 
@@ -247,35 +247,54 @@ module Pdf
 
       pdf.fill_color '000000'
 
-      begin
-        pdf.font('Lexend', style: :extra_bold)
-      rescue StandardError
-        nil
-      end
-      pdf.fill_color text_gray
-      pdf.text_box @t[:description],
-                   at: [41.67942810058594, ref_y.call(580.0847778320312)],
-                   width: 250,
-                   height: 20,
-                   size: 16,
-                   overflow: :shrink_to_fit
+      # Property Features section
+      if @property.property_features.any?
+        begin
+          pdf.font('Lexend', style: :extra_bold)
+        rescue StandardError
+          nil
+        end
+        pdf.fill_color brand_blue
+        features_label = @locale == :es ? 'Características' : 'Features'
+        pdf.text_box features_label,
+                     at: [41.67942810058594, ref_y.call(580)],
+                     width: 200,
+                     height: 20,
+                     size: 16,
+                     overflow: :shrink_to_fit
 
-      begin
-        pdf.font('Lexend')
-      rescue StandardError
-        nil
-      end
-      pdf.fill_color text_gray
+        begin
+          pdf.font('Lexend')
+        rescue StandardError
+          nil
+        end
 
-      desc_text = @property.description.to_s.strip
-      if desc_text.present?
-        pdf.text_box desc_text,
-                     at: [41.67942810058594, ref_y.call(609.3557739257812)],
-                     width: (pdf.bounds.width - (41.67942810058594 * 2)),
-                     height: 140,
-                     size: 10,
-                     leading: 2,
-                     overflow: :truncate
+        feature_names = @property.property_features.map do |f|
+          (@locale == :es ? f.es_name : f.name).to_s.strip
+        end.reject(&:blank?)
+
+        # Display features in columns (2 columns)
+        feature_names.each_slice(2).with_index do |pair, idx|
+          y_pos = 605 + (idx * 18)
+          break if y_pos > 720 # Don't overflow into footer
+
+          pdf.fill_color text_gray
+          pdf.text_box "• #{pair[0]}",
+                       at: [41.67942810058594, ref_y.call(y_pos)],
+                       width: 250,
+                       height: 16,
+                       size: 11,
+                       overflow: :shrink_to_fit
+
+          if pair[1]
+            pdf.text_box "• #{pair[1]}",
+                         at: [300, ref_y.call(y_pos)],
+                         width: 250,
+                         height: 16,
+                         size: 11,
+                         overflow: :shrink_to_fit
+          end
+        end
       end
 
       pdf.fill_color '000000'

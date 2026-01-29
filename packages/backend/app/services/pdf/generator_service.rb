@@ -10,7 +10,9 @@ Prawn::Fonts::AFM.hide_m17n_warning = true
 module Pdf
   class GeneratorService
     include Pdf::FooterHelper
+    include Pdf::HeaderHelper
     include Pdf::CoverHelper
+    include Pdf::DescriptionHelper
     include Pdf::ImagesHelper
     include Pdf::FeaturesHelper
     include Pdf::ContentHelper
@@ -126,24 +128,20 @@ module Pdf
     def generate_residential_pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
         add_global_footer(pdf)
+        add_global_header(pdf)
         add_residential_template_cover(pdf)
 
+        # Page 2: Description page with light gray background
+        add_description_page(pdf)
+
+        # Page 3+: Images section
         pdf.start_new_page(margin: 40)
-        add_images_section(pdf, max_images: 4)
+        add_images_section(pdf)
 
         pdf.move_down 20
         pdf.text @property.title, size: 20, style: :bold, color: '2C3E50'
         pdf.move_down 10
         pdf.text format_price(@property.price), size: 24, style: :bold, color: '27AE60'
-
-        pdf.move_down 15
-
-        if @property.description.present?
-          pdf.move_down 15
-          pdf.text @t[:description], size: 14, style: :bold
-          pdf.move_down 5
-          pdf.text @property.description, size: 10, align: :justify
-        end
 
         pdf.move_down 15
         add_location_section(pdf)
@@ -156,10 +154,15 @@ module Pdf
     def generate_commercial_pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
         add_global_footer(pdf)
+        add_global_header(pdf)
         add_cover_page(pdf, color: '3498DB')
 
+        # Page 2: Description page with light gray background
+        add_description_page(pdf)
+
+        # Page 3+: Images section
         pdf.start_new_page(margin: 40)
-        add_images_section(pdf, max_images: 3)
+        add_images_section(pdf)
 
         pdf.move_down 20
         pdf.text @property.title, size: 20, style: :bold, color: '2C3E50'
@@ -168,13 +171,6 @@ module Pdf
 
         pdf.move_down 15
         add_commercial_features_box(pdf)
-
-        if @property.description.present?
-          pdf.move_down 15
-          pdf.text @t[:description], size: 14, style: :bold
-          pdf.move_down 5
-          pdf.text @property.description, size: 10, align: :justify
-        end
 
         pdf.move_down 15
         add_location_section(pdf)
@@ -187,10 +183,15 @@ module Pdf
     def generate_industrial_pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
         add_global_footer(pdf)
+        add_global_header(pdf)
         add_cover_page(pdf, color: 'E74C3C')
 
+        # Page 2: Description page with light gray background
+        add_description_page(pdf)
+
+        # Page 3+: Images section
         pdf.start_new_page(margin: 40)
-        add_images_section(pdf, max_images: 3)
+        add_images_section(pdf)
 
         pdf.move_down 20
         pdf.text @property.title, size: 20, style: :bold, color: '2C3E50'
@@ -199,13 +200,6 @@ module Pdf
 
         pdf.move_down 15
         add_industrial_features_box(pdf)
-
-        if @property.description.present?
-          pdf.move_down 15
-          pdf.text @t[:description], size: 14, style: :bold
-          pdf.move_down 5
-          pdf.text @property.description, size: 10, align: :justify
-        end
 
         pdf.move_down 15
         add_location_section(pdf)
@@ -218,10 +212,15 @@ module Pdf
     def generate_land_pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
         add_global_footer(pdf)
+        add_global_header(pdf)
         add_cover_page(pdf, color: '8E44AD')
 
+        # Page 2: Description page with light gray background
+        add_description_page(pdf)
+
+        # Page 3+: Images section
         pdf.start_new_page(margin: 40)
-        add_images_section(pdf, max_images: 3)
+        add_images_section(pdf)
 
         pdf.move_down 15
         add_location_section(pdf)
