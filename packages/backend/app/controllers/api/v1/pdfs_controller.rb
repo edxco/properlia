@@ -16,7 +16,7 @@ module Api
         locale = :es unless %i[en es].include?(locale)
 
         # Generate PDF
-        pdf_service = PdfGeneratorService.new(
+        pdf_service = Pdf::GeneratorService.new(
           @property,
           locale: locale,
           base_url: frontend_base_url
@@ -53,7 +53,7 @@ module Api
         end
 
         # Generate PDF
-        pdf_service = PdfGeneratorService.new(
+        pdf_service = Pdf::GeneratorService.new(
           @property,
           locale: locale,
           base_url: frontend_base_url
