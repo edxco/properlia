@@ -9,6 +9,7 @@ RUN apt-get update -qq && apt-get install -y \
   npm \
   postgresql-client \
   libvips \
+  imagemagick \
   git \
   curl \
   unzip \
