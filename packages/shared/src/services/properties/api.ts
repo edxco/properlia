@@ -14,7 +14,6 @@ type PropertyQueryParams = {
   listing_type_id?: string;
   page?: number;
   items?: number;
-  include_suspended?: boolean;
   // Location filters
   city?: string;
   state?: string;
@@ -84,7 +83,6 @@ export const propertyApi = {
     if (params?.status_id) query.set('status_id', params.status_id);
     if (params?.property_type_id) query.set('property_type_id', params.property_type_id);
     if (params?.listing_type_id) query.set('listing_type_id', params.listing_type_id);
-    if (params?.include_suspended !== undefined) query.set('include_suspended', String(params.include_suspended));
     // Location filters
     if (params?.city) query.set('city', params.city);
     if (params?.state) query.set('state', params.state);
@@ -159,6 +157,20 @@ export const propertyApi = {
   ): Promise<void> => {
     return apiClient.request<void>(`/properties/${propertyId}/attachments/${attachmentId}`, {
       method: 'DELETE',
+      headers: buildAuthHeaders(token),
+      requiresAuth: true,
+    });
+  },
+
+  // Reorder images for a property
+  reorderImages: async (
+    propertyId: string,
+    imageIds: string[],
+    token?: string
+  ): Promise<Property> => {
+    return apiClient.request<Property>(`/properties/${propertyId}/reorder_images`, {
+      method: 'PUT',
+      body: JSON.stringify({ image_ids: imageIds }),
       headers: buildAuthHeaders(token),
       requiresAuth: true,
     });

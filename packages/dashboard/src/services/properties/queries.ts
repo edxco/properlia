@@ -8,7 +8,6 @@ import {
 import { propertyApi } from '@properlia/shared/services/properties/api';
 import type {
   CreatePropertyDto,
-  Property,
   UpdatePropertyDto,
 } from '@properlia/shared/types';
 
@@ -18,14 +17,12 @@ type PropertyFilters = {
   property_type_id?: string;
   page?: number;
   items?: number;
-  include_suspended?: boolean;
 };
 
 export const useProperties = (params?: PropertyFilters) => {
   // Dashboard should always include suspended properties
   const queryParams = {
     ...params,
-    include_suspended: params?.include_suspended !== undefined ? params.include_suspended : true,
   };
 
   return useQuery({
@@ -82,6 +79,24 @@ export const useDeleteAttachment = () => {
       propertyId: string;
       attachmentId: string;
     }) => propertyApi.deleteAttachment(propertyId, attachmentId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['properties', variables.propertyId] });
+    },
+  });
+};
+
+export const useReorderImages = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      propertyId,
+      imageIds,
+    }: {
+      propertyId: string;
+      imageIds: string[];
+    }) => propertyApi.reorderImages(propertyId, imageIds),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['properties', variables.propertyId] });

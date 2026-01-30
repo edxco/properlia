@@ -10,7 +10,6 @@ type PropertyFilters = {
   listing_type_id?: string;
   page?: number;
   items?: number;
-  include_suspended?: boolean;
   // Location filters
   city?: string;
   state?: string;

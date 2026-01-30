@@ -2,8 +2,10 @@
 module Api
   module V1
     class PropertiesController < ApplicationController
-      before_action :authenticate_user!, only: %i[create update delete_attachment destroy]
-      before_action :set_property, only: %i[show update delete_attachment destroy]
+      skip_before_action :authenticate_user!, only: %i[index show]
+      skip_before_action :reject_disabled_user!, only: %i[index show]
+      before_action :set_property, only: %i[show update delete_attachment destroy reorder_images]
+      before_action(only: %i[destroy]) { authorize_any!(:admin) }
       after_action { pagy_headers_merge(@pagy) if @pagy }
 
       # GET /api/v1/properties
@@ -12,10 +14,10 @@ module Api
 
         # Exclude suspended properties by default (unless include_suspended=true)
         # Suspended status ID: 7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64
-        unless ActiveModel::Type::Boolean.new.cast(params[:include_suspended])
-          suspended_status_id = '7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64'
-          properties = properties.where.not(status_id: suspended_status_id)
-        end
+        # unless ActiveModel::Type::Boolean.new.cast(params[:include_suspended])
+        #   suspended_status_id = '7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64'
+        #   properties = properties.where.not(status_id: suspended_status_id)
+        # end
 
         # Filter by featured
         if params[:featured].present?
@@ -149,6 +151,29 @@ module Api
         end
       end
 
+      # PUT /api/v1/properties/:id/reorder_images
+      def reorder_images
+        image_ids = params[:image_ids]
+
+        unless image_ids.is_a?(Array)
+          return render json: { error: 'image_ids must be an array' }, status: :bad_request
+        end
+
+        # Validate that all IDs belong to this property's images
+        existing_ids = @property.images.pluck(:id).map(&:to_s)
+        invalid_ids = image_ids - existing_ids
+
+        if invalid_ids.any?
+          return render json: { error: "Invalid image IDs: #{invalid_ids.join(', ')}" }, status: :bad_request
+        end
+
+        if @property.update(image_order: image_ids)
+          render json: property_json(@property), status: :ok
+        else
+          render json: { errors: @property.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def set_property
@@ -197,9 +222,16 @@ module Api
             { id: feature.id, name: feature.name, es_name: feature.es_name, slug: feature.slug }
           end,
           'images' => if property.images.attached?
-                        property.images.map do |i|
+                        images_data = property.images.map do |i|
                           { id: i.id, url: url_for(i), filename: i.filename.to_s,
                             content_type: i.content_type }
+                        end
+                        # Sort by image_order if present, otherwise keep original order
+                        if property.image_order.present?
+                          order_map = property.image_order.each_with_index.to_h
+                          images_data.sort_by { |img| order_map[img[:id].to_s] || Float::INFINITY }
+                        else
+                          images_data
                         end
                       else
                         []
