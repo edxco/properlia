@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Building2, ChevronDown, FileText, Users, Sparkles } from 'lucide-react';
+import { Home, Building2, ChevronDown, FileText, Users, Sparkles, UserCog } from 'lucide-react';
 import { useT } from '@properlia/shared/components/TranslationProvider';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useAuth } from '@/src/contexts/AuthContext';
 
 interface DashboardNavProps {
   locale: string;
@@ -13,32 +14,46 @@ interface DashboardNavProps {
 export function DashboardNav({ locale }: DashboardNavProps) {
   const pathname = usePathname();
   const t = useT();
+  const { user } = useAuth();
   const localePrefix = `/${locale}`;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const dropdownItems = [
-    {
-      href: `${localePrefix}/dashboard/properties`,
-      labelKey: 'properties',
-      icon: Building2,
-    },
-    {
-      href: `${localePrefix}/dashboard/leads`,
-      labelKey: 'leads',
-      icon: Users,
-    },
-    {
-      href: `${localePrefix}/dashboard/general-information`,
-      labelKey: 'generalInformation',
-      icon: FileText,
-    },
-    {
-      href: `${localePrefix}/dashboard/property-features`,
-      labelKey: 'propertyFeatures',
-      icon: Sparkles,
-    },
-  ];
+  const dropdownItems = useMemo(() => {
+    const items = [
+      {
+        href: `${localePrefix}/dashboard/properties`,
+        labelKey: 'properties',
+        icon: Building2,
+      },
+      {
+        href: `${localePrefix}/dashboard/leads`,
+        labelKey: 'leads',
+        icon: Users,
+      },
+      {
+        href: `${localePrefix}/dashboard/general-information`,
+        labelKey: 'generalInformation',
+        icon: FileText,
+      },
+      {
+        href: `${localePrefix}/dashboard/property-features`,
+        labelKey: 'propertyFeatures',
+        icon: Sparkles,
+      },
+    ];
+
+    // Add Users management option for admin users only
+    if (user?.role === 'admin') {
+      items.push({
+        href: `${localePrefix}/dashboard/users`,
+        labelKey: 'users',
+        icon: UserCog,
+      });
+    }
+
+    return items;
+  }, [localePrefix, user?.role]);
 
   const isActive = (href: string) => {
     if (href === `${localePrefix}/dashboard`) {
