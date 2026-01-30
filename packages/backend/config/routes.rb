@@ -21,6 +21,7 @@ Rails.application.routes.draw do
       resources :properties, only: %i[index show create update destroy] do
         member do
           delete 'attachments/:attachment_id', to: 'properties#delete_attachment', as: 'delete_attachment'
+          put 'reorder_images', to: 'properties#reorder_images'
         end
 
         # PDF generation routes
@@ -53,6 +54,15 @@ Rails.application.routes.draw do
       post 'emails/contact', to: 'emails#send_contact_form'
       post 'emails/property-inquiry', to: 'emails#send_property_inquiry'
       post 'emails/welcome', to: 'emails#send_welcome'
+
+      # Admin endpoints
+      namespace :admin do
+        resources :users, only: %i[index show create update] do
+          member do
+            patch 'disable'
+          end
+        end
+      end
     end
   end
 end
