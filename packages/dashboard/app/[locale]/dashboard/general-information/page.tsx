@@ -7,6 +7,7 @@ import {
   useGeneralInfo,
   useUpdateGeneralInfo,
 } from "@/src/services/general-info/queries";
+import { useAuth } from "@/src/contexts/AuthContext";
 
 type FormState = {
   phone: string;
@@ -32,6 +33,8 @@ const emptyForm: FormState = {
 
 export default function GeneralInformationPage() {
   const t = useT();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -157,9 +160,10 @@ export default function GeneralInformationPage() {
                     onChange={(event) =>
                       handleChange("phone", event.target.value)
                     }
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="+52 555 123 4567"
                     required
+                    disabled={!isAdmin}
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Main contact phone number for your business
@@ -176,9 +180,10 @@ export default function GeneralInformationPage() {
                     onChange={(event) =>
                       handleChange("whatsapp", event.target.value)
                     }
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="+52 555 123 4567"
                     required
+                    disabled={!isAdmin}
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     WhatsApp number for quick customer communication
@@ -195,9 +200,10 @@ export default function GeneralInformationPage() {
                     onChange={(event) =>
                       handleChange("email_to", event.target.value)
                     }
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="contact@example.com"
                     required
+                    disabled={!isAdmin}
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Email address where inquiries will be sent
@@ -219,8 +225,9 @@ export default function GeneralInformationPage() {
                         onChange={(event) =>
                           handleChange("email_contact", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="info@example.com"
+                        disabled={!isAdmin}
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Email displayed in the website footer
@@ -237,8 +244,9 @@ export default function GeneralInformationPage() {
                         onChange={(event) =>
                           handleChange("instagram", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="https://instagram.com/yourprofile"
+                        disabled={!isAdmin}
                       />
                       <p className="mt-1 text-xs text-gray-500">
                         Instagram displayed in the website footer
@@ -255,8 +263,9 @@ export default function GeneralInformationPage() {
                         onChange={(event) =>
                           handleChange("facebook", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="https://facebook.com/yourpage"
+                        disabled={!isAdmin}
                       />
                        <p className="mt-1 text-xs text-gray-500">
                         Facebook displayed in the website footer
@@ -273,8 +282,9 @@ export default function GeneralInformationPage() {
                         onChange={(event) =>
                           handleChange("linkedin", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="https://linkedin.com/company/yourcompany"
+                        disabled={!isAdmin}
                       />
                        <p className="mt-1 text-xs text-gray-500">
                         LinkedIn displayed in the website footer
@@ -291,11 +301,12 @@ export default function GeneralInformationPage() {
                         onChange={(event) =>
                           handleChange("tiktok", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="https://tiktok.com/@yourprofile"
+                        disabled={!isAdmin}
                       />
                       <p className="mt-1 text-xs text-gray-500">
-                        LinkedIn displayed in the website footer
+                        TikTok displayed in the website footer
                       </p>
                     </div>
                   </div>
@@ -303,12 +314,14 @@ export default function GeneralInformationPage() {
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <p className="text-sm text-gray-500">
-                    Phone, WhatsApp, and Email are required
+                    {!isAdmin
+                      ? "Only admins can edit this information"
+                      : "Phone, WhatsApp, and Email are required"}
                   </p>
                   <button
                     type="submit"
-                    className="flex items-center gap-2 rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                    disabled={updating}
+                    className="flex items-center gap-2 rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    disabled={updating || !isAdmin}
                   >
                     <Save className="h-4 w-4" />
                     {updating ? "Saving..." : "Save Changes"}
