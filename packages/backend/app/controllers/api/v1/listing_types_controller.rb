@@ -2,7 +2,8 @@
 module Api
   module V1
     class ListingTypesController < ApplicationController
-      skip_before_action :authenticate_user!, only: [:index, :show]
+      skip_before_action :authenticate_user!, only: %i[index show]
+      skip_before_action :reject_disabled_user!, only: %i[index show]
       before_action :set_listing_type, only: %i[show update destroy]
       after_action { pagy_headers_merge(@pagy) if @pagy }
 

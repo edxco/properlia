@@ -5,6 +5,7 @@ module Api
     class PdfsController < ApplicationController
       # No authentication required for downloading PDFs - they're public brochures
       skip_before_action :authenticate_user!
+      skip_before_action :reject_disabled_user!
       before_action :set_property
 
       # GET /api/v1/properties/:property_id/pdf

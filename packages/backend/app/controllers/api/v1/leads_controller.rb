@@ -1,7 +1,8 @@
 module Api
   module V1
     class LeadsController < ApplicationController
-      before_action :authenticate_user!, except: [:public_create]
+      skip_before_action :authenticate_user!, only: %i[public_create]
+      skip_before_action :reject_disabled_user!, only: %i[public_create]
       before_action :set_lead, only: %i[show update change_status assign record_contact]
       after_action { pagy_headers_merge(@pagy) if @pagy }
 

@@ -1,7 +1,8 @@
 module Api
   module V1
     class EmailsController < ApplicationController
-      skip_before_action :authenticate_user!, only: [:send_contact_form, :send_property_inquiry]
+      skip_before_action :authenticate_user!, only: %i[send_contact_form send_property_inquiry]
+      skip_before_action :reject_disabled_user!, only: %i[send_contact_form send_property_inquiry]
 
       # POST /api/v1/emails/contact
       def send_contact_form

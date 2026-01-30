@@ -1,8 +1,9 @@
 module Api
   module V1
     class PropertyFeaturesController < ApplicationController
-      skip_before_action :authenticate_user!, only: [:index]
-      before_action :set_property_feature, only: [:destroy]
+      skip_before_action :authenticate_user!, only: %i[index]
+      skip_before_action :reject_disabled_user!, only: %i[index]
+      before_action :set_property_feature, only: %i[destroy]
 
       # GET /api/v1/property_features
       def index

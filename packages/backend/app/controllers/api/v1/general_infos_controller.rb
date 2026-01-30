@@ -2,7 +2,9 @@
 module Api
   module V1
     class GeneralInfosController < ApplicationController
-      before_action :authenticate_user!, only: [:update]
+      skip_before_action :authenticate_user!, only: %i[show]
+      skip_before_action :reject_disabled_user!, only: %i[show]
+      before_action(only: %i[update]) { authorize_any!(:admin) }
 
       # GET /api/v1/general_info
       def show
