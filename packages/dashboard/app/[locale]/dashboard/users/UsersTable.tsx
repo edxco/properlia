@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import type { AdminUser, UserRole } from "@properlia/shared/services/users/types";
+import { useState } from "react";
+import type {
+  AdminUser,
+  AdminUserFilters,
+  UserRole,
+} from "@properlia/shared/services/users/types";
 import {
   useLocale,
   useT,
@@ -27,12 +31,8 @@ interface UsersTableProps {
     page: number;
     pages: number;
   };
-  filters: { role?: UserRole; enabled?: boolean; search?: string };
-  onFilterChange: (filters: {
-    role?: UserRole;
-    enabled?: boolean;
-    search?: string;
-  }) => void;
+  filters: AdminUserFilters;
+  onFilterChange: (filters: Partial<AdminUserFilters>) => void;
 }
 
 const ROLE_OPTIONS: UserRole[] = ["user", "staff", "admin"];
@@ -47,9 +47,7 @@ const getRoleBadgeColor = (role: UserRole) => {
 };
 
 const getEnabledBadgeColor = (enabled: boolean) => {
-  return enabled
-    ? "bg-green-100 text-green-800"
-    : "bg-red-100 text-red-800";
+  return enabled ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
 };
 
 interface EditFormState {
@@ -220,7 +218,9 @@ function UserEditRow({
               type="submit"
               disabled={
                 updateMutation.isPending ||
-                (form.password && form.password !== form.password_confirmation)
+                !!(
+                  form.password && form.password !== form.password_confirmation
+                )
               }
               className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
