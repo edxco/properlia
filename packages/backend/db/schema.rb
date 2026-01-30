@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_01_28_172754) do
+ActiveRecord::Schema[7.0].define(version: 2026_01_30_221118) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -155,6 +155,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_28_172754) do
     t.string "zip_code"
     t.uuid "listing_type_id", null: false
     t.boolean "exclusive_listing", default: true, null: false
+    t.jsonb "image_order", default: [], null: false
     t.index ["city"], name: "index_properties_on_city"
     t.index ["featured"], name: "index_properties_on_featured"
     t.index ["images"], name: "index_properties_on_images", using: :gin
@@ -245,7 +246,9 @@ ActiveRecord::Schema[7.0].define(version: 2026_01_28_172754) do
     t.string "name"
     t.string "role"
     t.string "jti", null: false
+    t.boolean "enabled", default: true, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["enabled"], name: "index_users_on_enabled"
     t.index ["jti"], name: "index_users_on_jti", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
