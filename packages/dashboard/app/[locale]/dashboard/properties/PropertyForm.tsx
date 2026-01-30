@@ -16,6 +16,7 @@ import {
   useCreateProperty,
   useUpdateProperty,
   useDeleteAttachment,
+  useReorderImages,
 } from "@/src/services/properties/queries";
 import { usePropertyTypes } from "@/src/services/property-types/queries";
 import { useStatuses } from "@/src/services/statuses/queries";
@@ -95,6 +96,11 @@ export default function PropertyForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState<Set<string>>(new Set());
+  // State for existing images order (for drag-and-drop reordering)
+  const [existingImageOrder, setExistingImageOrder] = useState<string[]>([]);
+  const [existingDraggedIndex, setExistingDraggedIndex] = useState<number | null>(null);
+  const [existingDragOverIndex, setExistingDragOverIndex] = useState<number | null>(null);
 
   const { data: propertyTypes } = usePropertyTypes();
   const { data: statuses } = useStatuses();
@@ -106,8 +112,14 @@ export default function PropertyForm({
     useUpdateProperty();
   const { mutateAsync: deleteAttachment, isPending: deletingAttachment } =
     useDeleteAttachment();
+  const { mutateAsync: reorderImages, isPending: reorderingImages } =
+    useReorderImages();
 
   useEffect(() => {
+    // Reset deleted attachments and existing image order when property changes
+    setDeletedAttachmentIds(new Set());
+    setExistingImageOrder(editingProperty?.images.map((img) => img.id) ?? []);
+
     if (editingProperty) {
       // Get existing category IDs from the property
       let categoryIds = editingProperty.property_categories?.map((c) => c.id) ?? [];
@@ -302,10 +314,78 @@ export default function PropertyForm({
     setDragOverIndex(null);
   };
 
+  // Existing images reordering handlers
+  const handleExistingDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    setExistingDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/html", index.toString());
+    e.dataTransfer.setDragImage(e.currentTarget, 0, 0);
+  };
+
+  const handleExistingDragEnd = () => {
+    setExistingDraggedIndex(null);
+    setExistingDragOverIndex(null);
+  };
+
+  const handleExistingDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (existingDraggedIndex !== null && existingDraggedIndex !== index) {
+      setExistingDragOverIndex(index);
+    }
+  };
+
+  const handleExistingDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.currentTarget === e.target) {
+      setExistingDragOverIndex(null);
+    }
+  };
+
+  const handleExistingDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleExistingDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const dragIndex = existingDraggedIndex !== null ? existingDraggedIndex : parseInt(e.dataTransfer.getData("text/html"));
+
+    if (dragIndex === dropIndex || dragIndex === null || !editingProperty) {
+      setExistingDraggedIndex(null);
+      setExistingDragOverIndex(null);
+      return;
+    }
+
+    // Update local state immediately for responsive UI
+    const newOrder = [...existingImageOrder];
+    const [removed] = newOrder.splice(dragIndex, 1);
+    newOrder.splice(dropIndex, 0, removed);
+    setExistingImageOrder(newOrder);
+
+    setExistingDraggedIndex(null);
+    setExistingDragOverIndex(null);
+
+    // Save the new order to the backend
+    try {
+      await reorderImages({ propertyId: editingProperty.id, imageIds: newOrder });
+    } catch (error: any) {
+      // Revert to original order on error
+      setExistingImageOrder(editingProperty.images.map((img) => img.id));
+      setFormError(error?.message || "Failed to reorder images");
+    }
+  };
+
   const handleDeleteAttachment = async (attachmentId: string) => {
     if (!editingProperty) return;
     try {
       await deleteAttachment({ propertyId: editingProperty.id, attachmentId });
+      // Track the deleted attachment locally so the UI updates immediately
+      setDeletedAttachmentIds((prev) => new Set(prev).add(attachmentId));
+      // Also remove from the existing image order
+      setExistingImageOrder((prev) => prev.filter((id) => id !== attachmentId));
     } catch (error: any) {
       setFormError(error?.message || "Failed to delete attachment");
     }
@@ -876,29 +956,58 @@ export default function PropertyForm({
           </label>
 
           {/* Existing Images */}
-          {editingProperty && editingProperty.images.length > 0 && (
+          {editingProperty && existingImageOrder.filter((id) => !deletedAttachmentIds.has(id)).length > 0 && (
             <div className="mb-3">
               <p className="text-xs text-gray-500 mb-2">
-                {t("currentImages")}:
+                {t("currentImages")} - Drag to reorder (first image will be the cover):
               </p>
               <div className="grid grid-cols-3 gap-2">
-                {editingProperty.images.map((img) => (
-                  <div key={img.id} className="relative group">
-                    <img
-                      src={getAbsoluteImageUrl(img.url)}
-                      alt={img.filename}
-                      className="w-full h-20 object-cover rounded border border-gray-200"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteAttachment(img.id)}
-                      disabled={deletingAttachment}
-                      className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:opacity-50"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
+                {existingImageOrder
+                  .filter((id) => !deletedAttachmentIds.has(id))
+                  .map((imageId, index) => {
+                    const img = editingProperty.images.find((i) => i.id === imageId);
+                    if (!img) return null;
+                    const isDragging = existingDraggedIndex === index;
+                    const isDropTarget = existingDragOverIndex === index;
+
+                    return (
+                      <div
+                        key={img.id}
+                        draggable
+                        onDragStart={(e) => handleExistingDragStart(e, index)}
+                        onDragEnd={handleExistingDragEnd}
+                        onDragEnter={(e) => handleExistingDragEnter(e, index)}
+                        onDragLeave={handleExistingDragLeave}
+                        onDragOver={handleExistingDragOver}
+                        onDrop={(e) => handleExistingDrop(e, index)}
+                        className={`relative group cursor-grab active:cursor-grabbing transition-all ${
+                          isDragging ? "opacity-40 scale-95" : "opacity-100"
+                        } ${
+                          isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""
+                        }`}
+                      >
+                        <img
+                          src={getAbsoluteImageUrl(img.url)}
+                          alt={img.filename}
+                          className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
+                          draggable={false}
+                        />
+                        {index === 0 && (
+                          <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+                            Cover
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAttachment(img.id)}
+                          disabled={deletingAttachment || reorderingImages}
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:opacity-50 z-10"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}
@@ -984,11 +1093,11 @@ export default function PropertyForm({
           </label>
 
           {/* Existing Videos */}
-          {editingProperty && editingProperty.videos.length > 0 && (
+          {editingProperty && editingProperty.videos.filter((video) => !deletedAttachmentIds.has(video.id)).length > 0 && (
             <div className="mb-3">
               <p className="text-xs text-gray-500 mb-2">Current videos:</p>
               <div className="space-y-2">
-                {editingProperty.videos.map((video) => (
+                {editingProperty.videos.filter((video) => !deletedAttachmentIds.has(video.id)).map((video) => (
                   <div
                     key={video.id}
                     className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded border border-gray-200"
