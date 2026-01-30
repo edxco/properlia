@@ -48,10 +48,7 @@ services:
       RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
       # Active Storage
       ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE}
-      # AWS Configuration
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+      # AWS Configuration (credentials auto-fetched from EC2 instance metadata)
       AWS_REGION: ${AWS_REGION}
       AWS_BUCKET: ${AWS_BUCKET}
       # Devise JWT

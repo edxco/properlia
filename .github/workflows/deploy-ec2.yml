@@ -368,8 +368,8 @@ jobs:
             docker pull "$DASHBOARD_IMAGE"
             docker pull "$NGINX_IMAGE"
 
-            # Add AWS credentials and image URIs to env file for the containers to use
-            echo "Adding AWS credentials and image URIs to env file..."
+            # Add image URIs to env file (AWS credentials are auto-fetched from EC2 metadata)
+            echo "Adding image URIs to env file..."
             # Remove old values if they exist
             sed -i '/^AWS_ACCESS_KEY_ID=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^AWS_SECRET_ACCESS_KEY=/d' "$ENV_FILE" 2>/dev/null || true
@@ -378,10 +378,7 @@ jobs:
             sed -i '/^FRONTEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^DASHBOARD_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^NGINX_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
-            # Add new credentials and image URIs
-            echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> "$ENV_FILE"
-            echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> "$ENV_FILE"
-            echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> "$ENV_FILE"
+            # Add image URIs only (no AWS credentials - container fetches from EC2 metadata)
             echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$ENV_FILE"
             echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$ENV_FILE"
             echo "DASHBOARD_IMAGE=$DASHBOARD_IMAGE" >> "$ENV_FILE"
