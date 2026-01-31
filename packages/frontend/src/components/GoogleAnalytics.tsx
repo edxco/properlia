@@ -14,6 +14,7 @@ export default function GoogleAnalytics({ gaId }: Props) {
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
         strategy="afterInteractive"
+        crossOrigin="anonymous"
       />
       <Script id="google-analytics" strategy="afterInteractive">
         {`
