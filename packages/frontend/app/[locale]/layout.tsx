@@ -6,7 +6,7 @@ import { QueryProvider } from "@/src/providers/QueryProvider";
 import { TranslationProvider } from "@properlia/shared/components/TranslationProvider";
 import { Navigation } from "@/src/components/Navigation";
 import { Footer } from "@/src/components/Footer";
-import { GoogleAnalytics } from "@/src/components/GoogleAnalytics";
+import GoogleAnalytics from "@/src/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: "Properlia",
@@ -29,6 +29,7 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const { locale } = await params;
 
   const normalizedLocale = SUPPORTED_LOCALES.includes(locale as Locale)
@@ -40,13 +41,11 @@ export default async function RootLayout({
   return (
     <html lang={normalizedLocale} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <GoogleAnalytics />
+        <GoogleAnalytics gaId={gaId} />
         <QueryProvider>
           <TranslationProvider dictionary={dict} locale={normalizedLocale}>
             <Navigation />
-            <main className="pt-20">
-              {children}
-            </main>
+            <main className="pt-20">{children}</main>
             <Footer />
           </TranslationProvider>
         </QueryProvider>
