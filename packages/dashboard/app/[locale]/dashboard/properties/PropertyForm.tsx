@@ -429,6 +429,8 @@ export default function PropertyForm({
     if (
       !payload.title ||
       !payload.address ||
+      !payload.price ||
+      !payload.neighborhood ||
       !payload.property_type_id ||
       !payload.listing_type_id ||
       !form.city ||
@@ -667,7 +669,7 @@ export default function PropertyForm({
 
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            {t("address")} <span className="text-red-600">*</span>
+            {t("address")}
           </label>
           <input
             type="text"
@@ -681,7 +683,7 @@ export default function PropertyForm({
 
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            {t("neighborhood")}
+            {t("neighborhood")} <span className="text-red-600">*</span>
           </label>
           <input
             type="text"
