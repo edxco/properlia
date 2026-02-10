@@ -74,6 +74,9 @@ export function FeaturedProperties() {
     half_bathrooms: property.half_bathrooms,
     property_features: property.property_features,
     property_categories: property.property_categories,
+    neighborhood: property.neighborhood,
+    city: property.city,
+    state: property.state,
   }));
 
   return (

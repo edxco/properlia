@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Phone } from "lucide-react";
+import { ChevronLeft, ChevronRight, Phone, MapPin } from "lucide-react";
 import {
   useT,
   useLocale,
@@ -32,6 +32,9 @@ interface PropertyCardProps {
   compact?: boolean;
   property_features?: PropertyFeature[];
   property_categories?: PropertyCategory[];
+  neighborhood?: string | null;
+  city?: string | null;
+  state?: string | null;
 }
 
 export const PropertyCard = ({
@@ -51,6 +54,9 @@ export const PropertyCard = ({
   compact = false,
   property_features = [],
   property_categories = [],
+  neighborhood,
+  city,
+  state,
 }: PropertyCardProps) => {
   const t = useT();
   const locale = useLocale();
@@ -223,6 +229,15 @@ export const PropertyCard = ({
             />
           )}
           </div>
+
+          {(neighborhood || city || state) && (
+            <div className="px-4 flex items-center gap-1.5 text-gray-500 text-xs my-5">
+              <MapPin className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">
+                {[neighborhood, city, state].filter(Boolean).join(", ")}
+              </span>
+            </div>
+          )}
 
           <div className="h-10 px-4">
             {property_features.length > 0 && (
