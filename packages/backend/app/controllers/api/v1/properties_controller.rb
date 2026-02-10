@@ -65,7 +65,11 @@ module Api
           )
         end
 
-        @pagy, @properties = pagy(properties.order(created_at: :desc))
+        # Apply custom items limit if provided
+        pagy_options = {}
+        pagy_options[:limit] = params[:items].to_i if params[:items].present? && params[:items].to_i.positive?
+
+        @pagy, @properties = pagy(properties.order(created_at: :desc), **pagy_options)
 
         render json: {
           data: @properties.map { |property| property_json(property) },
