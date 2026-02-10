@@ -208,6 +208,7 @@
   "buyerPropertyTypeResidential": "Residencial",
   "buyerPropertyTypeCommercial": "Comercial",
   "buyerPropertyTypeIndustrial": "Industrial",
+  "buyerPropertyTypeMixed": "Uso mixto",
 
   "buyerPurchaseGoal": "¿Cuál es el objetivo principal de esta compra?",
   "buyerGoalLiving": "Vivir la propiedad",
@@ -246,6 +247,78 @@
   "buyerBenefit3Description": "Análisis y verificación exhaustiva de propiedades para asegurar una inversión segura.",
   "buyerBenefit4Title": "Acompañamiento Integral",
   "buyerBenefit4Description": "Desde la búsqueda hasta el cierre, manejamos cada detalle para que te enfoques en tu decisión.",
+
+  "buyerStep1Title": "Contacto e Inicio",
+  "buyerStep1Description": "Comencemos con tu información de contacto",
+  "buyerStep2Title": "Perfil del Comprador",
+  "buyerStep2Description": "Cuéntanos sobre ti y cómo realizarás la compra",
+  "buyerStep3Title": "Propiedad, Ubicación y Presupuesto",
+  "buyerStep3Description": "Define lo que buscas y tu rango de inversión",
+  "buyerStep4Title": "Criterios, Objetivos y Compromiso",
+  "buyerStep4Description": "Ayúdanos a entender tus prioridades y tiempos",
+
+  "buyerNext": "Siguiente",
+  "buyerBack": "Anterior",
+
+  "buyerWhatsAppSwitch": "Este número tiene WhatsApp",
+  "buyerHowDidYouHear": "¿Cómo te enteraste de Properlia?",
+  "buyerHearReferral": "Recomendación",
+  "buyerHearGoogle": "Google / Búsqueda",
+  "buyerHearSocialMedia": "Redes sociales",
+  "buyerHearAd": "Publicidad",
+  "buyerHearOther": "Otro",
+  "buyerSpecifyOther": "Por favor especifica",
+  "buyerSpecifyOtherPlaceholder": "Cuéntanos más...",
+
+  "buyerProfileQuestion": "¿Cómo te describirías como comprador?",
+  "buyerProfileSingle": "Soltero/a / Individual",
+  "buyerProfileFamily": "Familia",
+  "buyerProfileInvestor": "Inversionista",
+  "buyerProfileCompany": "Empresa",
+  "buyerProfileOther": "Otro",
+
+  "buyerBuyingAsQuestion": "¿Comprarás como:",
+  "buyerBuyingAsIndividual": "Persona física",
+  "buyerBuyingAsCompany": "Persona moral / Empresa",
+
+  "buyerProcessStage": "¿En qué etapa del proceso de compra te encuentras?",
+  "buyerStageExploring": "Solo estoy explorando",
+  "buyerStageClearIdea": "Tengo una idea clara de lo que quiero",
+  "buyerStageVisited": "Ya he visitado propiedades",
+  "buyerStageDecideSoon": "Necesito decidir pronto",
+
+  "buyerPriorityZones": "Zonas / colonias prioritarias",
+  "buyerPriorityZonesHelper": "Ingresa las áreas o colonias de tu interés",
+  "buyerPriorityZonesPlaceholder": "ej., La Vista, Angelópolis, Zavaleta...",
+
+  "buyerOpenToOtherZones": "¿Estás abierto/a a otras zonas?",
+
+  "buyerPaymentCash": "Contado",
+  "buyerPaymentMortgage": "Crédito hipotecario",
+  "buyerPaymentMixed": "Mixto (Contado + Crédito)",
+  "buyerPaymentNotDefined": "Aún no definido",
+
+  "buyerCreditPreApproval": "¿Tienes pre-aprobación de crédito?",
+
+  "buyerDealBreakers": "Factores eliminatorios",
+  "buyerDealBreakersPlaceholder": "¿Qué haría que rechaces una propiedad? (opcional)",
+
+  "buyerPrimaryGoal": "¿Cuál es el objetivo principal de esta compra?",
+  "buyerGoalHome": "Vivienda / Residencia principal",
+  "buyerGoalOther": "Otro",
+
+  "buyerPriorExperience": "¿Has comprado una propiedad antes?",
+  "buyerFrustration": "¿Qué fue lo más frustrante de esa experiencia?",
+  "buyerFrustrationPlaceholder": "Cuéntanos qué no funcionó bien...",
+
+  "buyerConsultationExpectations": "¿Qué te gustaría obtener de esta consulta?",
+  "buyerConsultationExpectationsHelper": "Esta es una sesión de 30 minutos",
+  "buyerConsultationExpectationsPlaceholder": "Comparte tus expectativas para nuestra reunión...",
+
+  "buyerCommitmentQuestion": "¿Estás comprometido/a a comprar cuando encuentres la propiedad correcta?",
+  "buyerCommitmentYes": "Sí, estoy listo/a para comprar",
+  "buyerCommitmentEvaluating": "Lo estoy evaluando",
+  "buyerCommitmentInfoOnly": "Solo quiero información por ahora",
 
   "users": "Usuarios",
   "usersManagement": "Gestión de Usuarios",
