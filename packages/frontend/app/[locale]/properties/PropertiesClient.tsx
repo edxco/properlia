@@ -133,7 +133,7 @@ export default function PropertiesClient() {
 
   return (
     <section className="py-12 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         <PropertyFiltersBar
           filters={filters}
           onFilterChange={handleFilterChange}

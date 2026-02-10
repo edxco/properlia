@@ -67,7 +67,7 @@ export function Footer() {
   return (
     <footer className="text-white flex flex-col">
       <div className="bg-primary-70 m-0 p-0">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 m-0">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-12 m-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Logo and Company Info */}
             <div className="space-y-4 lg:col-span-2">
@@ -235,7 +235,7 @@ export function Footer() {
         </div>
       </div>
       <div className="bg-primary m-0 p-0">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 justify-between items-end gap-4">
             <div>
               <p className="text-white/70 text-sm">

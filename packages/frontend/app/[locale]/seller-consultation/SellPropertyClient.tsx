@@ -166,7 +166,7 @@ export default function SellPropertyClient() {
 
   return (
     <section className="py-16 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-stone-900 mb-4">
