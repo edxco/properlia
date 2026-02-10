@@ -271,5 +271,15 @@
   "enterName": "Enter name",
   "password": "Password",
   "enterPassword": "Enter password",
-  "searchByEmailOrName": "Search by email or name"
+  "searchByEmailOrName": "Search by email or name",
+
+  "serviceTileBuyTitle": "LOOKING TO BUY",
+  "serviceTileBuySubtitle": "Don’t see your property? We can help",
+  "serviceTileBuyButton": "We’ll find it for you",
+  "serviceTileSellTitle": "LOOKING TO SELL",
+  "serviceTileSellSubtitle": "Sell your property with expert guidance",
+  "serviceTileSellButton": "Start selling my property",
+  "serviceTileInvestTitle": "LOOKING TO INVEST",
+  "serviceTileInvestSubtitle": "Opportunities with real ROI",
+  "serviceTileInvestButton": "View investments"
 }
