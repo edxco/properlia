@@ -209,6 +209,7 @@ export const PropertyCard = ({
               rooms={rooms}
               bathrooms={bathrooms}
               half_bathrooms={half_bathrooms}
+              property_type={property_type.id}
             />
           ) : (
             <PropertyLabelStats
