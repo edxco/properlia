@@ -72,10 +72,13 @@
   "uploadImages": "Subir imágenes",
   "uploadVideos": "Subir videos",
   "addProperty": "Agregar Propiedad",
+  "addNewProperty": "Agregar Nueva Propiedad",
   "editProperty": "Editar Propiedad",
   "updateProperty": "Actualizar Propiedad",
   "selectStatus": "Seleccionar Estatus",
   "propertiesControlPanel": "Panel de Control de Propiedades",
+  "preview": "Vista previa",
+  "pdfPreview": "Esta es una vista previa de cómo se mostrará tu información en el PDF",
 
   "updating": "Actualizando",
   "updatedPropertiesInDataBase": "Propiedades actualizadas en la base de datos",

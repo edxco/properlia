@@ -72,10 +72,13 @@
   "uploadImages": "Upload images",
   "uploadVideos": "Upload videos",
   "addProperty": "Add Property",
+  "addNewProperty": "Add New Property",
   "editProperty": "Edit Property",
   "updateProperty": "Update Property",
   "selectStatus": "Select Status",
   "propertiesControlPanel": "Properties Control Panel",
+  "preview": "preview",
+  "pdfPreview": "This is a preview of how your information will appear in the PDF",
 
   "updating": "Updating",
   "updatedPropertiesInDataBase": "Updated properties in database",
