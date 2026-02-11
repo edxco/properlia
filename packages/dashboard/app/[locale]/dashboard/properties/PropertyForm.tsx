@@ -6,11 +6,9 @@ import {
   Upload,
   Image as ImageIcon,
   Video as VideoIcon,
+  Check,
 } from "lucide-react";
-import type {
-  Property,
-  PropertyPayload,
-} from "@properlia/shared/types";
+import type { Property, PropertyPayload } from "@properlia/shared/types";
 
 import {
   useCreateProperty,
@@ -28,6 +26,7 @@ import {
 } from "@properlia/shared/components/TranslationProvider";
 import { PriceInput } from "@properlia/shared/components";
 import { capitalizeFirstWord, getAbsoluteImageUrl } from "@properlia/shared";
+import PreviewPDF from "./[id]/previewPDF";
 
 type FormState = {
   title: string;
@@ -96,11 +95,17 @@ export default function PropertyForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState<Set<string>>(new Set());
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState<Set<string>>(
+    new Set()
+  );
   // State for existing images order (for drag-and-drop reordering)
   const [existingImageOrder, setExistingImageOrder] = useState<string[]>([]);
-  const [existingDraggedIndex, setExistingDraggedIndex] = useState<number | null>(null);
-  const [existingDragOverIndex, setExistingDragOverIndex] = useState<number | null>(null);
+  const [existingDraggedIndex, setExistingDraggedIndex] = useState<
+    number | null
+  >(null);
+  const [existingDragOverIndex, setExistingDragOverIndex] = useState<
+    number | null
+  >(null);
 
   const { data: propertyTypes } = usePropertyTypes();
   const { data: statuses } = useStatuses();
@@ -122,11 +127,18 @@ export default function PropertyForm({
 
     if (editingProperty) {
       // Get existing category IDs from the property
-      let categoryIds = editingProperty.property_categories?.map((c) => c.id) ?? [];
+      let categoryIds =
+        editingProperty.property_categories?.map((c) => c.id) ?? [];
 
       // If no categories assigned, auto-assign if property type has exactly one category
-      if (categoryIds.length === 0 && editingProperty.property_type_id && propertyTypes) {
-        const propertyType = propertyTypes.find((pt) => pt.id === editingProperty.property_type_id);
+      if (
+        categoryIds.length === 0 &&
+        editingProperty.property_type_id &&
+        propertyTypes
+      ) {
+        const propertyType = propertyTypes.find(
+          (pt) => pt.id === editingProperty.property_type_id
+        );
         const availableCategories = propertyType?.property_categories ?? [];
         if (availableCategories.length === 1) {
           categoryIds = [availableCategories[0].id];
@@ -154,7 +166,8 @@ export default function PropertyForm({
         featured: editingProperty.featured ?? false,
         exclusive_listing: editingProperty.exclusive_listing ?? true,
         property_category_ids: categoryIds,
-        property_feature_ids: editingProperty.property_features?.map((f) => f.id) ?? [],
+        property_feature_ids:
+          editingProperty.property_features?.map((f) => f.id) ?? [],
         images: [],
         videos: [],
       });
@@ -181,8 +194,8 @@ export default function PropertyForm({
   const convertWebPToPNG = async (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
       img.onload = () => {
         canvas.width = img.width;
@@ -190,26 +203,30 @@ export default function PropertyForm({
 
         if (ctx) {
           ctx.drawImage(img, 0, 0);
-          canvas.toBlob((blob) => {
-            if (blob) {
-              // Create new File from blob with .png extension
-              const pngFile = new File(
-                [blob],
-                file.name.replace(/\.webp$/i, '.png'),
-                { type: 'image/png' }
-              );
-              resolve(pngFile);
-            } else {
-              reject(new Error('Failed to convert image to PNG'));
-            }
-          }, 'image/png', 0.95); // 95% quality
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                // Create new File from blob with .png extension
+                const pngFile = new File(
+                  [blob],
+                  file.name.replace(/\.webp$/i, ".png"),
+                  { type: "image/png" }
+                );
+                resolve(pngFile);
+              } else {
+                reject(new Error("Failed to convert image to PNG"));
+              }
+            },
+            "image/png",
+            0.95
+          ); // 95% quality
         } else {
-          reject(new Error('Canvas context not available'));
+          reject(new Error("Canvas context not available"));
         }
       };
 
       img.onerror = () => {
-        reject(new Error('Failed to load image'));
+        reject(new Error("Failed to load image"));
       };
 
       img.src = URL.createObjectURL(file);
@@ -228,12 +245,12 @@ export default function PropertyForm({
       const processedFiles: File[] = [];
 
       for (const file of fileArray) {
-        if (file.type === 'image/webp') {
+        if (file.type === "image/webp") {
           try {
             const pngFile = await convertWebPToPNG(file);
             processedFiles.push(pngFile);
           } catch (error) {
-            console.error('Failed to convert WebP to PNG:', error);
+            console.error("Failed to convert WebP to PNG:", error);
             // If conversion fails, keep the original file
             processedFiles.push(file);
           }
@@ -242,7 +259,10 @@ export default function PropertyForm({
         }
       }
 
-      setForm((prev) => ({ ...prev, [field]: [...prev[field], ...processedFiles] }));
+      setForm((prev) => ({
+        ...prev,
+        [field]: [...prev[field], ...processedFiles],
+      }));
     } else {
       // For videos, no conversion needed
       setForm((prev) => ({ ...prev, [field]: [...prev[field], ...fileArray] }));
@@ -257,7 +277,10 @@ export default function PropertyForm({
   };
 
   // Image reordering handlers
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+  const handleDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number
+  ) => {
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/html", index.toString());
@@ -270,7 +293,10 @@ export default function PropertyForm({
     setDragOverIndex(null);
   };
 
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+  const handleDragEnter = (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number
+  ) => {
     e.preventDefault();
     if (draggedIndex !== null && draggedIndex !== index) {
       setDragOverIndex(index);
@@ -291,11 +317,17 @@ export default function PropertyForm({
     e.dataTransfer.dropEffect = "move";
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+  const handleDrop = (
+    e: React.DragEvent<HTMLDivElement>,
+    dropIndex: number
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const dragIndex = draggedIndex !== null ? draggedIndex : parseInt(e.dataTransfer.getData("text/html"));
+    const dragIndex =
+      draggedIndex !== null
+        ? draggedIndex
+        : parseInt(e.dataTransfer.getData("text/html"));
 
     if (dragIndex === dropIndex || dragIndex === null) {
       setDraggedIndex(null);
@@ -315,7 +347,10 @@ export default function PropertyForm({
   };
 
   // Existing images reordering handlers
-  const handleExistingDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+  const handleExistingDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number
+  ) => {
     setExistingDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/html", index.toString());
@@ -327,7 +362,10 @@ export default function PropertyForm({
     setExistingDragOverIndex(null);
   };
 
-  const handleExistingDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+  const handleExistingDragEnter = (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number
+  ) => {
     e.preventDefault();
     if (existingDraggedIndex !== null && existingDraggedIndex !== index) {
       setExistingDragOverIndex(index);
@@ -347,11 +385,17 @@ export default function PropertyForm({
     e.dataTransfer.dropEffect = "move";
   };
 
-  const handleExistingDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+  const handleExistingDrop = async (
+    e: React.DragEvent<HTMLDivElement>,
+    dropIndex: number
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const dragIndex = existingDraggedIndex !== null ? existingDraggedIndex : parseInt(e.dataTransfer.getData("text/html"));
+    const dragIndex =
+      existingDraggedIndex !== null
+        ? existingDraggedIndex
+        : parseInt(e.dataTransfer.getData("text/html"));
 
     if (dragIndex === dropIndex || dragIndex === null || !editingProperty) {
       setExistingDraggedIndex(null);
@@ -370,7 +414,10 @@ export default function PropertyForm({
 
     // Save the new order to the backend
     try {
-      await reorderImages({ propertyId: editingProperty.id, imageIds: newOrder });
+      await reorderImages({
+        propertyId: editingProperty.id,
+        imageIds: newOrder,
+      });
     } catch (error: any) {
       // Revert to original order on error
       setExistingImageOrder(editingProperty.images.map((img) => img.id));
@@ -419,8 +466,14 @@ export default function PropertyForm({
       description: form.description || undefined,
       featured: form.featured,
       exclusive_listing: form.exclusive_listing,
-      property_category_ids: form.property_category_ids.length > 0 ? form.property_category_ids : undefined,
-      property_feature_ids: form.property_feature_ids.length > 0 ? form.property_feature_ids : undefined,
+      property_category_ids:
+        form.property_category_ids.length > 0
+          ? form.property_category_ids
+          : undefined,
+      property_feature_ids:
+        form.property_feature_ids.length > 0
+          ? form.property_feature_ids
+          : undefined,
       images: form.images.length > 0 ? form.images : undefined,
       videos: form.videos.length > 0 ? form.videos : undefined,
     };
@@ -456,7 +509,10 @@ export default function PropertyForm({
       (pt) => pt.id === form.property_type_id
     );
     const availableCategories = selectedPropertyType?.property_categories ?? [];
-    if (availableCategories.length > 1 && form.property_category_ids.length === 0) {
+    if (
+      availableCategories.length > 1 &&
+      form.property_category_ids.length === 0
+    ) {
       setFormError("Please select at least one property category.");
       return;
     }
@@ -484,513 +540,629 @@ export default function PropertyForm({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-primary">
-          {editingProperty ? t("editProperty") : t("addProperty")}
-        </h3>
-        {editingProperty && (
-          <button
-            onClick={onCancelEdit}
-            className="text-sm text-blue-600 hover:text-blue-700"
-          >
-            {t("cancelEdit")}
-          </button>
-        )}
-      </div>
-      <p className="mt-1 text-sm text-gray-500">
-        {editingProperty ? t("updateForm") : t("createForm")}
-      </p>
-
-      {formError && (
-        <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {formError}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("propertyType")} <span className="text-red-600">*</span>
-          </label>
-          <select
-            value={form.property_type_id}
-            onChange={(event) => {
-              const newPropertyTypeId = event.target.value;
-              handleChange("property_type_id", newPropertyTypeId);
-              // Update property categories when property type changes
-              const newPropertyType = propertyTypes?.find(
-                (pt) => pt.id === newPropertyTypeId
-              );
-              const newCategories = newPropertyType?.property_categories ?? [];
-              if (newCategories.length === 1) {
-                // Auto-assign the single category
-                handleChange("property_category_ids", [newCategories[0].id]);
-              } else if (newCategories.length > 1) {
-                // Clear categories if new type has multiple categories (user must select)
-                handleChange("property_category_ids", []);
-              } else {
-                // No categories available
-                handleChange("property_category_ids", []);
-              }
-            }}
-            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-            required
-          >
-            <option value="">{t("select")}</option>
-            {propertyTypes?.map((type) => (
-              <option key={type.id} value={type.id}>
-                {capitalizeFirstWord(
-                  locale === "es" ? type.es_name : type.name
-                )}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Property Categories - shown only when land is selected and not editing */}
-        {(() => {
-          const selectedPropertyType = propertyTypes?.find(
-            (pt) => pt.id === form.property_type_id
-          );
-          const categories = selectedPropertyType?.property_categories ?? [];
-
-          // Hide category selection when editing a land property
-          if (categories.length > 1 && !editingProperty) {
-            return (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("propertyCategory")} <span className="text-red-600">*</span>
-                </label>
-                <div className="space-y-2">
-                  {categories.map((category) => (
-                    <label
-                      key={category.id}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={form.property_category_ids.includes(category.id)}
-                        onChange={(e) => {
-                          const newIds = e.target.checked
-                            ? [...form.property_category_ids, category.id]
-                            : form.property_category_ids.filter(
-                                (id) => id !== category.id
-                              );
-                          handleChange("property_category_ids", newIds);
-                        }}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {capitalizeFirstWord(
-                          locale === "es" ? category.es_name : category.name
-                        )}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            );
-          }
-          return null;
-        })()}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {capitalizeFirstWord(t("listingType"))}{" "}
-            <span className="text-red-600">*</span>
-          </label>
-          <select
-            value={form.listing_type_id}
-            onChange={(event) =>
-              handleChange("listing_type_id", event.target.value)
-            }
-            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-            required
-          >
-            <option value="">{t("select")}</option>
-            {listingTypes?.map((type) => (
-              <option key={type.id} value={type.id}>
-                {capitalizeFirstWord(
-                  locale === "es" ? type.es_name : type.name
-                )}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-center">
-          <div className="flex items-center gap-2 pt-6">
-            <input
-              id="featured"
-              type="checkbox"
-              checked={form.featured}
-              onChange={(event) =>
-                handleChange("featured", event.target.checked)
-              }
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="featured" className="text-sm text-gray-700">
-              {t("featured")}
-            </label>
+    <div className="flex gap-8">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm w-2/3">
+        <div className="flex items-center justify-between content-center">
+          <div className="m-none">
+            <h3 className="text-lg font-semibold text-primary">
+              {editingProperty ? t("editProperty") : t("addProperty")}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {editingProperty ? t("updateForm") : t("createForm")}
+            </p>
           </div>
-          <div className="flex items-center gap-2 pt-6">
-            <input
-              id="exclusive_listing"
-              type="checkbox"
-              checked={form.exclusive_listing}
-              onChange={(event) =>
-                handleChange("exclusive_listing", event.target.checked)
-              }
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label
-              htmlFor="exclusive_listing"
-              className="text-sm text-gray-700"
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleChange("featured", !form.featured)}
+              className={`cursor-pointer relative px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
+                form.featured
+                  ? "bg-blue-100 text-blue-700 border-blue-300"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+              }`}
             >
+              {form.featured && (
+                <span className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5">
+                  <Check className="h-2.5 w-2.5 text-white" />
+                </span>
+              )}
+              {t("featured")}
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                handleChange("exclusive_listing", !form.exclusive_listing)
+              }
+              className={`cursor-pointer relative px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
+                form.exclusive_listing
+                  ? "bg-blue-100 text-blue-700 border-blue-300"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              {form.exclusive_listing && (
+                <span className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5">
+                  <Check className="h-2.5 w-2.5 text-white" />
+                </span>
+              )}
               {t("exclusiveListing")}
-            </label>
+            </button>
+            {editingProperty && (
+              <button
+                onClick={onCancelEdit}
+                className="cursor-pointer  relative px-3 py-1.5 text-sm rounded-md border transition-colors bg-red-400 text-white border-gray-400"
+              >
+                {t("cancelEdit")}
+              </button>
+            )}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("title")} <span className="text-red-600">*</span>
-          </label>
-          <input
-            type="text"
-            value={form.title}
-            onChange={(event) => handleChange("title", event.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            placeholder={t("modernApartmentInLomas")}
-            required
-          />
-        </div>
+        {formError && (
+          <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {formError}
+          </div>
+        )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("address")}
-          </label>
-          <input
-            type="text"
-            value={form.address}
-            onChange={(event) => handleChange("address", event.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            placeholder={t('streetNumberNeighborhood')}
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("propertyType")} <span className="text-red-600">*</span>
+              </label>
+              <select
+                value={form.property_type_id}
+                onChange={(event) => {
+                  const newPropertyTypeId = event.target.value;
+                  handleChange("property_type_id", newPropertyTypeId);
+                  // Update property categories when property type changes
+                  const newPropertyType = propertyTypes?.find(
+                    (pt) => pt.id === newPropertyTypeId
+                  );
+                  const newCategories =
+                    newPropertyType?.property_categories ?? [];
+                  if (newCategories.length === 1) {
+                    // Auto-assign the single category
+                    handleChange("property_category_ids", [
+                      newCategories[0].id,
+                    ]);
+                  } else if (newCategories.length > 1) {
+                    // Clear categories if new type has multiple categories (user must select)
+                    handleChange("property_category_ids", []);
+                  } else {
+                    // No categories available
+                    handleChange("property_category_ids", []);
+                  }
+                }}
+                className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                required
+              >
+                <option value="">{t("select")}</option>
+                {propertyTypes?.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {capitalizeFirstWord(
+                      locale === "es" ? type.es_name : type.name
+                    )}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("neighborhood")} <span className="text-red-600">*</span>
-          </label>
-          <input
-            type="text"
-            value={form.neighborhood}
-            onChange={(event) =>
-              handleChange("neighborhood", event.target.value)
-            }
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            placeholder={t("neighborhood")}
-          />
-        </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {capitalizeFirstWord(t("listingType"))}{" "}
+                <span className="text-red-600">*</span>
+              </label>
+              <select
+                value={form.listing_type_id}
+                onChange={(event) =>
+                  handleChange("listing_type_id", event.target.value)
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                required
+              >
+                <option value="">{t("select")}</option>
+                {listingTypes?.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {capitalizeFirstWord(
+                      locale === "es" ? type.es_name : type.name
+                    )}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 items-center my-6">
+            {/* Property Categories - shown only when land is selected and not editing */}
+            {(() => {
+              const selectedPropertyType = propertyTypes?.find(
+                (pt) => pt.id === form.property_type_id
+              );
+              const categories =
+                selectedPropertyType?.property_categories ?? [];
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              // Hide category selection when editing a land property
+              if (categories.length > 1 && !editingProperty) {
+                return (
+                  <div className="flex flex-wrap content-center items-center gap-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {t("propertyCategory")}{" "}
+                      <span className="text-red-600">*</span>
+                    </label>
+                    <div className="flex gap-4">
+                      {categories.map((category) => {
+                        const isSelected = form.property_category_ids.includes(
+                          category.id
+                        );
+                        return (
+                          <button
+                            key={category.id}
+                            type="button"
+                            onClick={() => {
+                              const newIds = isSelected
+                                ? form.property_category_ids.filter(
+                                    (id) => id !== category.id
+                                  )
+                                : [...form.property_category_ids, category.id];
+                              handleChange("property_category_ids", newIds);
+                            }}
+                            className={`relative px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
+                              isSelected
+                                ? "bg-blue-100 text-blue-700 border-blue-300"
+                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                            }`}
+                          >
+                            {isSelected && (
+                              <span className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5">
+                                <Check className="h-2.5 w-2.5 text-white" />
+                              </span>
+                            )}
+                            {capitalizeFirstWord(
+                              locale === "es" ? category.es_name : category.name
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              {t("city")} <span className="text-red-600">*</span>
+              {t("title")} <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
-              value={form.city}
-              onChange={(event) => handleChange("city", event.target.value)}
+              value={form.title}
+              onChange={(event) => handleChange("title", event.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder="City"
+              placeholder={t("modernApartmentInLomas")}
               required
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              {t("state")} <span className="text-red-600">*</span>
+              {t("address")}
             </label>
             <input
               type="text"
-              value={form.state}
-              onChange={(event) => handleChange("state", event.target.value)}
+              value={form.address}
+              onChange={(event) => handleChange("address", event.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder="State"
+              placeholder={t("streetNumberNeighborhood")}
               required
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              {t("zipCode")} <span className="text-red-600">*</span>
+              {t("neighborhood")} <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
-              value={form.zip_code}
+              value={form.neighborhood}
               onChange={(event) =>
-                handleChange("zip_code", event.target.value)
+                handleChange("neighborhood", event.target.value)
               }
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder="78640"
+              placeholder={t("neighborhood")}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("city")} <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.city}
+                onChange={(event) => handleChange("city", event.target.value)}
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                placeholder="City"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("state")} <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.state}
+                onChange={(event) => handleChange("state", event.target.value)}
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                placeholder="State"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("zipCode")} <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="text"
+                value={form.zip_code}
+                onChange={(event) =>
+                  handleChange("zip_code", event.target.value)
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                placeholder="78640"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("price")} <span className="text-red-600">*</span>
+              </label>
+              <PriceInput
+                value={form.price}
+                onChange={(formatted) => handleChange("price", formatted)}
+                wrapperClassName="mt-1"
+                className="w-full rounded-md border border-gray-300 pl-7 pr-3 py-2 text-sm"
+                placeholder="5,000,000"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              {t("status")} <span className="text-red-600">*</span>
+            </label>
+            <select
+              value={form.status_id}
+              onChange={(event) =>
+                handleChange("status_id", event.target.value)
+              }
+              className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t("price")} <span className="text-red-600">*</span>
-            </label>
-            <PriceInput
-              value={form.price}
-              onChange={(formatted) => handleChange("price", formatted)}
-              wrapperClassName="mt-1"
-              className="w-full rounded-md border border-gray-300 pl-7 pr-3 py-2 text-sm"
-              placeholder="5,000,000"
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("status")} <span className="text-red-600">*</span>
-          </label>
-          <select
-            value={form.status_id}
-            onChange={(event) => handleChange("status_id", event.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-            required
-          >
-            <option value="">{t("select")}</option>
-            {statuses?.map((status) => (
-              <option key={status.id} value={status.id}>
-                {capitalizeFirstWord(
-                  locale === "es" ? status.es_name : status.name
-                )}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {capitalizeFirstWord(t("rooms"))}
-            </label>
-            <input
-              type="number"
-              min={0}
-              value={form.rooms}
-              onChange={(event) => handleChange("rooms", event.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t("parking")}
-            </label>
-            <input
-              type="number"
-              min={0}
-              value={form.parking_spaces}
-              onChange={(event) =>
-                handleChange("parking_spaces", event.target.value)
-              }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {capitalizeFirstWord(t("baths"))}
-            </label>
-            <input
-              type="number"
-              min={0}
-              value={form.bathrooms}
-              onChange={(event) =>
-                handleChange("bathrooms", event.target.value)
-              }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {capitalizeFirstWord(t("guestBath"))}
-            </label>
-            <input
-              type="number"
-              min={0}
-              value={form.half_bathrooms}
-              onChange={(event) =>
-                handleChange("half_bathrooms", event.target.value)
-              }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {capitalizeFirstWord(t("landArea_m2"))}<span className="text-red-600">*</span>
-            </label>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              value={form.land_area}
-              onChange={(event) =>
-                handleChange("land_area", event.target.value)
-              }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {capitalizeFirstWord(t("builtArea_m2"))}
-            </label>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              value={form.built_area}
-              onChange={(event) =>
-                handleChange("built_area", event.target.value)
-              }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("description")} <span className="text-red-600">*</span>
-          </label>
-          <textarea
-            value={form.description}
-            onChange={(event) =>
-              handleChange("description", event.target.value)
-            }
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            rows={3}
-            placeholder={t("keyHighlightsForThisListing")}
-            required
-          />
-        </div>
-
-        {/* Property Features */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("propertyFeatures")}
-          </label>
-          <select
-            value=""
-            onChange={(event) => {
-              const selectedId = event.target.value;
-              if (selectedId && !form.property_feature_ids.includes(selectedId)) {
-                handleChange("property_feature_ids", [
-                  ...form.property_feature_ids,
-                  selectedId,
-                ]);
-              }
-            }}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-          >
-            <option value="">{t("select")}</option>
-            {propertyFeatures
-              ?.filter((feature) => !form.property_feature_ids.includes(feature.id))
-              .map((feature) => (
-                <option key={feature.id} value={feature.id}>
+            >
+              <option value="">{t("select")}</option>
+              {statuses?.map((status) => (
+                <option key={status.id} value={status.id}>
                   {capitalizeFirstWord(
-                    locale === "es" ? feature.es_name : feature.name
+                    locale === "es" ? status.es_name : status.name
                   )}
                 </option>
               ))}
-          </select>
+            </select>
+          </div>
 
-          {/* Selected Features Pills */}
-          {form.property_feature_ids.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {form.property_feature_ids.map((featureId) => {
-                const feature = propertyFeatures?.find((f) => f.id === featureId);
-                if (!feature) return null;
-                return (
-                  <span
-                    key={featureId}
-                    className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
-                  >
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {capitalizeFirstWord(t("rooms"))}
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={form.rooms}
+                onChange={(event) => handleChange("rooms", event.target.value)}
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("parking")}
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={form.parking_spaces}
+                onChange={(event) =>
+                  handleChange("parking_spaces", event.target.value)
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {capitalizeFirstWord(t("baths"))}
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={form.bathrooms}
+                onChange={(event) =>
+                  handleChange("bathrooms", event.target.value)
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {capitalizeFirstWord(t("guestBath"))}
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={form.half_bathrooms}
+                onChange={(event) =>
+                  handleChange("half_bathrooms", event.target.value)
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {capitalizeFirstWord(t("landArea_m2"))}
+                <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={form.land_area}
+                onChange={(event) =>
+                  handleChange("land_area", event.target.value)
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {capitalizeFirstWord(t("builtArea_m2"))}
+              </label>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={form.built_area}
+                onChange={(event) =>
+                  handleChange("built_area", event.target.value)
+                }
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              {t("description")} <span className="text-red-600">*</span>
+            </label>
+            <textarea
+              value={form.description}
+              onChange={(event) =>
+                handleChange("description", event.target.value)
+              }
+              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              rows={3}
+              placeholder={t("keyHighlightsForThisListing")}
+              required
+            />
+          </div>
+
+          {/* Property Features */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("propertyFeatures")}
+            </label>
+            <select
+              value=""
+              onChange={(event) => {
+                const selectedId = event.target.value;
+                if (
+                  selectedId &&
+                  !form.property_feature_ids.includes(selectedId)
+                ) {
+                  handleChange("property_feature_ids", [
+                    ...form.property_feature_ids,
+                    selectedId,
+                  ]);
+                }
+              }}
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+            >
+              <option value="">{t("select")}</option>
+              {propertyFeatures
+                ?.filter(
+                  (feature) => !form.property_feature_ids.includes(feature.id)
+                )
+                .map((feature) => (
+                  <option key={feature.id} value={feature.id}>
                     {capitalizeFirstWord(
                       locale === "es" ? feature.es_name : feature.name
                     )}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleChange(
-                          "property_feature_ids",
-                          form.property_feature_ids.filter((id) => id !== featureId)
-                        )
-                      }
-                      className="ml-1 text-blue-600 hover:text-blue-800"
+                  </option>
+                ))}
+            </select>
+
+            {/* Selected Features Pills */}
+            {form.property_feature_ids.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {form.property_feature_ids.map((featureId) => {
+                  const feature = propertyFeatures?.find(
+                    (f) => f.id === featureId
+                  );
+                  if (!feature) return null;
+                  return (
+                    <span
+                      key={featureId}
+                      className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
                     >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                );
-              })}
+                      {capitalizeFirstWord(
+                        locale === "es" ? feature.es_name : feature.name
+                      )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleChange(
+                            "property_feature_ids",
+                            form.property_feature_ids.filter(
+                              (id) => id !== featureId
+                            )
+                          )
+                        }
+                        className="ml-1 text-blue-600 hover:text-blue-800"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Images Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <ImageIcon className="inline h-4 w-4 mr-1" />
+              Images <span className="text-red-600">*</span>
+            </label>
+
+            {/* Existing Images */}
+            {editingProperty &&
+              existingImageOrder.filter((id) => !deletedAttachmentIds.has(id))
+                .length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs text-gray-500 mb-2">
+                    {t("currentImages")} - Drag to reorder (first image will be
+                    the cover):
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {existingImageOrder
+                      .filter((id) => !deletedAttachmentIds.has(id))
+                      .map((imageId, index) => {
+                        const img = editingProperty.images.find(
+                          (i) => i.id === imageId
+                        );
+                        if (!img) return null;
+                        const isDragging = existingDraggedIndex === index;
+                        const isDropTarget = existingDragOverIndex === index;
+
+                        return (
+                          <div
+                            key={img.id}
+                            draggable
+                            onDragStart={(e) =>
+                              handleExistingDragStart(e, index)
+                            }
+                            onDragEnd={handleExistingDragEnd}
+                            onDragEnter={(e) =>
+                              handleExistingDragEnter(e, index)
+                            }
+                            onDragLeave={handleExistingDragLeave}
+                            onDragOver={handleExistingDragOver}
+                            onDrop={(e) => handleExistingDrop(e, index)}
+                            className={`relative group cursor-grab active:cursor-grabbing transition-all ${
+                              isDragging ? "opacity-40 scale-95" : "opacity-100"
+                            } ${
+                              isDropTarget
+                                ? "ring-2 ring-blue-500 ring-offset-2"
+                                : ""
+                            }`}
+                          >
+                            <img
+                              src={getAbsoluteImageUrl(img.url)}
+                              alt={img.filename}
+                              className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
+                              draggable={false}
+                            />
+                            {index === 0 && (
+                              <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+                                Cover
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAttachment(img.id)}
+                              disabled={deletingAttachment || reorderingImages}
+                              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:opacity-50 z-10"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+            {/* New Images Upload */}
+            <div className="flex items-center gap-2">
+              <label className="flex-1 cursor-pointer">
+                <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
+                  <Upload className="h-4 w-4" />
+                  <span>{t("uploadImages")}</span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => handleFileChange("images", e.target.files)}
+                  className="hidden"
+                />
+              </label>
             </div>
-          )}
-        </div>
 
-        {/* Images Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <ImageIcon className="inline h-4 w-4 mr-1" />
-            Images <span className="text-red-600">*</span>
-          </label>
-
-          {/* Existing Images */}
-          {editingProperty && existingImageOrder.filter((id) => !deletedAttachmentIds.has(id)).length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs text-gray-500 mb-2">
-                {t("currentImages")} - Drag to reorder (first image will be the cover):
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {existingImageOrder
-                  .filter((id) => !deletedAttachmentIds.has(id))
-                  .map((imageId, index) => {
-                    const img = editingProperty.images.find((i) => i.id === imageId);
-                    if (!img) return null;
-                    const isDragging = existingDraggedIndex === index;
-                    const isDropTarget = existingDragOverIndex === index;
+            {/* New Images Preview */}
+            {form.images.length > 0 && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-500 mb-2">
+                  Drag to reorder images (first image will be the cover)
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {form.images.map((file, index) => {
+                    const isDragging = draggedIndex === index;
+                    const isDropTarget = dragOverIndex === index;
 
                     return (
                       <div
-                        key={img.id}
+                        key={index}
                         draggable
-                        onDragStart={(e) => handleExistingDragStart(e, index)}
-                        onDragEnd={handleExistingDragEnd}
-                        onDragEnter={(e) => handleExistingDragEnter(e, index)}
-                        onDragLeave={handleExistingDragLeave}
-                        onDragOver={handleExistingDragOver}
-                        onDrop={(e) => handleExistingDrop(e, index)}
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragEnd={handleDragEnd}
+                        onDragEnter={(e) => handleDragEnter(e, index)}
+                        onDragLeave={handleDragLeave}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, index)}
                         className={`relative group cursor-grab active:cursor-grabbing transition-all ${
                           isDragging ? "opacity-40 scale-95" : "opacity-100"
                         } ${
-                          isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""
+                          isDropTarget
+                            ? "ring-2 ring-blue-500 ring-offset-2"
+                            : ""
                         }`}
                       >
                         <img
-                          src={getAbsoluteImageUrl(img.url)}
-                          alt={img.filename}
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
                           className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
                           draggable={false}
                         />
@@ -1001,190 +1173,210 @@ export default function PropertyForm({
                         )}
                         <button
                           type="button"
-                          onClick={() => handleDeleteAttachment(img.id)}
-                          disabled={deletingAttachment || reorderingImages}
-                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:opacity-50 z-10"
+                          onClick={() => removeFile("images", index)}
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
                         >
                           <X className="h-3 w-3" />
                         </button>
+                        <p className="text-xs text-gray-500 mt-1 truncate pointer-events-none">
+                          {file.name}
+                        </p>
                       </div>
                     );
                   })}
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* New Images Upload */}
-          <div className="flex items-center gap-2">
-            <label className="flex-1 cursor-pointer">
-              <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
-                <Upload className="h-4 w-4" />
-                <span>{t("uploadImages")}</span>
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => handleFileChange("images", e.target.files)}
-                className="hidden"
-              />
-            </label>
+            )}
           </div>
 
-          {/* New Images Preview */}
-          {form.images.length > 0 && (
-            <div className="mt-2">
-              <p className="text-xs text-gray-500 mb-2">
-                Drag to reorder images (first image will be the cover)
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {form.images.map((file, index) => {
-                  const isDragging = draggedIndex === index;
-                  const isDropTarget = dragOverIndex === index;
+          {/* Videos Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <VideoIcon className="inline h-4 w-4 mr-1" />
+              Videos
+            </label>
 
-                  return (
-                    <div
-                      key={index}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, index)}
-                      onDragEnd={handleDragEnd}
-                      onDragEnter={(e) => handleDragEnter(e, index)}
-                      onDragLeave={handleDragLeave}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, index)}
-                      className={`relative group cursor-grab active:cursor-grabbing transition-all ${
-                        isDragging ? "opacity-40 scale-95" : "opacity-100"
-                      } ${
-                        isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""
-                      }`}
-                    >
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={file.name}
-                        className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
-                        draggable={false}
-                      />
-                      {index === 0 && (
-                        <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
-                          Cover
+            {/* Existing Videos */}
+            {editingProperty &&
+              editingProperty.videos.filter(
+                (video) => !deletedAttachmentIds.has(video.id)
+              ).length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs text-gray-500 mb-2">Current videos:</p>
+                  <div className="space-y-2">
+                    {editingProperty.videos
+                      .filter((video) => !deletedAttachmentIds.has(video.id))
+                      .map((video) => (
+                        <div
+                          key={video.id}
+                          className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded border border-gray-200"
+                        >
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <VideoIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-sm text-gray-700 truncate">
+                              {video.filename}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAttachment(video.id)}
+                            disabled={deletingAttachment}
+                            className="flex-shrink-0 text-red-600 hover:text-red-700 disabled:opacity-50"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeFile("images", index)}
-                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                      <p className="text-xs text-gray-500 mt-1 truncate pointer-events-none">
-                        {file.name}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+            {/* New Videos Upload */}
+            <div className="flex items-center gap-2">
+              <label className="flex-1 cursor-pointer">
+                <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
+                  <Upload className="h-4 w-4" />
+                  <span>{t("uploadVideos")}</span>
+                </div>
+                <input
+                  type="file"
+                  accept="video/*"
+                  multiple
+                  onChange={(e) => handleFileChange("videos", e.target.files)}
+                  className="hidden"
+                />
+              </label>
             </div>
-          )}
-        </div>
 
-        {/* Videos Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <VideoIcon className="inline h-4 w-4 mr-1" />
-            Videos
-          </label>
-
-          {/* Existing Videos */}
-          {editingProperty && editingProperty.videos.filter((video) => !deletedAttachmentIds.has(video.id)).length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs text-gray-500 mb-2">Current videos:</p>
-              <div className="space-y-2">
-                {editingProperty.videos.filter((video) => !deletedAttachmentIds.has(video.id)).map((video) => (
+            {/* New Videos Preview */}
+            {form.videos.length > 0 && (
+              <div className="mt-2 space-y-2">
+                {form.videos.map((file, index) => (
                   <div
-                    key={video.id}
-                    className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded border border-gray-200"
+                    key={index}
+                    className="flex items-center justify-between gap-2 p-2 bg-blue-50 rounded border border-blue-200"
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <VideoIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 truncate">
-                        {video.filename}
-                      </span>
+                      <VideoIcon className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700 truncate">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleDeleteAttachment(video.id)}
-                      disabled={deletingAttachment}
-                      className="flex-shrink-0 text-red-600 hover:text-red-700 disabled:opacity-50"
+                      onClick={() => removeFile("videos", index)}
+                      className="flex-shrink-0 text-red-600 hover:text-red-700"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* New Videos Upload */}
-          <div className="flex items-center gap-2">
-            <label className="flex-1 cursor-pointer">
-              <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
-                <Upload className="h-4 w-4" />
-                <span>{t("uploadVideos")}</span>
-              </div>
-              <input
-                type="file"
-                accept="video/*"
-                multiple
-                onChange={(e) => handleFileChange("videos", e.target.files)}
-                className="hidden"
-              />
-            </label>
+            )}
           </div>
 
-          {/* New Videos Preview */}
-          {form.videos.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {form.videos.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between gap-2 p-2 bg-blue-50 rounded border border-blue-200"
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <VideoIcon className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-700 truncate">
-                        {file.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeFile("videos", index)}
-                    className="flex-shrink-0 text-red-600 hover:text-red-700"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          <button
+            type="submit"
+            className="w-full rounded-md bg-primary cursor-pointer px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50"
+            disabled={creating || updating}
+          >
+            {creating || updating
+              ? "Saving..."
+              : editingProperty
+              ? t("updateProperty")
+              : t("createProperty")}
+          </button>
+        </form>
+      </div>
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm w-1/3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-properlia-gray">
+            {t("preview")}
+          </h3>
         </div>
+        <p className="mt-1 text-sm text-gray-500">{t("pdfPreview")}</p>
 
-        <button
-          type="submit"
-          className="w-full rounded-md bg-primary cursor-pointer px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50"
-          disabled={creating || updating}
-        >
-          {creating || updating
-            ? "Saving..."
-            : editingProperty
-            ? t("updateProperty")
-            : t("createProperty")}
-        </button>
-      </form>
+        <PreviewPDF
+          title={form.title || t("propertyTitle")}
+          price={form.price ? `$${form.price} MXN` : ""}
+          exclusive={form.exclusive_listing}
+          address={form.address}
+          neighborhood={form.neighborhood}
+          city={form.city}
+          state={form.state}
+          heroImage={{
+            src: (() => {
+              if (editingProperty && existingImageOrder.length > 0) {
+                const firstImageId = existingImageOrder.find(
+                  (id) => !deletedAttachmentIds.has(id)
+                );
+                const img = editingProperty.images.find(
+                  (i) => i.id === firstImageId
+                );
+                if (img) return getAbsoluteImageUrl(img.url);
+              }
+              if (form.images.length > 0) {
+                return URL.createObjectURL(form.images[0]);
+              }
+              return "";
+            })(),
+            alt: form.title || undefined,
+          }}
+          tag={{
+            label: listingTypes?.find((lt) => lt.id === form.listing_type_id)
+              ? capitalizeFirstWord(
+                  locale === "es"
+                    ? listingTypes.find((lt) => lt.id === form.listing_type_id)
+                        ?.es_name ?? ""
+                    : listingTypes.find((lt) => lt.id === form.listing_type_id)
+                        ?.name ?? ""
+                )
+              : "",
+            kind: propertyTypes?.find((pt) => pt.id === form.property_type_id)
+              ? capitalizeFirstWord(
+                  locale === "es"
+                    ? propertyTypes.find(
+                        (pt) => pt.id === form.property_type_id
+                      )?.es_name ?? ""
+                    : propertyTypes.find(
+                        (pt) => pt.id === form.property_type_id
+                      )?.name ?? ""
+                )
+              : "",
+          }}
+          detailLines={[
+            Number(form.rooms) > 0 ? `${form.rooms} ${t("rooms")}` : "",
+            Number(form.bathrooms) > 0
+              ? `${Number(form.bathrooms)} ${t("baths")}`
+              : "",
+            Number(form.half_bathrooms)
+              ? `${form.half_bathrooms} ${t("guestBath")}`
+              : "",
+            Number(form.parking_spaces)
+              ? `${form.parking_spaces} ${t("parking")}`
+              : "",
+            form.land_area ? `${form.land_area} ${t("landArea_m2")}` : "",
+            Number(form.built_area)
+              ? `${form.built_area} m² ${t("builtArea_m2")}`
+              : "",
+          ].filter(Boolean)}
+          features={form.property_feature_ids
+            .map((featureId) => {
+              const feature = propertyFeatures?.find((f) => f.id === featureId);
+              if (!feature) return "";
+              return capitalizeFirstWord(
+                locale === "es" ? feature.es_name : feature.name
+              );
+            })
+            .filter(Boolean)}
+          description={form.description}
+        />
+      </div>
     </div>
   );
 }
