@@ -10,6 +10,8 @@ import { Property } from "@properlia/shared/types";
 import { getAbsoluteImageUrl } from "@properlia/shared";
 import { PropertyCard, Banner } from "@/components/ui";
 
+const ITEMS_PER_PAGE = 9;
+
 interface Filters {
   rooms?: number;
   bathrooms?: number;
@@ -27,6 +29,7 @@ export default function PropertiesClient() {
   const t = useT();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<Filters>({});
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Initialize filters from URL params
   useEffect(() => {
@@ -112,9 +115,13 @@ export default function PropertiesClient() {
 
   const handleFilterChange = (key: keyof Filters, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value || undefined }));
+    setCurrentPage(1);
   };
 
-  const clearFilters = () => setFilters({});
+  const clearFilters = () => {
+    setFilters({});
+    setCurrentPage(1);
+  };
 
   const activeFilterCount = Object.values(filters).filter(
     (v) => v !== undefined
@@ -127,9 +134,15 @@ export default function PropertiesClient() {
   ].filter((v) => v !== undefined).length;
 
   const hasNoResults = filteredProperties.length === 0 && activeFilterCount > 0;
-  const propertiesToDisplay = hasNoResults
+  const allProperties = hasNoResults
     ? propertiesData?.data || []
     : filteredProperties;
+
+  const totalPages = Math.ceil(allProperties.length / ITEMS_PER_PAGE);
+  const propertiesToDisplay = allProperties.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <section className="py-12 bg-gray-50 min-h-screen">
@@ -188,50 +201,88 @@ export default function PropertiesClient() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {propertiesToDisplay.map((property: Property) => (
-              <PropertyCard
-                key={property.id}
-                id={property.id}
-                title={property.title}
-                property_type={
-                  property?.property_type ?? {
-                    id: "",
-                    name: "Unknown",
-                    es_name: "Desconocido",
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {propertiesToDisplay.map((property: Property) => (
+                <PropertyCard
+                  key={property.id}
+                  id={property.id}
+                  title={property.title}
+                  property_type={
+                    property?.property_type ?? {
+                      id: "",
+                      name: "Unknown",
+                      es_name: "Desconocido",
+                    }
                   }
-                }
-                status={
-                  property?.status ?? {
-                    id: "",
-                    name: "Unknown",
-                    es_name: "Desconocido",
+                  status={
+                    property?.status ?? {
+                      id: "",
+                      name: "Unknown",
+                      es_name: "Desconocido",
+                    }
                   }
-                }
-                listing_types={
-                  property?.listing_type ?? {
-                    id: "",
-                    name: "Unknown",
-                    es_name: "Desconocido",
+                  listing_types={
+                    property?.listing_type ?? {
+                      id: "",
+                      name: "Unknown",
+                      es_name: "Desconocido",
+                    }
                   }
-                }
-                images={property.images.map((img) => getAbsoluteImageUrl(img.url))}
-                landArea={property.land_area ?? 0}
-                builtArea={property.built_area ?? 0}
-                price={property.price}
-                rooms={property.rooms}
-                bathrooms={property.bathrooms}
-                slug={property.id}
-                compact={true}
-                half_bathrooms={property.half_bathrooms}
-                property_features={property.property_features}
-                property_categories={property.property_categories}
-                neighborhood={property.neighborhood}
-                city={property.city}
-                state={property.state}
-              />
-            ))}
-          </div>
+                  images={property.images.map((img) => getAbsoluteImageUrl(img.url))}
+                  landArea={property.land_area ?? 0}
+                  builtArea={property.built_area ?? 0}
+                  price={property.price}
+                  rooms={property.rooms}
+                  bathrooms={property.bathrooms}
+                  slug={property.id}
+                  compact={true}
+                  half_bathrooms={property.half_bathrooms}
+                  property_features={property.property_features}
+                  property_categories={property.property_categories}
+                  neighborhood={property.neighborhood}
+                  city={property.city}
+                  state={property.state}
+                />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t("previous") || "Previous"}
+                </button>
+
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 rounded-lg border ${
+                        currentPage === page
+                          ? "bg-stone-800 text-white border-stone-800"
+                          : "bg-white text-stone-700 border-stone-300 hover:bg-stone-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t("next") || "Next"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
