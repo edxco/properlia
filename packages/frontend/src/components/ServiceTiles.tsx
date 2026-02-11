@@ -43,8 +43,8 @@ export function ServiceTiles() {
   const locale = useLocale();
 
   return (
-    <section className="py-16 md:py-24 bg-stone-50 border">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <section className="py-16 md:py-24 bg-stone-50">
+      <div className="max-w-7xl mx-auto px-0">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {tiles.map((tile, index) => (
             <Link
