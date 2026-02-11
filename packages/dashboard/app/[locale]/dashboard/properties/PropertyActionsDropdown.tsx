@@ -14,13 +14,11 @@ import { useUpdateProperty } from "@/src/services/properties/queries";
 
 interface PropertyActionsDropdownProps {
   property: Property;
-  onEdit: (property: Property) => void;
   onFactSheetClick: (propertyId: string) => void;
 }
 
 export default function PropertyActionsDropdown({
   property,
-  onEdit,
   onFactSheetClick,
 }: PropertyActionsDropdownProps) {
   const t = useT();
@@ -54,8 +52,7 @@ export default function PropertyActionsDropdown({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    onEdit(property);
-                    setIsOpen(false);
+                    window.location.href = `/dashboard/properties/${property.id}/edit`;
                   }}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-l-md cursor-pointer"
                 >

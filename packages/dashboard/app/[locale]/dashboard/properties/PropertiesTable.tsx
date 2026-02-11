@@ -26,7 +26,6 @@ interface PropertiesTableProps {
   statuses?: Status[];
   filters: { status_id?: string };
   onFilterChange: (filters: { status_id?: string }) => void;
-  onEditProperty: (property: Property) => void;
 }
 
 export default function PropertiesTable({
@@ -36,7 +35,6 @@ export default function PropertiesTable({
   statuses,
   filters,
   onFilterChange,
-  onEditProperty,
 }: PropertiesTableProps) {
   const t = useT();
   const locale = useLocale();
@@ -177,7 +175,6 @@ export default function PropertiesTable({
 
                   <PropertyActionsDropdown
                     property={property}
-                    onEdit={onEditProperty}
                     onFactSheetClick={(propertyId) => {
                       setSelectedPropertyId(propertyId);
                       setShowFactSheetModal(true);
@@ -190,9 +187,6 @@ export default function PropertiesTable({
             <div className="px-6 py-12 text-center text-gray-500">
               <p className="font-medium text-gray-700">
                 No properties found
-              </p>
-              <p className="text-sm text-gray-500">
-                Use the form on the left to create your first listing.
               </p>
             </div>
           )}
