@@ -133,7 +133,7 @@ module Pdf
                    width: title_box_w,
                    height: 52.5,
                    size: 42,
-                   align: :center,
+                   align: :right,
                    overflow: :shrink_to_fit
 
       pdf.fill_color '000000'
