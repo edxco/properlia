@@ -61,8 +61,8 @@ export function Hero() {
                 loop
               />
             </h1>
-            <h2 className="text-3xl text-white mb-6 inline-block leading-11">
-              <span className="bg-slate-800/50 px-px">
+            <h2 className="text-2xl md:text-3xl text-white mb-6 inline-block leading-11">
+              <span className="bg-slate-800/70 px-px">
                 {t("residentialCommercialIndustrial")}
               </span>
             </h2>
@@ -70,7 +70,7 @@ export function Hero() {
             {/* Search Card */}
             <div className="bg-white/95 backdrop-blur-sm p-6 rounded-lg max-w-3xl">
               <div className="flex flex-col gap-5">
-                {/* Property Type Filter */}
+                {/* Property Type Filter 
                 <div className="flex gap-4">
                   <button
                     onClick={() => setActiveCategory("all")}
@@ -112,7 +112,7 @@ export function Hero() {
                   >
                     {capitalizeEachWord(t("industrial"))}
                   </button>
-                </div>
+                </div>*/}
                 {/* Location Search Input */}
                 <div className="relative">
                   <svg
@@ -133,12 +133,12 @@ export function Hero() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                    placeholder="Ciudad, colonia o zona"
+                    placeholder={t("searchByCityOrLocation")}
                     className="w-full h-12 pl-10 pr-4 bg-stone-100 rounded-md text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
 
-                {/* Intent Selector (Comprar / Rentar) */}
+                {/* Intent Selector (Comprar / Rentar) 
                 <div className="bg-stone-100 p-1 rounded-md inline-flex">
                   <button
                     onClick={() => setActiveTab("buy")}
@@ -160,7 +160,7 @@ export function Hero() {
                   >
                     Rentar
                   </button>
-                </div>
+                </div>*/}
 
                 {/* Primary CTA */}
                 <button
@@ -176,17 +176,6 @@ export function Hero() {
                 </p>
               </div>
             </div>
-
-            <PillLink
-              href={""}
-              children={t("letsGetYourPropertySold")}
-              className="mt-6 bg-slate-100"
-            />
-            <PillLink
-              href={""}
-              children={t("readyToInvest")}
-              className="mt-6 ml-4 bg-slate-300"
-            />
           </div>
         </div>
       </div>
