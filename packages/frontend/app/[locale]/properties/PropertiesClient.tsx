@@ -153,7 +153,7 @@ export default function PropertiesClient() {
           onClearFilters={clearFilters}
           activeFilterCount={activeFilterCount}
           advancedFilterCount={advancedFilterCount}
-          currentCount={filteredProperties.length}
+          currentCount={propertiesToDisplay.length}
           totalCount={propertiesData?.data.length || 0}
           cities={cities}
           states={states}
