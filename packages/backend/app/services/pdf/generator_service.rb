@@ -19,8 +19,8 @@ module Pdf
     include Pdf::FormatHelper
     include Pdf::DisplayImageCover
 
-    RESIDENTIAL_TYPES = %w[house departament].freeze
-    COMMERCIAL_TYPES = ['retail space'].freeze
+    RESIDENTIAL_TYPES = ['house', 'department'].freeze
+    COMMERCIAL_TYPES = ['retail space', 'doctor office', 'office'].freeze
     INDUSTRIAL_TYPES = %w[warehouse].freeze
     LAND_TYPES = %w[land].freeze
 
@@ -137,17 +137,6 @@ module Pdf
         # Page 3+: Images section
         pdf.start_new_page(margin: 40)
         add_images_section(pdf)
-
-        pdf.move_down 20
-        pdf.text @property.title, size: 20, style: :bold, color: '2C3E50'
-        pdf.move_down 10
-        pdf.text format_price(@property.price), size: 24, style: :bold, color: '27AE60'
-
-        pdf.move_down 15
-        add_location_section(pdf)
-
-        pdf.move_down 15
-        add_property_details_table(pdf)
       end.render
     end
 
@@ -163,20 +152,6 @@ module Pdf
         # Page 3+: Images section
         pdf.start_new_page(margin: 40)
         add_images_section(pdf)
-
-        pdf.move_down 20
-        pdf.text @property.title, size: 20, style: :bold, color: '2C3E50'
-        pdf.move_down 10
-        pdf.text format_price(@property.price), size: 24, style: :bold, color: '3498DB'
-
-        pdf.move_down 15
-        add_commercial_features_box(pdf)
-
-        pdf.move_down 15
-        add_location_section(pdf)
-
-        pdf.move_down 15
-        add_property_details_table(pdf)
       end.render
     end
 
@@ -200,12 +175,6 @@ module Pdf
 
         pdf.move_down 15
         add_industrial_features_box(pdf)
-
-        pdf.move_down 15
-        add_location_section(pdf)
-
-        pdf.move_down 15
-        add_property_details_table(pdf)
       end.render
     end
 
