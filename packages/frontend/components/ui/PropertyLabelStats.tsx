@@ -7,8 +7,6 @@ import { Home, LandPlot, Bed, ShowerHead, Toilet, Car } from "lucide-react";
 interface PropertyStatsGridProps {
   property_category: PropertyCategory[];
   property_type: string;
-  landArea: number;
-  builtArea: number;
   rooms: number;
   bathrooms: number;
   half_bathrooms: number;
@@ -21,8 +19,6 @@ interface PropertyStatsGridProps {
 export function PropertyLabelStats({
   property_category,
   property_type,
-  landArea,
-  builtArea,
   rooms,
   bathrooms,
   half_bathrooms,
@@ -38,29 +34,6 @@ export function PropertyLabelStats({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="flex items-center gap-2 text-gray-600">
-          <LandPlot className="w-4 h-4 flex-shrink-0" />
-          <div className="text-sm">
-            <span className="font-medium text-gray-900">
-              {landArea.toLocaleString()}
-            </span>
-            <span className="text-xs ml-1">m² {t("land")}</span>
-          </div>
-        </div>
-
-        {isResidential && (
-          <div className="flex items-center gap-2 text-gray-600">
-            <Home className="w-4 h-4 flex-shrink-0" />
-            <div className="text-sm">
-              <span className="font-medium text-gray-900">
-                {builtArea.toLocaleString()}
-              </span>
-              <span className="text-xs ml-1">m² {t("built")}</span>
-            </div>
-          </div>
-        )}
-      </div>
       {isResidential && (
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="flex items-center gap-2 text-gray-600">

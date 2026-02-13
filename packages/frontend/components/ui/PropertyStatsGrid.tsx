@@ -1,10 +1,8 @@
 "use client";
 
-import { Home, LandPlot, Bed, ShowerHead, Toilet } from "lucide-react";
+import { Bed, ShowerHead, Toilet } from "lucide-react";
 
 interface PropertyStatsGridProps {
-  landArea: number;
-  builtArea: number;
   rooms: number;
   bathrooms: number;
   half_bathrooms: number;
@@ -16,8 +14,6 @@ interface PropertyStatsGridProps {
  * Displays property statistics in a 4-column grid
  */
 export function PropertyStatsGrid({
-  landArea,
-  builtArea,
   rooms,
   bathrooms,
   half_bathrooms,
@@ -31,22 +27,6 @@ export function PropertyStatsGrid({
   console.log("PropertyStatsGrid - isResidential:", isResidential);
   return (
     <div className="grid grid-cols-7 gap-2 mb-4">
-      {/* Land Area (2x width) */}
-      <div className="col-span-2 flex items-center justify-center gap-1.5 bg-gray-50 rounded-md py-2">
-        <LandPlot className="w-4 h-4" />
-        <span className="text-sm font-medium text-gray-900">
-          {landArea.toLocaleString()} m&sup2;
-        </span>
-      </div>
-
-      {/* Built Area (2x width) */}
-      <div className="col-span-2 flex items-center justify-center gap-1.5 bg-gray-50 rounded-md py-2">
-        <Home className="w-4 h-4" />
-        <span className="text-sm font-medium text-gray-900">
-          {builtArea.toLocaleString()} m&sup2;
-        </span>
-      </div>
-
       {isResidential ? (
         <>
           {/* Rooms */}

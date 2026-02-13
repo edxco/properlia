@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Phone, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Phone, MapPin, LandPlot, Home } from "lucide-react";
 import {
   useT,
   useLocale,
@@ -35,6 +35,7 @@ interface PropertyCardProps {
   neighborhood?: string | null;
   city?: string | null;
   state?: string | null;
+  autoplay?: boolean;
 }
 
 export const PropertyCard = ({
@@ -57,6 +58,7 @@ export const PropertyCard = ({
   neighborhood,
   city,
   state,
+  autoplay = false,
 }: PropertyCardProps) => {
   const t = useT();
   const locale = useLocale();
@@ -79,7 +81,7 @@ export const PropertyCard = ({
 
   // Autoplay carousel
   useEffect(() => {
-    if (images.length <= 1 || isHovered) return;
+    if (!autoplay || images.length <= 1 || isHovered) return;
 
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
@@ -88,7 +90,7 @@ export const PropertyCard = ({
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [images.length, isHovered]);
+  }, [autoplay, images.length, isHovered]);
 
   const goToPrevious = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -135,23 +137,40 @@ export const PropertyCard = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {images.map((image, index) => (
-          <Image
-            key={index}
-            src={image}
-            alt={`${title} - Image ${index + 1}`}
-            fill
-            className={`object-cover transition-opacity duration-700 ease-in-out ${
-              index === currentImageIndex ? "opacity-100" : "opacity-0"
-            }`}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={index === 0}
-            unoptimized={
-              image.includes("localhost") ||
-              image.includes("rails/active_storage")
-            }
-          />
-        ))}
+        {autoplay ? (
+          images.map((image, index) => (
+            <Image
+              key={index}
+              src={image}
+              alt={`${title} - Image ${index + 1}`}
+              fill
+              className={`object-cover transition-opacity duration-700 ease-in-out ${
+                index === currentImageIndex ? "opacity-100" : "opacity-0"
+              }`}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={index === 0}
+              unoptimized={
+                image.includes("localhost") ||
+                image.includes("rails/active_storage")
+              }
+            />
+          ))
+        ) : (
+          images[0] && (
+            <Image
+              src={images[0]}
+              alt={title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
+              unoptimized={
+                images[0].includes("localhost") ||
+                images[0].includes("rails/active_storage")
+              }
+            />
+          )
+        )}
 
         {/* Badges overlay on top left */}
         <div className="absolute top-3 left-3 flex gap-2 flex-wrap z-10">
@@ -159,7 +178,7 @@ export const PropertyCard = ({
           {getBadge(property_type, locale)}
         </div>
 
-        {images.length > 1 && (
+        {autoplay && images.length > 1 && (
           <>
             <button
               onClick={goToPrevious}
@@ -178,7 +197,23 @@ export const PropertyCard = ({
           </>
         )}
 
-        {images.length > 1 && (
+        {/* Area badges on bottom right */}
+        <div className="absolute bottom-3 right-3 flex gap-1.5 z-10">
+          {landArea > 0 && (
+            <span className="flex items-center gap-1 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-medium px-2 py-1 rounded shadow-sm whitespace-nowrap">
+              <LandPlot className="w-3.5 h-3.5" />
+              {landArea.toLocaleString()} m²
+            </span>
+          )}
+          {builtArea > 0 && (
+            <span className="flex items-center gap-1 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-medium px-2 py-1 rounded shadow-sm whitespace-nowrap">
+              <Home className="w-3.5 h-3.5" />
+              {builtArea.toLocaleString()} m²
+            </span>
+          )}
+        </div>
+
+        {autoplay && images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
             {images.map((_, index) => (
               <button
@@ -210,8 +245,6 @@ export const PropertyCard = ({
           <div className="px-4">
           {compact ? (
             <PropertyStatsGrid
-              landArea={landArea}
-              builtArea={builtArea}
               rooms={rooms}
               bathrooms={bathrooms}
               half_bathrooms={half_bathrooms}
@@ -221,8 +254,6 @@ export const PropertyCard = ({
             <PropertyLabelStats
             property_category={property_categories}
             property_type={property_type.id}
-              landArea={landArea}
-              builtArea={builtArea}
               rooms={rooms}
               bathrooms={bathrooms}
               half_bathrooms={half_bathrooms}
