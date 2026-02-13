@@ -75,11 +75,15 @@ export default function PreviewPDF({
         .join(" ")}
     >
       <div className="relative w-full">
-        <img
-          src={heroImage.src}
-          alt={heroImage.alt ?? "Property hero image"}
-          className="h-[520px] w-full object-cover md:h-[560px]"
-        />
+        {heroImage.src ? (
+          <img
+            src={heroImage.src}
+            alt={heroImage.alt ?? "Property hero image"}
+            className="h-[520px] w-full object-cover md:h-[560px]"
+          />
+        ) : (
+          <div className="h-[520px] w-full bg-gray-200 md:h-[560px]" />
+        )}
 
         {exclusive ? (
           <div className="absolute left-4 top-4 md:left-0 md:top-0">
