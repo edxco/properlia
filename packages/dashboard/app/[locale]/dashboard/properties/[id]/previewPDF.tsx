@@ -65,7 +65,7 @@ export default function PreviewPDF({
   const { data: generalInfo } = useGeneralInfo();
   const [leftFeatures, rightFeatures] = splitIntoTwoColumns(features);
   const titleTruncated = title.substring(0, 48) + "...";
-  const titleFooter =
+  const titleHeader =
     title.length > 92 ? title.substring(0, 93) + "..." : title;
 
   return (
@@ -183,7 +183,7 @@ export default function PreviewPDF({
       <div className="w-full bg-[#E8E8E8] mt-4">
         <div className="border-b-3 border-primary p-3">
           <div className="w-full text-xs font-extrabold mb-1">
-            {titleFooter}
+            {titleHeader}
           </div>
           <div className="text-right text-xs flex justify-between items-center gap-1 text-right">
             <div className="font-semibold w-3/4 text-left">
