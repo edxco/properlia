@@ -10,6 +10,7 @@ env:
   BACKEND_IMAGE_NAME: properlia-backend
   FRONTEND_IMAGE_NAME: properlia-frontend
   DASHBOARD_IMAGE_NAME: properlia-dashboard
+  LINKS_IMAGE_NAME: properlia-links
   NGINX_IMAGE_NAME: properlia-nginx
   DOCKER_BUILDKIT: 1
 
@@ -105,10 +106,12 @@ jobs:
           BACKEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:backend-${GITHUB_REF_NAME}-${SHA_SHORT}"
           FRONTEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:frontend-${GITHUB_REF_NAME}-${SHA_SHORT}"
           DASHBOARD_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:dashboard-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          LINKS_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:links-${GITHUB_REF_NAME}-${SHA_SHORT}"
           NGINX_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:nginx-${GITHUB_REF_NAME}-${SHA_SHORT}"
           echo "BACKEND_IMAGE_URI=$BACKEND_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "FRONTEND_IMAGE_URI=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "DASHBOARD_IMAGE_URI=$DASHBOARD_IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "LINKS_IMAGE_URI=$LINKS_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "NGINX_IMAGE_URI=$NGINX_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_OUTPUT
 
@@ -159,6 +162,17 @@ jobs:
             ${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}
           cache-from: type=gha,scope=dashboard-${{ steps.vars.outputs.DASHBOARD_CACHE_KEY }}
           cache-to: type=gha,mode=max,scope=dashboard-${{ steps.vars.outputs.DASHBOARD_CACHE_KEY }}
+
+      - name: Build and push links image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./packages/links/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.LINKS_IMAGE_URI }}
+          cache-from: type=gha,scope=links
+          cache-to: type=gha,mode=max,scope=links
 
       - name: Build and push nginx image
         uses: docker/build-push-action@v6
@@ -307,6 +321,7 @@ jobs:
             export BACKEND_IMAGE="${{ steps.vars.outputs.BACKEND_IMAGE_URI }}"
             export FRONTEND_IMAGE="${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}"
             export DASHBOARD_IMAGE="${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}"
+            export LINKS_IMAGE="${{ steps.vars.outputs.LINKS_IMAGE_URI }}"
             export NGINX_IMAGE="${{ steps.vars.outputs.NGINX_IMAGE_URI }}"
             export BACKEND_PORT="${{ steps.envmap.outputs.BACKEND_PORT }}"
             export FRONTEND_PORT="${{ steps.envmap.outputs.FRONTEND_PORT }}"
@@ -317,6 +332,7 @@ jobs:
             echo "Using BACKEND_IMAGE=$BACKEND_IMAGE"
             echo "Using FRONTEND_IMAGE=$FRONTEND_IMAGE"
             echo "Using DASHBOARD_IMAGE=$DASHBOARD_IMAGE"
+            echo "Using LINKS_IMAGE=$LINKS_IMAGE"
             echo "Using NGINX_IMAGE=$NGINX_IMAGE"
             echo "Using COMPOSE_FILE=$COMPOSE_FILE"
             echo "Using ENV_FILE=$ENV_FILE"
@@ -366,6 +382,7 @@ jobs:
             docker pull "$BACKEND_IMAGE"
             docker pull "$FRONTEND_IMAGE"
             docker pull "$DASHBOARD_IMAGE"
+            docker pull "$LINKS_IMAGE"
             docker pull "$NGINX_IMAGE"
 
             # Add image URIs to env file (AWS credentials are auto-fetched from EC2 metadata)
@@ -377,11 +394,13 @@ jobs:
             sed -i '/^BACKEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^FRONTEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^DASHBOARD_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^LINKS_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             sed -i '/^NGINX_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
             # Add image URIs only (no AWS credentials - container fetches from EC2 metadata)
             echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$ENV_FILE"
             echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$ENV_FILE"
             echo "DASHBOARD_IMAGE=$DASHBOARD_IMAGE" >> "$ENV_FILE"
+            echo "LINKS_IMAGE=$LINKS_IMAGE" >> "$ENV_FILE"
             echo "NGINX_IMAGE=$NGINX_IMAGE" >> "$ENV_FILE"
 
             echo "Starting services with Docker Compose..."
