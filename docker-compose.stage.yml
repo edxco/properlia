@@ -9,6 +9,7 @@ services:
     depends_on:
       - frontend
       - dashboard
+      - links
       - backend
     restart: unless-stopped
     networks:
@@ -92,6 +93,16 @@ services:
       INTERNAL_API_URL: http://backend:3000/api/v1
     depends_on:
       - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  links:
+    image: ${LINKS_IMAGE:-properlia-links:latest}
+    expose:
+      - "3003"
+    environment:
+      NODE_ENV: production
     restart: unless-stopped
     networks:
       - app-network

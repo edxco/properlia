@@ -32,6 +32,7 @@ GA_ID=${NEXT_PUBLIC_GA_ID:-}
 BACKEND_TAG=${BACKEND_TAG:-properlia-backend:latest}
 FRONTEND_TAG=${FRONTEND_TAG:-properlia-frontend:latest}
 DASHBOARD_TAG=${DASHBOARD_TAG:-properlia-dashboard:latest}
+LINKS_TAG=${LINKS_TAG:-properlia-links:latest}
 
 echo "========================================="
 echo "Building Properlia Docker Images"
@@ -72,6 +73,15 @@ docker build \
 echo "✅ Dashboard built: $DASHBOARD_TAG"
 echo ""
 
+# Build Links
+echo "📦 Building Links..."
+docker build \
+  -t $LINKS_TAG \
+  -f packages/links/Dockerfile \
+  .
+echo "✅ Links built: $LINKS_TAG"
+echo ""
+
 echo "========================================="
 echo "✅ All images built successfully!"
 echo "========================================="
@@ -80,6 +90,7 @@ echo "Built images:"
 echo "  - Backend:   $BACKEND_TAG"
 echo "  - Frontend:  $FRONTEND_TAG"
 echo "  - Dashboard: $DASHBOARD_TAG"
+echo "  - Links:     $LINKS_TAG"
 echo ""
 echo "To run with production settings:"
 echo "  docker-compose -f docker-compose.prod.yml up -d"

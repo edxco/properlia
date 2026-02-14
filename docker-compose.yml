@@ -94,6 +94,25 @@ services:
     networks:
       - app-network
 
+  links:
+    image: node:20-slim
+    working_dir: /monorepo
+    command: bash -c "apt-get update && apt-get install -y python3 make g++ && npm ci && cd packages/links && npm run dev"
+    volumes:
+      - .:/monorepo
+      - /monorepo/node_modules
+      - /monorepo/packages/links/node_modules
+      - /monorepo/packages/shared/node_modules
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
 volumes:
   postgres_data:
   bundle_cache:
