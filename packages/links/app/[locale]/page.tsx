@@ -8,6 +8,7 @@ import ProperliaLogo from "@/public/properlia.png";
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
+    dataLayer?: Record<string, unknown>[];
   }
 }
 
@@ -116,12 +117,18 @@ const links = [
 ];
 
 function trackEvent(eventName: string) {
-  if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("event", eventName, {
-      event_category: "links",
-      event_label: eventName,
-    });
-  }
+  if (typeof window === "undefined") return;
+
+  window.dataLayer?.push({
+    event: eventName,
+    event_category: "links",
+    event_label: eventName,
+  });
+
+  window.gtag?.("event", eventName, {
+    event_category: "links",
+    event_label: eventName,
+  });
 }
 
 export default function Home() {
