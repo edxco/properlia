@@ -33,6 +33,10 @@ WORKDIR /monorepo/packages/links
 
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_PUBLIC_GTM_ID
+ENV NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
+ARG NEXT_PUBLIC_GA_ID
+ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 
 # Build the application
 RUN npm run build
