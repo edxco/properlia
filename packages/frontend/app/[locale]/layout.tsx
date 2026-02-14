@@ -6,7 +6,7 @@ import { QueryProvider } from "@/src/providers/QueryProvider";
 import { TranslationProvider } from "@properlia/shared/components/TranslationProvider";
 import { Navigation } from "@/src/components/Navigation";
 import { Footer } from "@/src/components/Footer";
-import GoogleAnalytics from "@/src/components/GoogleAnalytics";
+import { GoogleAnalytics } from "@properlia/shared";
 
 export const metadata: Metadata = {
   title: "Properlia",
