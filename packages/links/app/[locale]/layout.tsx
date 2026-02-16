@@ -7,6 +7,7 @@ import { TranslationProvider } from "@properlia/shared/components/TranslationPro
 export const metadata: Metadata = {
   title: "Properlia Links",
   description: "Properlia - Your real estate links",
+  robots: { index: false, follow: false },
 };
 
 const SUPPORTED_LOCALES = ["es", "en"] as const;
