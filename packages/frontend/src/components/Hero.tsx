@@ -48,22 +48,23 @@ export function Hero() {
       <div className="relative z-20 h-full flex items-center">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-3xl">
-            <h5 className="text-2xl text-white bg-primary inline-block px-3 py-1">
-              {t("helpU")}
-            </h5>
-            <h1 className="font-bold text-5xl md:text-7xl font-lexend text-white leading-tight tracking-wide">
+            <span className="text-2xl text-white font-semibold tracking-wider bg-primary inline-block px-3 py-1">
+              {t("heroBadge")}
+            </span>
+            <h1 className="font-bold text-2xl md:text-5xl lg:text-6xl font-lexend text-white leading-tight tracking-wide">
               <TypingAnimation
                 words={[
-                  capitalizeEachWord(t("buy")),
-                  capitalizeEachWord(t("sell")),
-                  capitalizeEachWord(t("invest")),
+                  t("heroLine1"),
+                  t("heroLine2"),
+                  t("heroLine3"),
+                  t("heroLine4"),
                 ]}
                 loop
               />
             </h1>
-            <h2 className="text-2xl md:text-3xl text-white mb-6 inline-block leading-11">
+            <h2 className="text-xl md:text-3xl text-white mb-6 inline-block leading-8 md:leading-11">
               <span className="bg-slate-800/70 px-px">
-                {t("residentialCommercialIndustrial")}
+                {t("heroSubheadline")}
               </span>
             </h2>
 
@@ -167,12 +168,11 @@ export function Hero() {
                   onClick={handleSearch}
                   className="w-full h-12 bg-primary text-white font-medium rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
                 >
-                  Buscar propiedades
+                  {t("heroCtaButton")}
                 </button>
 
-                {/* Micro-trust copy */}
                 <p className="text-xs text-stone-400 text-center">
-                  Acompañamiento experto en cada paso
+                  {t("heroMicroTrust")}
                 </p>
               </div>
             </div>

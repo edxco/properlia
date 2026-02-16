@@ -1,4 +1,12 @@
 {
+  "metaTitle": "Properlia | Real Estate in Puebla — Houses, Apartments & Investments",
+  "metaDescription": "Find properties for sale in Puebla: houses, apartments, land, and investment opportunities. Personalized real estate advisory with real market data.",
+  "propertiesMetaTitle": "Properties for Sale in Puebla | Properlia",
+  "propertiesMetaDescription": "Browse houses, apartments, land, and commercial spaces for sale in Puebla. Filter by location, price, and property type.",
+  "buyerMetaTitle": "Buyer Consultation | Properlia Puebla",
+  "buyerMetaDescription": "Book a free consultation and receive personalized property options in Puebla within 24 hours.",
+  "sellerMetaTitle": "Sell Your Property in Puebla | Properlia",
+  "sellerMetaDescription": "Fill out the form and an advisor will help you sell your property at the best price in Puebla.",
   "hi": "hola",
   "imABuyer": "I'm a buyer",
   "imASeller": "I'm a seller",
@@ -17,6 +25,15 @@
   "sell": "sell",
   "invest": "invest",
   "residentialCommercialIndustrial": "residential, commercial, and industrial properties",
+
+  "heroBadge": "Real Estate in Puebla",
+  "heroLine1": "Your next property in Puebla",
+  "heroLine2": "Investments with real returns",
+  "heroLine3": "Your ideal home, hassle-free",
+  "heroLine4": "Your trusted real estate advisor",
+  "heroSubheadline": "We find the property that fits your goals. No surprises.",
+  "heroCtaButton": "Browse available properties",
+  "heroMicroTrust": "+200 deals closed in Puebla and surrounding areas",
   "letsGetYourPropertySold": "Let's Get Your Property Sold",
   "readyToInvest": "Ready to Invest? We'll Guide You Every Step",
 
@@ -51,9 +68,10 @@
   "phone": "Phone",
   "email": "Email",
 
-  "properliaBriefTitle": "We promote properties with processes, technology, and expert guidance.",
-  "properliaBriefDescription": "At Properlia, we help discerning buyers find exceptional properties in Puebla and across Mexico. With years of experience supporting investors, families, and developers, we understand the market in depth and provide a service tailored to your needs.",
-  "properliaBriefDescription2": "For us, finding the right property is about more than size or location—it's about choosing a lifestyle that matches your vision, comfort, and long-term goals. Whether you're looking for residential, commercial, or industrial properties—or exploring investment opportunities—we guide you with transparency, confidence, and a firm commitment to your success.",
+  "properliaBriefTitle": "Buying, selling, and investing in Puebla properties. With data, not promises.",
+  "properliaBriefDescription": "At Properlia, we analyze every property with real market data: price per m², projected appreciation, and area comparisons. Our clients make informed decisions, not rushed ones.",
+  "mainAboutCtaPrimary": "Book a free consultation",
+  "mainAboutCtaSecondary": "Browse properties for sale",
 
   "featuredProperties": "Featured properties",
   "viewFullDetails": "View Full Details",
@@ -144,7 +162,7 @@
   "consentMarketing": "I agree to receive marketing communications",
   "submitForm": "Submit request",
   "submitting": "Submitting...",
-  "formSuccess": "Thank you! Your request has been submitted successfully. An advisor will contact you soon.",
+  "formSuccess": "We've received your request. An advisor will contact you within 24 hours with options that match your search.",
   "formError": "There was an error submitting your request. Please try again.",
   "requiredField": "This field is required",
   "emailOrPhoneRequired": "At least an email or phone number is required",
@@ -204,9 +222,9 @@
   "bannerGuidanceTitle": "New to buying property?",
   "bannerGuidanceDescription": "We've got you covered — from financing options to closing, we'll guide you every step of the way.",
 
-  "buyerPageTitle": "Private Buyer Consultation",
-  "buyerPageSubtitle": "Let us understand your goals so we can find the perfect property for you.",
-  "buyerFormTitle": "Tell us about your search",
+  "buyerPageTitle": "Find your ideal property in Puebla",
+  "buyerPageSubtitle": "Fill out the form and an advisor will contact you within 24 hours with personalized options.",
+  "buyerFormTitle": "What type of property are you looking for?",
 
   "buyerFullName": "Full name",
   "buyerEmail": "Email address",
@@ -354,12 +372,12 @@
   "searchByEmailOrName": "Search by email or name",
 
   "serviceTileBuyTitle": "LOOKING TO BUY",
-  "serviceTileBuySubtitle": "Don’t see your property? We can help",
-  "serviceTileBuyButton": "We’ll find it for you",
+  "serviceTileBuySubtitle": "Access exclusive properties before other buyers",
+  "serviceTileBuyButton": "Book a buyer consultation",
   "serviceTileSellTitle": "LOOKING TO SELL",
-  "serviceTileSellSubtitle": "Sell your property with expert guidance",
-  "serviceTileSellButton": "Start selling my property",
+  "serviceTileSellSubtitle": "We sell your property in an average of 90 days",
+  "serviceTileSellButton": "Request a free valuation",
   "serviceTileInvestTitle": "LOOKING TO INVEST",
-  "serviceTileInvestSubtitle": "Opportunities with real ROI",
-  "serviceTileInvestButton": "View investments"
+  "serviceTileInvestSubtitle": "Projected returns of 8-12% annually in Puebla",
+  "serviceTileInvestButton": "Explore investment opportunities"
 }
