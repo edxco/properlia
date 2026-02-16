@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,6 +16,7 @@ import {
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
 import { getBadge, BadgeItem } from "@properlia/shared/lib/getBadge";
+import { buildPropertyUrl } from "@properlia/shared/lib/slugify";
 import {
   ListingType,
   PropertyFeature,
@@ -39,7 +39,6 @@ interface PropertyCardProps {
   rooms: number;
   bathrooms: number;
   half_bathrooms: number;
-  slug?: string;
   compact?: boolean;
   property_features?: PropertyFeature[];
   property_categories?: PropertyCategory[];
@@ -62,7 +61,6 @@ export const PropertyCard = ({
   rooms,
   bathrooms,
   half_bathrooms,
-  slug,
   compact = false,
   property_features = [],
   property_categories = [],
@@ -73,16 +71,17 @@ export const PropertyCard = ({
 }: PropertyCardProps) => {
   const t = useT();
   const locale = useLocale();
-  const pathname = usePathname();
   const { data: generalInfo, isLoading, isError } = useGeneralInfo();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
+  const propertyPath = `/${locale}${buildPropertyUrl({ id, title, state, city })}`;
+
   // Construct the full property URL for WhatsApp sharing
   const propertyUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}${pathname}/properties/${slug || id}`
+      ? `${window.location.origin}${propertyPath}`
       : "";
 
   const whatsappMessage = `Hola! Me interesa esta propiedad:\n${title}\n${property_type.es_name} en ${listing_types.es_name}\n${propertyUrl}`;
@@ -143,7 +142,7 @@ export const PropertyCard = ({
 
   return (
     <Link
-      href={`/properties/${slug || id}`}
+      href={propertyPath}
       className="flex flex-col bg-white mb-4 mx-4 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 h-full"
     >
       <div

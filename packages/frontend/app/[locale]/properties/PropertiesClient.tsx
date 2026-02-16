@@ -235,7 +235,6 @@ export default function PropertiesClient() {
                   price={property.price}
                   rooms={property.rooms}
                   bathrooms={property.bathrooms}
-                  slug={property.id}
                   compact={true}
                   half_bathrooms={property.half_bathrooms}
                   property_features={property.property_features}

@@ -70,7 +70,6 @@ export function FeaturedProperties() {
     price: property.price,
     rooms: property.rooms,
     bathrooms: property.bathrooms,
-    slug: property.id,
     half_bathrooms: property.half_bathrooms,
     property_features: property.property_features,
     property_categories: property.property_categories,
