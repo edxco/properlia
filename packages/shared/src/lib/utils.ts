@@ -115,7 +115,7 @@ export function parsePriceInput(value: string): number {
 export function formatPriceDisplay(
   value: number,
   locale: string = "en-US",
-  currency: string = "USD"
+  currency: string = "MXN"
 ): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",

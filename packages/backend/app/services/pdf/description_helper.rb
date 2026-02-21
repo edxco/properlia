@@ -48,7 +48,7 @@ module Pdf
                    at: [margin, pdf.bounds.top - 80],
                    width: content_width,
                    height: 30,
-                   size: 16,
+                   size: 14,
                    overflow: :shrink_to_fit
 
       # Description text
@@ -65,7 +65,7 @@ module Pdf
                      at: [margin, pdf.bounds.top - 120],
                      width: content_width,
                      height: 500,
-                     size: 12,
+                     size: 9,
                      leading: 4,
                      align: :justify,
                      overflow: :truncate

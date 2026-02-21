@@ -63,7 +63,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({
     locale === "es" ? "es-MX" : "en-US",
     {
       style: "currency",
-      currency: "USD",
+      currency: "MXN",
       minimumFractionDigits: 0,
     }
   ).format(property.price);
