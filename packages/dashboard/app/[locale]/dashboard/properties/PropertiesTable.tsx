@@ -13,7 +13,7 @@ import {
 } from "@properlia/shared";
 import PropertyActionsDropdown from "./PropertyActionsDropdown";
 import FactSheetModal from "./FactSheetModal";
-import { Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 interface PropertiesTableProps {
   properties: Property[];
@@ -26,6 +26,7 @@ interface PropertiesTableProps {
   statuses?: Status[];
   filters: { status_id?: string };
   onFilterChange: (filters: { status_id?: string }) => void;
+  onPageChange: (page: number) => void;
 }
 
 export default function PropertiesTable({
@@ -35,6 +36,7 @@ export default function PropertiesTable({
   statuses,
   filters,
   onFilterChange,
+  onPageChange,
 }: PropertiesTableProps) {
   const t = useT();
   const locale = useLocale();
@@ -192,6 +194,59 @@ export default function PropertiesTable({
           )}
         </div>
       </div>
+
+      {/* Pagination */}
+      {metadata && metadata.pages > 1 && (
+        <div className="flex items-center justify-center gap-1">
+          <button
+            onClick={() => onPageChange(metadata.page - 1)}
+            disabled={metadata.page <= 1}
+            className="p-2 rounded-md text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          {Array.from({ length: metadata.pages }, (_, i) => i + 1)
+            .filter(
+              (p) =>
+                p === 1 ||
+                p === metadata.pages ||
+                Math.abs(p - metadata.page) <= 2
+            )
+            .reduce<(number | "...")[]>((acc, p, i, arr) => {
+              if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((item, i) =>
+              item === "..." ? (
+                <span key={`ellipsis-${i}`} className="px-2 text-gray-400">
+                  …
+                </span>
+              ) : (
+                <button
+                  key={item}
+                  onClick={() => onPageChange(item as number)}
+                  className={`min-w-[2rem] h-8 px-2 rounded-md text-sm font-medium transition-colors ${
+                    metadata.page === item
+                      ? "bg-primary text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {item}
+                </button>
+              )
+            )}
+
+          <button
+            onClick={() => onPageChange(metadata.page + 1)}
+            disabled={metadata.page >= metadata.pages}
+            className="p-2 rounded-md text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Fact Sheet Modal */}
       <FactSheetModal

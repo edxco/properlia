@@ -16,10 +16,17 @@ export default function PropertiesPage() {
   const t = useT();
   const locale = useLocale();
   const [filters, setFilters] = useState<{ status_id?: string }>({});
+  const [page, setPage] = useState(1);
 
   const { data, isLoading, error } = useProperties({
     status_id: filters.status_id || undefined,
+    page,
   });
+
+  const handleFilterChange = (newFilters: { status_id?: string }) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
   const { data: statuses } = useStatuses();
 
   const properties = useMemo(() => data?.data ?? [], [data]);
@@ -60,7 +67,8 @@ export default function PropertiesPage() {
         metadata={metadata}
         statuses={statuses}
         filters={filters}
-        onFilterChange={setFilters}
+        onFilterChange={handleFilterChange}
+        onPageChange={setPage}
       />
     </div>
   );
