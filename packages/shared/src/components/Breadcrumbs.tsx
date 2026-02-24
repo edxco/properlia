@@ -24,7 +24,8 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' 
             <li key={index} className="inline-flex items-center">
               {index > 0 && (
                 <svg
-                  className="w-3 h-3 mx-1 text-gray-400"
+                  className="text-primary"
+                  style={{width: '8px', margin: '0 8px'}}
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
