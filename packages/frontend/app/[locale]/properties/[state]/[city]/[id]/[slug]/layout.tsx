@@ -35,7 +35,7 @@ function buildPropertyJsonLd(property: Property, locale: string) {
       "@type": "PostalAddress",
       ...(property.address && { streetAddress: property.address }),
       ...(property.neighborhood && { addressLocality: property.neighborhood }),
-      ...(property.city && { addressRegion: property.city }),
+      ...(property.city && { addressLocality: property.city }),
       ...(property.state && { addressRegion: property.state }),
       addressCountry: "MX",
       ...(property.zip_code && { postalCode: property.zip_code }),
