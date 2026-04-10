@@ -1,8 +1,6 @@
 "use client";
 
 import { TypingAnimation } from "@/components/ui/typing-animation";
-import { capitalizeEachWord } from "@/lib/utils/index";
-import { PillLink } from "@/components/ui";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -10,7 +8,7 @@ import {
   useT,
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
-import ProperliaBg from "@/public/properlia-bg.png";
+import ProperliaBg from "@/public/properlia-bg.webp";
 
 type ListingType = "rent" | "buy";
 type PropertyCategory = "all" | "commercial" | "residential" | "industrial";
@@ -42,6 +40,8 @@ export function Hero() {
       <Image
         src={ProperliaBg}
         alt=""
+        priority
+        sizes="100vw"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
