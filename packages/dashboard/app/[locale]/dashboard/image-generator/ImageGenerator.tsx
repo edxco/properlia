@@ -20,7 +20,7 @@ type Preset = keyof typeof PRESETS;
 
 export function ImageGenerator() {
   const previewRef = useRef<HTMLDivElement>(null);
-  const [bgColor, setBgColor] = useState("#1e3a5f");
+  const [bgColor, setBgColor] = useState("#fffff");
   const [preset, setPreset] = useState<Preset>("square");
   const [isCapturing, setIsCapturing] = useState(false);
 
