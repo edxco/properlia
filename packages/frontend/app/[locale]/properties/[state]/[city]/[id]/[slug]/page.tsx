@@ -1,30 +1,19 @@
-'use client';
+import { propertyApi } from "@properlia/shared/services/properties/api";
+import { PropertyDetail } from "@properlia/shared";
+import { notFound } from "next/navigation";
 
-import { useParams } from 'next/navigation';
-import { useProperty } from '@/src/services/properties/queries';
-import { PropertyDetail } from '@properlia/shared';
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}) {
+  const { locale, id } = await params;
 
-export default function Page() {
-  const params = useParams();
-  const id = params?.id as string;
-  const locale = params?.locale as string;
-
-  const { data: property, isLoading, isError } = useProperty(id);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-stone-600">Loading property...</div>
-      </div>
-    );
-  }
-
-  if (isError || !property) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-600">Property not found</div>
-      </div>
-    );
+  let property;
+  try {
+    property = await propertyApi.getById(id);
+  } catch {
+    notFound();
   }
 
   return <PropertyDetail property={property} locale={locale} />;
