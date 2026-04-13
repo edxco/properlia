@@ -54,10 +54,6 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({
       filename: img.filename,
     })) || [];
 
-  // Debug logging
-  console.log("PropertyDetail - property.images:", property.images);
-  console.log("PropertyDetail - carouselImages:", carouselImages);
-
   // Format price
   const formattedPrice = new Intl.NumberFormat(
     locale === "es" ? "es-MX" : "en-US",

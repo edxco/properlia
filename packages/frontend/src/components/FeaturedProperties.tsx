@@ -13,8 +13,7 @@ export function FeaturedProperties() {
     isError,
   } = useProperties({ items: 3, featured: true });
   const { data: statusesData } = useStatuses();
-  console.log("propertiesData", propertiesData);
-  if (isLoading) {
+if (isLoading) {
     return (
       <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
