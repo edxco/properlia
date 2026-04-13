@@ -167,7 +167,7 @@ export function Footer() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href={`/${locale}/properties`}
+                    href={`/${locale}/buyer-consultation`}
                     className="text-white/80 hover:text-white transition-colors text-sm"
                   >
                     {t("lookingToBuy")}
@@ -175,7 +175,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href={`/${locale}/sell`}
+                    href={`/${locale}/seller-consultation`}
                     className="text-white/80 hover:text-white transition-colors text-sm"
                   >
                     {t("lookingToSell")}
