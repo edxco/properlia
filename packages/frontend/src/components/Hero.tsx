@@ -52,6 +52,9 @@ export function Hero() {
               {t("heroBadge")}
             </span>
             <h1 className="font-bold text-2xl md:text-5xl lg:text-6xl font-lexend text-white leading-tight tracking-wide">
+              {t("heroStaticH1")}
+            </h1>
+            <p aria-hidden="true" className="font-bold text-2xl md:text-5xl lg:text-6xl font-lexend text-white leading-tight tracking-wide">
               <TypingAnimation
                 words={[
                   t("heroLine1"),
@@ -61,7 +64,7 @@ export function Hero() {
                 ]}
                 loop
               />
-            </h1>
+            </p>
             <h2 className="text-xl md:text-3xl text-white mb-6 inline-block leading-8 md:leading-11">
               <span className="bg-slate-800/70 px-px">
                 {t("heroSubheadline")}
