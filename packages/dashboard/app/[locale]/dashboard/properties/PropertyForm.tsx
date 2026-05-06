@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   X,
   Upload,
@@ -91,6 +92,7 @@ export default function PropertyForm({
 }: PropertyFormProps) {
   const t = useT();
   const locale = useLocale();
+  const router = useRouter();
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -538,13 +540,13 @@ export default function PropertyForm({
     }
 
     try {
+      let property;
       if (editingProperty) {
-        await updateProperty({ id: editingProperty.id, data: payload });
+        property = await updateProperty({ id: editingProperty.id, data: payload });
       } else {
-        await createProperty(payload);
+        property = await createProperty(payload);
       }
-      onCancelEdit();
-      setForm(emptyForm);
+      router.push(`/dashboard/properties/${property.id}`);
     } catch (mutationError: any) {
       setFormError(
         mutationError?.message ||
