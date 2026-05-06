@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   X,
   Upload,
@@ -106,6 +106,20 @@ export default function PropertyForm({
   const [existingDragOverIndex, setExistingDragOverIndex] = useState<
     number | null
   >(null);
+
+  const [featureSearch, setFeatureSearch] = useState("");
+  const [featureOpen, setFeatureOpen] = useState(false);
+  const featureRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (featureRef.current && !featureRef.current.contains(e.target as Node)) {
+        setFeatureOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { data: propertyTypes } = usePropertyTypes();
   const { data: statuses } = useStatuses();
@@ -972,69 +986,91 @@ export default function PropertyForm({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("propertyFeatures")}
             </label>
-            <select
-              value=""
-              onChange={(event) => {
-                const selectedId = event.target.value;
-                if (
-                  selectedId &&
-                  !form.property_feature_ids.includes(selectedId)
-                ) {
-                  handleChange("property_feature_ids", [
-                    ...form.property_feature_ids,
-                    selectedId,
-                  ]);
-                }
-              }}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-            >
-              <option value="">{t("select")}</option>
-              {propertyFeatures
-                ?.filter(
-                  (feature) => !form.property_feature_ids.includes(feature.id)
-                )
-                .map((feature) => (
-                  <option key={feature.id} value={feature.id}>
-                    {capitalizeFirstWord(
-                      locale === "es" ? feature.es_name : feature.name
-                    )}
-                  </option>
-                ))}
-            </select>
+            <div ref={featureRef} className="relative">
+              <input
+                type="text"
+                value={featureSearch}
+                onChange={(e) => { setFeatureSearch(e.target.value); setFeatureOpen(true); }}
+                onFocus={() => setFeatureOpen(true)}
+                placeholder={t("select")}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+              />
+              {featureOpen && (
+                <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg text-sm">
+                  {propertyFeatures
+                    ?.filter((feature) => {
+                      if (form.property_feature_ids.includes(feature.id)) return false;
+                      const name = (locale === "es" ? feature.es_name : feature.name) ?? "";
+                      return name.toLowerCase().includes(featureSearch.toLowerCase());
+                    })
+                    .sort((a, b) => {
+                      const nameA = (locale === "es" ? a.es_name : a.name) ?? "";
+                      const nameB = (locale === "es" ? b.es_name : b.name) ?? "";
+                      return nameA.localeCompare(nameB);
+                    })
+                    .map((feature) => (
+                      <li
+                        key={feature.id}
+                        onMouseDown={() => {
+                          handleChange("property_feature_ids", [
+                            ...form.property_feature_ids,
+                            feature.id,
+                          ]);
+                          setFeatureSearch("");
+                          setFeatureOpen(false);
+                        }}
+                        className="cursor-pointer px-3 py-2 hover:bg-blue-50"
+                      >
+                        {capitalizeFirstWord(
+                          locale === "es" ? feature.es_name : feature.name
+                        )}
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </div>
 
             {/* Selected Features Pills */}
             {form.property_feature_ids.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
-                {form.property_feature_ids.map((featureId) => {
-                  const feature = propertyFeatures?.find(
-                    (f) => f.id === featureId
-                  );
-                  if (!feature) return null;
-                  return (
-                    <span
-                      key={featureId}
-                      className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
-                    >
-                      {capitalizeFirstWord(
-                        locale === "es" ? feature.es_name : feature.name
-                      )}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleChange(
-                            "property_feature_ids",
-                            form.property_feature_ids.filter(
-                              (id) => id !== featureId
-                            )
-                          )
-                        }
-                        className="ml-1 text-blue-600 hover:text-blue-800"
+                {[...form.property_feature_ids]
+                  .sort((a, b) => {
+                    const featureA = propertyFeatures?.find((f) => f.id === a);
+                    const featureB = propertyFeatures?.find((f) => f.id === b);
+                    const nameA = (locale === "es" ? featureA?.es_name : featureA?.name) ?? "";
+                    const nameB = (locale === "es" ? featureB?.es_name : featureB?.name) ?? "";
+                    return nameA.localeCompare(nameB);
+                  })
+                  .map((featureId) => {
+                    const feature = propertyFeatures?.find(
+                      (f) => f.id === featureId
+                    );
+                    if (!feature) return null;
+                    return (
+                      <span
+                        key={featureId}
+                        className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
                       >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  );
-                })}
+                        {capitalizeFirstWord(
+                          locale === "es" ? feature.es_name : feature.name
+                        )}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleChange(
+                              "property_feature_ids",
+                              form.property_feature_ids.filter(
+                                (id) => id !== featureId
+                              )
+                            )
+                          }
+                          className="ml-1 text-blue-600 hover:text-blue-800"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
               </div>
             )}
           </div>
