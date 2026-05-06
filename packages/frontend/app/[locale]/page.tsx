@@ -9,7 +9,7 @@ export default function Page() {
       <Hero />
       <ServiceTiles />
       <FeaturedProperties />
-      <MainAbout />
+      {/* <MainAbout /> */}
     </>
   );
 }
