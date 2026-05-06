@@ -5,29 +5,37 @@ import Link from "next/link";
 
 import { useProperties } from "@/src/services/properties/queries";
 import { useStatuses } from "@/src/services/statuses/queries";
-import {
-  useLocale,
-  useT,
-} from "@properlia/shared/components/TranslationProvider";
-import { capitalizeFirstWord } from "@properlia/shared";
+import { usePropertyTypes } from "@/src/services/property-types/queries";
+import { useT } from "@properlia/shared/components/TranslationProvider";
 import PropertiesTable from "./PropertiesTable";
+
+type Filters = { status_id?: string; property_type_id?: string };
 
 export default function PropertiesPage() {
   const t = useT();
-  const locale = useLocale();
-  const [filters, setFilters] = useState<{ status_id?: string }>({});
+  const [filters, setFilters] = useState<Filters>({});
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const { data, isLoading, error } = useProperties({
     status_id: filters.status_id || undefined,
+    property_type_id: filters.property_type_id || undefined,
     page,
+    items: pageSize,
   });
 
-  const handleFilterChange = (newFilters: { status_id?: string }) => {
+  const handleFilterChange = (newFilters: Filters) => {
     setFilters(newFilters);
     setPage(1);
   };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(1);
+  };
+
   const { data: statuses } = useStatuses();
+  const { data: propertyTypes } = usePropertyTypes();
 
   const properties = useMemo(() => data?.data ?? [], [data]);
   const metadata = data?.metadata;
@@ -66,9 +74,12 @@ export default function PropertiesPage() {
         isLoading={isLoading}
         metadata={metadata}
         statuses={statuses}
+        propertyTypes={propertyTypes}
         filters={filters}
         onFilterChange={handleFilterChange}
         onPageChange={setPage}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
       />
     </div>
   );
