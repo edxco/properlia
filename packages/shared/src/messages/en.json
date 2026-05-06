@@ -202,6 +202,7 @@
   "interest": "Interest",
   "page": "Page",
   "desiredLocation": "Desired location",
+  "propertiesPerPage": "Properties per page",
 
   "residential": "Residential",
   "commercial": "Commercial",
