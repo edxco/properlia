@@ -5,6 +5,8 @@ const INTERNAL_API_URL = process.env.INTERNAL_API_URL || 'http://backend:3000/ap
 const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 const API_BASE_URL = isServer ? INTERNAL_API_URL : PUBLIC_API_URL;
 const API_ROOT_URL = API_BASE_URL.replace(/\/api\/v1$/, '');
+// Image URLs must always use the public URL so the browser can resolve them
+const PUBLIC_API_ROOT = PUBLIC_API_URL.replace(/\/api\/v1$/, '');
 console.log('API Client initialized', API_BASE_URL);
 
 export class ApiError extends Error {
@@ -56,7 +58,7 @@ class ApiClient {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new ApiError(
-        errorData.message || 'An error occurred',
+        errorData.message || errorData.error || 'An error occurred',
         response.status,
         errorData.errors
       );
@@ -103,7 +105,7 @@ class ApiClient {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new ApiError(
-        errorData.message || 'An error occurred',
+        errorData.message || errorData.error || 'An error occurred',
         response.status,
         errorData.errors
       );
@@ -179,7 +181,7 @@ class ApiClient {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new ApiError(
-        errorData.message || 'An error occurred',
+        errorData.message || errorData.error || 'An error occurred',
         response.status,
         errorData.errors
       );
@@ -191,16 +193,19 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
-/**
- * Converts a relative image URL to an absolute URL using the API root.
- * Handles Active Storage URLs like /rails/active_storage/blobs/...
- */
 export function getAbsoluteImageUrl(url: string): string {
   if (!url) return '';
-  // Already absolute URL
   if (url.startsWith('http://') || url.startsWith('https://')) {
+    // Rebase internal Docker/localhost URLs so the browser can resolve them
+    if (url.includes('://backend:') || url.includes('://localhost:')) {
+      try {
+        const path = new URL(url).pathname;
+        return `${PUBLIC_API_ROOT}${path}`;
+      } catch {
+        return url;
+      }
+    }
     return url;
   }
-  // Relative URL - prepend API root
-  return `${API_ROOT_URL}${url}`;
+  return `${PUBLIC_API_ROOT}${url}`;
 }
