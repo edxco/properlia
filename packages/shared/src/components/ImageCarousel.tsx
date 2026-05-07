@@ -50,22 +50,26 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
             </button>
           </section>
           <section className={styles.right}>
-            <div className={`${styles.card} ${styles.green}`}>
-              <img src={preview[1].url} alt={title} loading="lazy" />
-            </div>
-            <div className={`${styles.card} ${styles.yellow}`}>
-              <img src={preview[2].url} alt={title} loading="lazy" />
-            </div>
+            {preview[1] && (
+              <div className={`${styles.card} ${styles.green}`}>
+                <img src={preview[1].url} alt={title} loading="lazy" />
+              </div>
+            )}
+            {preview[2] && (
+              <div className={`${styles.card} ${styles.yellow}`}>
+                <img src={preview[2].url} alt={title} loading="lazy" />
+              </div>
+            )}
             {preview[3] && (
               <div className={`${styles.card} ${styles.red}`}>
                 <img src={preview[3].url} alt={title} loading="lazy" />
               </div>
             )}
-            {preview[4] &&
+            {preview[4] && (
               <div className={`${styles.card} ${styles.purple}`}>
                 <img src={preview[4].url} alt={title} loading="lazy" />
               </div>
-            }
+            )}
           </section>
         </div>
       </div>
