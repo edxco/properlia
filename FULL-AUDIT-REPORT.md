@@ -1,325 +1,263 @@
 # Properlia.com — Full SEO Audit Report
 
-**Audit Date:** April 14, 2026
-**URL:** https://properlia.com
-**Stack:** Next.js 16 (App Router) + Ruby on Rails API + Nginx + Cloudflare
-**Locales:** `es` (default), `en`
-**Method:** Full codebase review — all pages, components, configs, nginx, schemas
+**Date:** 2026-05-05  
+**Site:** https://properlia.com  
+**Platform:** Next.js 14 + Rails API, Cloudflare CDN  
+**Market:** Real estate, Puebla Mexico, bilingual (es/en)
 
 ---
 
-## Overall SEO Health Score: 53 / 100
+## SEO Health Score: 47 / 100
 
-| Category | Weight | Score | Weighted Score |
+| Category | Weight | Score | Weighted |
 |---|---|---|---|
-| Technical SEO | 25% | 61 | 15.25 |
-| Content Quality | 25% | 54 | 13.50 |
-| On-Page SEO | 20% | 50 | 10.00 |
-| Schema / Structured Data | 10% | 55 | 5.50 |
-| Performance (Core Web Vitals) | 10% | 40 | 4.00 |
-| Images | 5% | 60 | 3.00 |
-| AI Search Readiness | 5% | 38 | 1.90 |
-| **Total** | **100%** | | **53.15** |
+| Technical SEO | 25% | 30/100 | 7.5 |
+| Content Quality | 25% | 49/100 | 12.3 |
+| On-Page SEO | 20% | 55/100 | 11.0 |
+| Schema / Structured Data | 10% | 35/100 | 3.5 |
+| Performance (CWV) | 10% | 62/100 | 6.2 |
+| Images | 5% | 75/100 | 3.8 |
+| AI Search Readiness | 5% | 28/100 | 1.4 |
+| **Total** | | | **47** |
 
 ---
 
 ## Executive Summary
 
-The site has solid structural bones — server-side rendering on most routes, a working dynamic sitemap, canonical and hreflang tags on all key pages, correct HTTPS/www redirect chains, and well-formed property JSON-LD. The primary gaps fall into three clusters:
+### Business Type
+Real estate advisory platform serving buyers, sellers, and investors in Puebla, Mexico. Bilingual (Spanish primary, English secondary). Primary revenue: buyer/seller consultation lead generation.
 
-1. **No social meta** — `buildMetadata()` never sets Open Graph or Twitter Card tags. Every share of any Properlia URL produces a blank preview on WhatsApp, Facebook, LinkedIn, and iMessage.
-2. **Homepage performance crisis** — the Hero component is marked `"use client"`, which prevents the browser's preload scanner from discovering the LCP image during server render. Combined with a render-blocking Google Fonts `@import`, LCP is likely in the "Poor" range (>4s).
-3. **Thin content and missing E-E-A-T signals** — the homepage renders ~180 words, there are no testimonials, no team bios, no real market data, and the investment return claim (8–12% annual) is unattributed.
+### Top 5 Critical Issues
 
-There are also several **Critical bugs** that need immediate attention: a WhatsApp link incorrectly using `mailto:`, `addressLocality` silently overwritten in property JSON-LD, and `"@type": "State"` in the organization schema (invalid Schema.org type causing validation errors in Google's Rich Results Test).
+1. **robots.txt returns 404** — The Next.js middleware redirects `/robots.txt` → `/es/robots.txt` (404). Google has no crawl instructions for this site.
+2. **sitemap.xml returns 404** — Same middleware bug: `/sitemap.xml` → `/es/sitemap.xml` (404). Google cannot discover property URLs via sitemap.
+3. **Homepage has ~80–120 words of indexable content** — The MainAbout section is commented out. Google sees a nearly empty page for "inmobiliaria en Puebla".
+4. **No H1 on the properties listing page** — The most commercially important page has no page-level heading.
+5. **Zero testimonials or social proof anywhere** — A real estate platform with no verified client reviews is a critical E-E-A-T failure.
 
----
+### Top 5 Quick Wins
 
-## Top 5 Critical Issues
-
-1. **No Open Graph / Twitter Card meta tags** — affects every page; breaks social sharing entirely
-2. **Hero `"use client"` blocks LCP preload** — likely "Poor" LCP score site-wide
-3. **`@type: "State"` in RealEstateAgent schema** — invalid, fails Google's Rich Results validator
-4. **`addressLocality` key overwritten in property JSON-LD** — neighborhood data silently lost
-5. **WhatsApp `mailto:` bug in Footer** — primary contact channel is broken
-
-## Top 5 Quick Wins
-
-1. Add `openGraph` and `twitter` objects to `buildMetadata()` — ~30 min, affects all pages
-2. Add `/services`, `/privacy`, `/terms` to `app/sitemap.ts` — ~10 min
-3. Fix `"@type": "State"` → `"@type": "AdministrativeArea"` in `layout.tsx` JSON-LD — ~2 min
-4. Fix Footer WhatsApp href from `mailto:` to `https://wa.me/` — ~2 min
-5. Replace CSS `@import` fonts with `next/font/google` in `layout.tsx` — ~1 hour, eliminates render-blocking request chain
+1. Fix middleware to bypass `robots.txt` and `sitemap.xml` from locale routing (30-min fix, immediate Google impact)
+2. Re-enable `<MainAbout />` on the homepage (1-line uncomment)
+3. Add `<h1>` to the properties page
+4. Add `/services` to `sitemap.ts` static routes
+5. Populate `sameAs` array in JSON-LD with social profile URLs
 
 ---
 
-## Section 1 — Technical SEO
+## Technical SEO — Score: 30/100
 
-**Score: 61 / 100**
+### CRITICAL: robots.txt and sitemap.xml return 404
 
-### 1.1 Crawlability
+**Confirmed live:** Both files return HTTP 307 redirects to locale-prefixed paths that do not exist.
 
-| Check | Result | Severity |
-|---|---|---|
-| robots.ts served via Next.js | Pass | — |
-| `/api/` disallowed | Pass | — |
-| Sitemap URL declared in robots.txt | Pass | — |
-| Middleware locale redirect | Pass | — |
-| robots.txt/sitemap.xml not excluded from middleware matcher | Warn | Medium |
-| No AI crawler rules (GPTBot, CCBot, ClaudeBot, Google-Extended) | Fail | Low |
+```
+GET /robots.txt   → HTTP 307 → /es/robots.txt   → HTTP 404 (noindex)
+GET /sitemap.xml  → HTTP 307 → /es/sitemap.xml  → HTTP 404 (noindex)
+```
 
-**Middleware matcher gap:** `middleware.ts` matcher pattern `/((?!_next|static|images|favicon.ico|api).*)` does not explicitly exclude `robots.txt` or `sitemap.xml`. In practice Next.js route handlers take precedence, but this is fragile.
+**Root cause:** `packages/frontend/src/middleware.ts` — the matcher `/((?!_next|static|images|favicon.ico|api).*)` does not exclude `robots.txt` or `sitemap.xml`. Every request without a locale prefix is redirected to `/{defaultLocale}{path}`.
 
-### 1.2 Indexability & Canonicals
+**Impact:** Google Googlebot fetches `/robots.txt`, follows the 307 to `/es/robots.txt`, gets a 404 with `noindex`. Without robots.txt, Google applies default crawl behavior. The sitemap cannot be submitted to or verified in Google Search Console.
 
-| Check | Result | Severity |
-|---|---|---|
-| `buildMetadata()` emits canonical and hreflang | Pass | — |
-| Homepage relies on layout-level metadata only | Warn | Medium |
-| `/services`, `/privacy`, `/terms` missing from XML sitemap | Fail | High |
-| `lastModified: new Date()` on all static sitemap entries | Warn | Medium |
-| No root `/` fallback page (middleware handles it) | Warn | Low |
+**Fix** (`middleware.ts`):
+```typescript
+if (
+  pathname.startsWith("/_next") ||
+  pathname.startsWith("/static") ||
+  pathname.startsWith("/images") ||
+  pathname === "/favicon.ico" ||
+  pathname === "/robots.txt" ||  // ADD
+  pathname === "/sitemap.xml"    // ADD
+) {
+  return NextResponse.next();
+}
 
-### 1.3 Security Headers
-
-**Nginx config: `/nginx/nginx.conf`**
-
-| Header | Status | Severity |
-|---|---|---|
-| `Strict-Transport-Security` | Present (1yr) | Pass |
-| `X-Content-Type-Options` | Present | Pass |
-| `X-Frame-Options` | Present | Pass |
-| `Referrer-Policy` | Present | Pass |
-| `Permissions-Policy` | Present | Pass |
-| `Content-Security-Policy` | **Missing** | High |
-| HSTS `preload` directive | Missing | Medium |
-| HSTS `max-age` < 2yr preload threshold | Warn | Medium |
-| Security headers absent on subdomains | Fail | Medium |
-
-### 1.4 URL Structure & Redirects
-
-| Check | Result |
-|---|---|
-| HTTP → HTTPS 301 | Pass |
-| www → non-www 301 | Pass |
-| Root `/` → locale 301 (middleware) | Pass |
-| Property URL pattern `/{locale}/properties/{state}/{city}/{id}/{slug}` | Pass |
-| Property page ignores `state`, `city`, `slug` params (only `id` used) | Warn — stale URLs always resolve without canonical correction |
-
-### 1.5 Mobile Friendliness
-
-| Check | Result | Severity |
-|---|---|---|
-| Responsive grid layouts | Pass | — |
-| Mobile navigation menu | Pass | — |
-| Explicit `<meta name="viewport">` | **Missing** | High |
-| Touch target size (mobile menu spacing) | Marginal | Low |
-
-### 1.6 Open Graph & Social Meta
-
-**Score: 10 / 100 — FAIL**
-
-`buildMetadata()` (`src/lib/metadata.ts`) returns only `title`, `description`, `alternates.canonical`, and `alternates.languages`. No `openGraph` or `twitter` properties are set on any page.
-
-Impact: All social shares produce blank previews. Property listing pages cannot show listing photos when shared.
-
-### 1.7 Hreflang
-
-| Check | Result | Severity |
-|---|---|---|
-| `alternates.languages` on all `buildMetadata()` pages | Pass | — |
-| `x-default` points to `/es` instead of root `/` | Warn | High |
-| Hreflang URLs on property pages may diverge from canonicals due to slugification | Warn | High |
-| Pages with hreflang but absent from XML sitemap (`services`, `privacy`, `terms`) | Inconsistency | Low |
+export const config = {
+  matcher: ["/((?!_next|static|images|favicon.ico|robots.txt|sitemap.xml|api).*)"],
+};
+```
 
 ---
 
-## Section 2 — Content Quality
+### Redirect Behavior
 
-**Score: 54 / 100**
-
-### 2.1 E-E-A-T Assessment
-
-| Factor | Score | Key Issues |
+| URL | Status | Notes |
 |---|---|---|
-| Experience (20%) | 18/20 | "+200 deals" claim unattributed; zero testimonials; zero case studies |
-| Expertise (25%) | 20/25 | No team bios or named agents; 8–12% return claim has no source |
-| Authoritativeness (25%) | 15/25 | `sameAs: []` in schema; no blog; no press; no AMPI certification |
-| Trustworthiness (30%) | 30/30 | Strong legal pages (LFPDPPP compliant); physical address in footer; ARCO rights |
+| `https://properlia.com/` | 307 → `/es/` | Locale detection redirect (acceptable) |
+| `https://properlia.com/es` | 200 | Works directly |
+| `https://properlia.com/en` | 200 | Works directly |
+| `https://properlia.com/robots.txt` | 307 → 404 | **Critical bug** |
+| `https://properlia.com/sitemap.xml` | 307 → 404 | **Critical bug** |
 
-**Normalized E-E-A-T: 53 / 100**
+### Security Headers (Confirmed Live)
 
-### 2.2 Word Count by Page
+| Header | Status | Value |
+|---|---|---|
+| HTTPS | ✅ | Enforced by Cloudflare |
+| HSTS | ✅ | `max-age=31536000; includeSubDomains` |
+| X-Content-Type-Options | ✅ | `nosniff` |
+| X-Frame-Options | ✅ | `SAMEORIGIN` |
+| Referrer-Policy | ✅ | `strict-origin-when-cross-origin` |
+| Permissions-Policy | ✅ | `camera=(), microphone=(), geolocation=()` |
+| Content-Security-Policy | ❌ | Missing |
 
-| Page | Estimated Words | Minimum Target | Status |
+### Hreflang
+
+Correctly implemented per-page via `buildMetadata()`:
+- `hreflang="es"` → `/es{path}`
+- `hreflang="en"` → `/en{path}`
+- `hreflang="x-default"` → `/es{path}` (correct for MX-primary audience)
+
+### Canonical
+
+Correctly implemented. Each locale+path combination has a self-referencing canonical.
+
+### JavaScript Rendering
+
+All key pages are server-rendered (Next.js SSR). The properties listing is a client component wrapped in `<Suspense>` — property grid is not available to crawlers on first render. Page structure and filters are server-rendered.
+
+---
+
+## Content Quality — Score: 49/100
+
+### E-E-A-T Assessment
+
+| Signal | Score | Notes |
+|---|---|---|
+| Experience | 4/10 | "+200 deals closed" is the only claim; no testimonials, no case studies |
+| Expertise | 5/10 | Services page has structure; no named credentials or agent profiles |
+| Authoritativeness | 3/10 | Physical address present; `sameAs` empty; no external citations |
+| Trustworthiness | 6/10 | HTTPS, legal pages, canonical/hreflang correct; no visible phone in hero |
+| **Overall E-E-A-T** | **4.5/10** | |
+
+### Thin Content
+
+**Homepage word count: ~80–120 words** (minimum floor: 500).
+
+The MainAbout section is commented out in `packages/frontend/app/[locale]/page.tsx`:
+```tsx
+{/* <MainAbout /> */}
+```
+This was the only prose content section. The homepage now has: H1 + hero subheadline + search widget + micro-trust line + 3 service tiles + dynamic property cards (not indexable on first render).
+
+**Properties page: ~40–60 words.** No editorial framing, no H1.
+
+**Consultation pages: ~150–250 words** each. Minimal editorial content around the form.
+
+### Heading Structure
+
+| Page | H1 | Notes |
+|---|---|---|
+| `/es` homepage | ✅ "Inmobiliaria en Puebla" | Correct keyword targeting |
+| `/es/properties` | ❌ Missing | No H1 anywhere on the page |
+| `/es/services` | ⚠️ "Servicios" | Present but no keyword; should be "Servicios Inmobiliarios en Puebla" |
+| `/es/buyer-consultation` | ✅ "Encuentra tu propiedad ideal en Puebla" | Good |
+| `/es/seller-consultation` | ✅ "Vende tu propiedad con Properlia" | Acceptable |
+
+### AI Citation Readiness — 28/100
+
+- No article-format or FAQ-format content for AI extraction.
+- No author attribution on any non-legal page.
+- `sameAs` empty weakens entity recognition in AI knowledge graphs.
+- Specific quotable claims exist (`8–12% projected returns`, `90-day average sale`) but are isolated in micro-copy.
+
+---
+
+## On-Page SEO — Score: 55/100
+
+### Title Tags
+
+| Page | Title | Length | Issues |
 |---|---|---|---|
-| Homepage | ~180 | 500 | **FAIL** |
-| Properties listing | ~50 (UI only) | 800 | **FAIL** |
-| Seller consultation | ~350 | 800 | **FAIL** |
-| Services | ~480 | 800 | Borderline |
-| Buyer consultation | ~600 | 800 | Borderline |
-| Privacy, Terms | ~650 | N/A | Pass |
+| Homepage (es) | "Properlia \| Inmobiliaria en Puebla — Casas, Departamentos e Inversiones" | 71 chars | Slightly over 60-char ideal |
+| Homepage (en) | "Properlia \| Real Estate in Puebla — Houses, Apartments & Investments" | 69 chars | Slightly over 60-char ideal |
+| Properties (es) | "Propiedades en Venta en Puebla \| Properlia" | 43 chars | Good |
+| Services (es) | "Servicios Inmobiliarios en Puebla \| Properlia" | 47 chars | Good |
 
-### 2.3 Translation / EN Parity
+### Internal Linking Issues
 
-| Issue | Severity |
-|---|---|
-| `contactMe` key has Spanish value in `en.json` | High |
-| `"hi": "hola"` test key value reversed in `en.json` | Low |
-| `propertyDetails` empty string in both locale files | Low |
-| ~17 form/validation keys present in `es.json` but absent from `en.json` | **High** — English form pages will render broken states |
-| Hardcoded English strings in `FeaturedProperties.tsx` ("Loading properties...") | Medium |
-
-### 2.4 Key Content Issues
-
-- **Services page H1** is "Servicios" — no geo-modifier. Should be "Servicios Inmobiliarios en Puebla"
-- **`MainAbout` section** renders one 40-word paragraph with non-functional buttons (no `href`/`onClick`)
-- **Investment return claim** ("8–12% anual en Puebla") is a financial/YMYL claim with no source
-- **`properliaBriefDescription`** promises "datos de mercado reales" but no actual data is surfaced on any page
+- ServiceTiles "invest" tile links to `/properties?category=investment` — this URL parameter is not handled by the filter logic in `PropertiesClient.tsx`. Users land on an unfiltered list.
+- No breadcrumb navigation on any page.
+- Footer contact links are conditional on API `generalInfo` data — if the API call fails, no contact links render.
 
 ---
 
-## Section 3 — Schema / Structured Data
+## Schema / Structured Data — Score: 35/100
 
-**Score: 55 / 100**
+### Current Implementation
 
-### 3.1 Current Implementation
+One JSON-LD block injected globally in `layout.tsx`:
+- `RealEstateAgent` with address, logo, areaServed
+- `WebSite` with publisher cross-reference
+- `sameAs: []` — **empty array, no social profiles linked**
 
-| File | Schema Types | Status |
+### Validation Gaps
+
+| Schema | Status | Priority |
 |---|---|---|
-| `app/[locale]/layout.tsx` | `RealEstateAgent`, `WebSite` | Present with issues |
-| `app/[locale]/properties/.../layout.tsx` | `RealEstateListing` | Present with issues |
-| All other pages | None | Missing |
-
-### 3.2 Validation Issues
-
-| Issue | Severity |
-|---|---|
-| `areaServed: { "@type": "State" }` — `State` is not a valid Schema.org type | **Critical** |
-| `addressLocality` key overwritten twice in property JSON-LD | **Critical** |
-| `sameAs: []` empty array in `RealEstateAgent` | High |
-| `WebSite` missing `SearchAction` (Sitelinks Searchbox eligibility lost) | High |
-| `numberOfBathroomsTotal` includes half baths (semantic inaccuracy) | Low |
-| No `datePosted` on `RealEstateListing` | Low |
-
-### 3.3 Missing Schema Opportunities
-
-| Page | Missing Schema | Priority |
-|---|---|---|
-| Property detail | `BreadcrumbList` | High |
-| Properties listing | `ItemList` | Medium |
-| Services | `Service` + `OfferCatalog` | Medium |
-| Buyer/Seller consultation | `ContactPage` | Low |
-| Privacy/Terms | `WebPage` | Low |
+| `sameAs` array populated | ❌ | Critical |
+| `WebSite.potentialAction` SearchAction | ❌ | Critical |
+| `telephone` on RealEstateAgent | ❌ | High |
+| `BreadcrumbList` on inner pages | ❌ | High |
+| `ItemList` on properties page | ❌ | High |
+| `RealEstateListing` on property detail | ❌ (page doesn't exist yet) | High |
+| `Service` nodes on services page | ❌ | Medium |
+| `ContactPage` on consultation pages | ❌ | Medium |
+| `geo` on RealEstateAgent | ❌ | Medium |
+| `openingHours`, `priceRange` | ❌ | Low |
 
 ---
 
-## Section 4 — Performance / Core Web Vitals
+## Performance — Score: 62/100
 
-**Score: 40 / 100** *(static code analysis — validate with real CrUX data)*
+### Confirmed Live
 
-### 4.1 LCP (Estimated: Poor — likely >4s)
+- **CDN:** Cloudflare, `s-maxage=31536000` on homepage — excellent caching.
+- **Compression:** Present via Cloudflare + Next.js.
+- **Image format:** WebP confirmed, responsive srcset present.
+- **LCP candidate:** Hero background correctly preloaded with `<link rel="preload">`.
 
-| Root Cause | File | Severity |
-|---|---|---|
-| `Hero.tsx` is `"use client"` — LCP image not server-rendered, `priority` preload tag not emitted | `src/components/Hero.tsx:1` | **Critical** |
-| Google Fonts loaded via CSS `@import` — render-blocking external request chain | `packages/shared/src/styles/globals.css:1` | **Critical** |
-| Hero background image `properlia-bg.webp` is 392 KB — oversized | `public/properlia-bg.webp` | High |
-| No `<link rel="preconnect" href="https://fonts.gstatic.com">` in layout | `app/[locale]/layout.tsx` | High |
+### Issues
 
-### 4.2 INP (Estimated: Needs Improvement)
-
-| Root Cause | Severity |
-|---|---|
-| `TypingAnimation` drives a 10Hz `setState` loop indefinitely via `setTimeout` — competes with user interactions | High |
-| Framer Motion (`motion/react` v12) imported for typing animation — ~30–50 KB gzipped bundle cost | High |
-| `useGeneralInfo()` called independently in each `PropertyCard` (3 separate React Query subscribers) | Medium |
-| `PropertiesClient.tsx` — entire properties page is client-rendered; heavy filter/pagination state | Medium |
-
-### 4.3 CLS (Estimated: Needs Improvement)
-
-| Root Cause | Severity |
-|---|---|
-| `FeaturedProperties` has no height-matched skeleton — cards appear after hydration, shifting content below | Medium |
-| Footer renders social/contact data conditionally via API call — empty slots expand after fetch | Medium |
-| Navigation logo missing `height` prop | Low |
-| Google Fonts FOUT — fallback font metrics differ from loaded font | Medium |
-
-### 4.4 Bundle / Configuration
-
-| Issue | Severity |
-|---|---|
-| `motion` (Framer Motion) imported solely for a typing cursor effect | High |
-| No `experimental.optimizePackageImports` in `next.config.js` | Low |
-| `placeholder.com` / `your-domain.com` still listed in image `remotePatterns` | Low |
+1. **Google Fonts via CSS `@import`** (`packages/shared/src/styles/globals.css` line 1) — render-blocking. Should use `next/font/google`.
+2. **No skeleton loading states** — `FeaturedProperties` and `PropertiesClient` use plain text fallbacks. CLS risk.
+3. **Filter inputs `text-xs` (12px)** — triggers automatic iOS Safari page zoom. All filter `<input>` and `<select>` must have `font-size: 16px` minimum.
 
 ---
 
-## Section 5 — Sitemap
+## Images — Score: 75/100
 
-**Score: 76 / 100**
-
-| Check | Status | Severity |
-|---|---|---|
-| Dynamic sitemap via `app/sitemap.ts` | Pass | — |
-| `robots.ts` references sitemap URL | Pass | — |
-| hreflang alternates in sitemap entries | Pass | — |
-| `/services`, `/terms`, `/privacy` missing from sitemap | **Fail** | High |
-| `priority` and `changeFrequency` fields used (deprecated by Google) | Info | Low |
-| `lastModified: new Date()` on static routes | Warn | Low |
-| Properties with null `state`/`city` generate `/na/na/` paths in sitemap | Warn | Medium |
-| Single sitemap file (<50k URL limit — fine for current catalog size) | Pass | — |
+- WebP format in use ✅
+- Hero LCP image preloaded with priority ✅
+- Decorative images: correct empty alt text ✅
+- Logo images: descriptive alt text ✅
+- Missing: skeleton placeholders for property card images (CLS risk) ⚠️
 
 ---
 
-## Section 6 — Images
+## Sitemap Analysis
 
-**Score: 60 / 100**
-
-| Image | Format | Size | Issues |
-|---|---|---|---|
-| `properlia-bg.webp` (hero) | WebP | 392 KB | Oversized — target <150 KB |
-| `properlia.png` (logo) | PNG | 68 KB | Should be WebP; `height` missing on `<Image>` |
-| Property card images | Dynamic | Unknown | `unoptimized={true}` for localhost; correct for production |
-| Hero `<Image>` alt attribute | `alt=""` | — | Intentional/decorative — Pass |
+- `sitemap.ts` generates valid Next.js sitemap.
+- **Live sitemap 404s** due to middleware bug (fix in C1).
+- Missing from sitemap: `/services` (has dedicated metadata and content).
+- `priority` and `changeFrequency` present — Google ignores both; remove.
+- Static routes use `lastModified: new Date()` — fake timestamps reduce crawl trust.
+- `alternates.languages` in sitemap entries is silently discarded by Next.js.
+- Properties with null `state`/`city` generate `/properties/na/na/{id}/{slug}` URLs.
 
 ---
 
-## Section 7 — AI Search Readiness
+## Key Files Reference
 
-**Score: 38 / 100**
-
-| Criterion | Status |
+| File | Issues |
 |---|---|
-| Quotable factual statements | Weak — "+200 operations" unattributed |
-| Clear H1 > H2 > H3 hierarchy | Partial — ServiceTiles/FeaturedProperties have no headings |
-| FAQ or Q&A structure | None |
-| Named entities (people, locations) | Partial — Puebla referenced; no named agents |
-| Schema completeness for AI disambiguation | Partial — `sameAs: []`, no `AggregateRating` |
-| `llms.txt` file | Missing |
-| AI training crawler rules in `robots.txt` | Missing |
-| Content freshness signals (publication dates) | Only on legal pages |
-| Structural data density (verifiable claims) | Very low |
-
----
-
-## Files Referenced
-
-### Files with Critical Issues
-
-- [`src/lib/metadata.ts`](packages/frontend/src/lib/metadata.ts) — missing Open Graph and Twitter Card
-- [`src/components/Hero.tsx`](packages/frontend/src/components/Hero.tsx) — `"use client"` blocks LCP preload
-- [`app/[locale]/layout.tsx`](packages/frontend/app/%5Blocale%5D/layout.tsx) — invalid `areaServed` type, empty `sameAs`, missing viewport
-- [`app/[locale]/properties/[state]/[city]/[id]/[slug]/layout.tsx`](packages/frontend/app/%5Blocale%5D/properties/%5Bstate%5D/%5Bcity%5D/%5Bid%5D/%5Bslug%5D/layout.tsx) — duplicate `addressLocality`
-- [`src/components/Footer.tsx`](packages/frontend/src/components/Footer.tsx) — WhatsApp `mailto:` bug
-- [`packages/shared/src/messages/en.json`](packages/shared/src/messages/en.json) — ~17 missing form keys
-- [`packages/shared/src/styles/globals.css`](packages/shared/src/styles/globals.css) — render-blocking `@import` fonts
-
-### Files Needing Updates
-
-- [`app/sitemap.ts`](packages/frontend/app/sitemap.ts) — add `/services`, `/privacy`, `/terms`
-- [`app/robots.ts`](packages/frontend/app/robots.ts) — add AI crawler rules
-- [`middleware.ts`](packages/frontend/middleware.ts) — exclude robots.txt/sitemap.xml from matcher
-- [`nginx/nginx.conf`](nginx/nginx.conf) — add CSP header, update HSTS
-- [`next.config.js`](packages/frontend/next.config.js) — remove placeholder image domains
-- [`components/ui/typing-animation.tsx`](packages/frontend/components/ui/typing-animation.tsx) — replace Framer Motion with CSS animation
+| `packages/frontend/src/middleware.ts` | Does not exclude robots.txt/sitemap.xml |
+| `packages/frontend/app/[locale]/page.tsx` | MainAbout commented out |
+| `packages/frontend/app/[locale]/properties/PropertiesClient.tsx` | Missing H1, 12px inputs, no skeleton |
+| `packages/frontend/app/[locale]/layout.tsx` | sameAs empty, missing SearchAction + telephone |
+| `packages/frontend/app/sitemap.ts` | Missing /services, fake lastmod, unused alternates block |
+| `packages/shared/src/styles/globals.css` | CSS @import for fonts (render-blocking) |
+| `packages/frontend/app/[locale]/services/page.tsx` | H1 lacks keyword, no schema |
+| `packages/frontend/app/[locale]/buyer-consultation/BuyerConsultationClient.tsx` | No FAQ, thin editorial content |
+| `packages/frontend/app/[locale]/seller-consultation/SellPropertyClient.tsx` | Generic benefit copy, thin content |
