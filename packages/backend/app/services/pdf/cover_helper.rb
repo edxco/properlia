@@ -138,18 +138,20 @@ module Pdf
 
       pdf.fill_color '000000'
 
-      pdf.canvas do
-        pdf.fill_color 'FFFFFF'
-        pdf.fill_rectangle [0, ref_y.call(0)], 151.32655334472656, 61.19999694824219
-        pdf.fill_color '000000'
-      end
+      if @display_properlia_info
+        pdf.canvas do
+          pdf.fill_color 'FFFFFF'
+          pdf.fill_rectangle [0, ref_y.call(0)], 151.32655334472656, 61.19999694824219
+          pdf.fill_color '000000'
+        end
 
-      logo_path = Rails.root.join('app/assets/images/properlia.png')
-      if File.exist?(logo_path)
-        pdf.image logo_path.to_s,
-                  at: [8.503936767578125, ref_y.call(13.609603881835938)],
-                  width: 135.75,
-                  height: 33.75
+        logo_path = Rails.root.join('app/assets/images/properlia.png')
+        if File.exist?(logo_path)
+          pdf.image logo_path.to_s,
+                    at: [8.503936767578125, ref_y.call(13.609603881835938)],
+                    width: 135.75,
+                    height: 33.75
+        end
       end
 
       pdf.canvas do
@@ -299,58 +301,60 @@ module Pdf
 
       pdf.fill_color '000000'
 
-      pdf.canvas do
-        pdf.fill_color footer_blue
-        pdf.fill_rectangle [-5.4219255447387695, ref_y.call(750.4647827148438)],
-                           (617.3419189453125 - -5.4219255447387695),
-                           (791.9284057617188 - 750.4647827148438)
-        pdf.fill_color '000000'
-      end
+      if @display_properlia_info
+        pdf.canvas do
+          pdf.fill_color footer_blue
+          pdf.fill_rectangle [-5.4219255447387695, ref_y.call(750.4647827148438)],
+                             (617.3419189453125 - -5.4219255447387695),
+                             (791.9284057617188 - 750.4647827148438)
+          pdf.fill_color '000000'
+        end
 
-      pdf.fill_color 'FFFFFF'
-      begin
-        pdf.font('Lexend', style: :extra_bold)
-      rescue StandardError
-        nil
-      end
-      pdf.text_box "Properlia © #{Time.current.year}",
-                   at: [11.35546875, ref_y.call(763.6965942382812)],
-                   width: 250,
-                   height: 15,
-                   size: 12,
-                   overflow: :shrink_to_fit
+        pdf.fill_color 'FFFFFF'
+        begin
+          pdf.font('Lexend', style: :extra_bold)
+        rescue StandardError
+          nil
+        end
+        pdf.text_box "Properlia © #{Time.current.year}",
+                     at: [11.35546875, ref_y.call(763.6965942382812)],
+                     width: 250,
+                     height: 15,
+                     size: 12,
+                     overflow: :shrink_to_fit
 
-      begin
-        pdf.font('Lexend', style: :semi_bold)
-      rescue StandardError
+        begin
+          pdf.font('Lexend', style: :semi_bold)
+        rescue StandardError
+          begin
+            pdf.font('Lexend')
+          rescue StandardError
+            nil
+          end
+        end
+        phone = @general_info&.phone.to_s.presence || '222 255 9549'
+        pdf.text_box "#{phone}   |",
+                     at: [380.1168518066406, ref_y.call(763.6965942382812)],
+                     width: 110,
+                     height: 15,
+                     size: 12,
+                     overflow: :shrink_to_fit
+
         begin
           pdf.font('Lexend')
         rescue StandardError
           nil
         end
-      end
-      phone = @general_info&.phone.to_s.presence || '222 255 9549'
-      pdf.text_box "#{phone}   |",
-                   at: [380.1168518066406, ref_y.call(763.6965942382812)],
-                   width: 110,
-                   height: 15,
-                   size: 12,
-                   overflow: :shrink_to_fit
+        pdf.fill_color 'F6F6F6'
+        pdf.text_box 'www.properlia.com',
+                     at: [485.0113525390625, ref_y.call(763.6965942382812)],
+                     width: 120,
+                     height: 15,
+                     size: 12,
+                     overflow: :shrink_to_fit
 
-      begin
-        pdf.font('Lexend')
-      rescue StandardError
-        nil
+        pdf.fill_color '000000'
       end
-      pdf.fill_color 'F6F6F6'
-      pdf.text_box 'www.properlia.com',
-                   at: [485.0113525390625, ref_y.call(763.6965942382812)],
-                   width: 120,
-                   height: 15,
-                   size: 12,
-                   overflow: :shrink_to_fit
-
-      pdf.fill_color '000000'
     end
 
     def add_cover_page(pdf, color: '27AE60')

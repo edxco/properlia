@@ -29,7 +29,7 @@ export default function FactSheetModal({
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
       // Generate PDF download URL with locale parameter
-      const pdfUrl = `${apiBaseUrl}/properties/${propertyId}/pdf?locale=${locale}`;
+      const pdfUrl = `${apiBaseUrl}/properties/${propertyId}/pdf?locale=${locale}&display_properlia_info=${includeProperliaInfo}`;
 
       // Open PDF in new tab to trigger download
       window.open(pdfUrl, "_blank");

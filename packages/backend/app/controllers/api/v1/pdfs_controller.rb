@@ -15,12 +15,14 @@ module Api
       def show
         locale = params[:locale]&.to_sym || :es
         locale = :es unless %i[en es].include?(locale)
+        display_properlia_info = params[:display_properlia_info] != 'false'
 
         # Generate PDF
         pdf_service = Pdf::GeneratorService.new(
           @property,
           locale: locale,
-          base_url: frontend_base_url
+          base_url: frontend_base_url,
+          display_properlia_info: display_properlia_info
         )
 
         pdf_data = pdf_service.generate

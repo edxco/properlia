@@ -85,12 +85,13 @@ module Pdf
       }
     }.freeze
 
-    def initialize(property, locale: :es, base_url: nil)
+    def initialize(property, locale: :es, base_url: nil, display_properlia_info: true)
       @property = property
       @locale = locale.to_sym
       @base_url = base_url || ENV['FRONTEND_URL'] || 'http://localhost:3001'
       @general_info = GeneralInfo.instance
       @t = TRANSLATIONS[@locale]
+      @display_properlia_info = display_properlia_info
     end
 
     def generate
@@ -127,7 +128,7 @@ module Pdf
 
     def generate_residential_pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
-        add_global_footer(pdf)
+        add_global_footer(pdf) if @display_properlia_info
         add_global_header(pdf)
         add_residential_template_cover(pdf)
 
@@ -142,7 +143,7 @@ module Pdf
 
     def generate_commercial_pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
-        add_global_footer(pdf)
+        add_global_footer(pdf) if @display_properlia_info
         add_global_header(pdf)
         add_cover_page(pdf, color: '3498DB')
 
@@ -157,7 +158,7 @@ module Pdf
 
     def generate_industrial_pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
-        add_global_footer(pdf)
+        add_global_footer(pdf) if @display_properlia_info
         add_global_header(pdf)
         add_cover_page(pdf, color: 'E74C3C')
 
@@ -168,19 +169,12 @@ module Pdf
         pdf.start_new_page(margin: 40)
         add_images_section(pdf)
 
-        pdf.move_down 20
-        pdf.text @property.title, size: 20, style: :bold, color: '2C3E50'
-        pdf.move_down 10
-        pdf.text format_price(@property.price), size: 24, style: :bold, color: 'E74C3C'
-
-        pdf.move_down 15
-        add_industrial_features_box(pdf)
       end.render
     end
 
     def generate_land_pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
-        add_global_footer(pdf)
+        add_global_footer(pdf) if @display_properlia_info
         add_global_header(pdf)
         add_cover_page(pdf, color: '8E44AD')
 
