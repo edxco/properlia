@@ -176,7 +176,7 @@ module Pdf
       Prawn::Document.new(page_size: 'LETTER', margin: 0) do |pdf|
         add_global_footer(pdf) if @display_properlia_info
         add_global_header(pdf)
-        add_cover_page(pdf, color: '8E44AD')
+        add_residential_template_cover(pdf)
 
         # Page 2: Description page with light gray background
         add_description_page(pdf)
