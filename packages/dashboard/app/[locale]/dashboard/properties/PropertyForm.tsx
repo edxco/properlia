@@ -26,7 +26,7 @@ import {
   useT,
 } from "@properlia/shared/components/TranslationProvider";
 import { PriceInput } from "@properlia/shared/components";
-import { capitalizeFirstWord, getAbsoluteImageUrl } from "@properlia/shared";
+import { capitalizeFirstWord, getAbsoluteImageUrl, formatPriceInput } from "@properlia/shared";
 import PreviewPDF from "./[id]/previewPDF";
 
 type FormState = {
@@ -164,7 +164,7 @@ export default function PropertyForm({
       setForm({
         title: editingProperty.title ?? "",
         address: editingProperty.address ?? "",
-        price: editingProperty.price?.toLocaleString() ?? "",
+        price: editingProperty.price ? formatPriceInput(editingProperty.price.toString()) : "",
         property_type_id: editingProperty.property_type_id ?? "",
         status_id: editingProperty.status_id ?? "",
         listing_type_id: editingProperty.listing_type_id ?? "",
@@ -461,7 +461,7 @@ export default function PropertyForm({
     const payload: PropertyPayload = {
       title: form.title.trim(),
       address: form.address.trim(),
-      price: parseFloat(form.price.replace(/,/g, "")) || 0,
+      price: parseInt(form.price.replace(/,/g, ""), 10) || 0,
       property_type_id: form.property_type_id,
       status_id: form.status_id || undefined,
       listing_type_id: form.listing_type_id,
@@ -696,8 +696,7 @@ export default function PropertyForm({
               const categories =
                 selectedPropertyType?.property_categories ?? [];
 
-              // Hide category selection when editing a land property
-              if (categories.length > 1 && !editingProperty) {
+              if (categories.length > 1) {
                 return (
                   <div className="flex flex-wrap content-center items-center gap-2">
                     <label className="block text-sm font-medium text-gray-700">
