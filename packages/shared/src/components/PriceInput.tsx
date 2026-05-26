@@ -80,7 +80,7 @@ export function PriceInput({
         placeholder={placeholder}
         required={required}
         disabled={disabled}
-        inputMode="decimal"
+        inputMode="numeric"
         className={className}
         aria-invalid={hasError}
       />

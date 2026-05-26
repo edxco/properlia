@@ -68,23 +68,9 @@ export function formatLargeNumber(value: number, decimals: number = 1): string {
  * formatPriceInput("abc123") // "123"
  */
 export function formatPriceInput(value: string): string {
-  // Remove non-numeric characters except decimal point
-  const numericValue = value.replace(/[^\d.]/g, "");
-
-  // Split into integer and decimal parts
-  const parts = numericValue.split(".");
-
-  // Format integer part with commas
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-  // Rejoin with decimal part if it exists (limit to 2 decimal places)
-  if (parts.length > 1) {
-    // Limit decimal places to 2
-    parts[1] = parts[1].slice(0, 2);
-    return parts.slice(0, 2).join(".");
-  }
-
-  return parts[0];
+  const integerPart = value.split(".")[0];
+  const numericValue = integerPart.replace(/[^\d]/g, "");
+  return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 /**
@@ -97,9 +83,8 @@ export function formatPriceInput(value: string): string {
  * parsePriceInput("") // NaN
  */
 export function parsePriceInput(value: string): number {
-  // Remove all non-numeric characters except decimal point
-  const cleanValue = value.replace(/[^\d.]/g, "");
-  return parseFloat(cleanValue);
+  const cleanValue = value.replace(/[^\d]/g, "");
+  return parseInt(cleanValue, 10);
 }
 
 /**
