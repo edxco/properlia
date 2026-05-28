@@ -1,18 +1,29 @@
 "use client";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ProperliaLogo from "@/public/properlia.png";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
+import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
+
+const PROPERTY_CATEGORIES = [
+  { key: "residential", param: "residential" },
+  { key: "commercial", param: "commercial" },
+  { key: "land", param: "land" },
+  { key: "industrial", param: "industrial" },
+] as const;
 
 export function Navigation() {
   const t = useT();
   const locale = useLocale();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobilePropertiesOpen, setIsMobilePropertiesOpen] = useState(false);
+  const [isPropertiesOpen, setIsPropertiesOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isActive = (path: string) => {
     const fullPath = `/${locale}${path}`;
@@ -33,6 +44,15 @@ export function Navigation() {
         : "text-stone-700 hover:text-stone-900"
     }`;
 
+  const handleMouseEnter = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setIsPropertiesOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimer.current = setTimeout(() => setIsPropertiesOpen(false), 150);
+  };
+
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-stone-100">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
@@ -42,9 +62,42 @@ export function Navigation() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            <Link href={`/${locale}/properties`} className={linkClass("/properties")}>
-              {t("properties")}
-            </Link>
+            <div
+              className="relative"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <button
+                className={`flex items-center gap-1 transition-colors text-sm tracking-wide font-medium ${
+                  isActive("/properties")
+                    ? "text-primary font-semibold border-b-2 border-stone-900 pb-0.5"
+                    : "text-stone-600 hover:text-stone-900"
+                }`}
+              >
+                {t("properties")}
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${isPropertiesOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isPropertiesOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3">
+                  <div className="bg-white border border-stone-100 rounded-lg shadow-lg py-1.5 min-w-[160px]">
+                    {PROPERTY_CATEGORIES.map(({ key, param }) => (
+                      <Link
+                        key={param}
+                        href={`/${locale}/properties?category=${param}`}
+                        className="block px-4 py-2 text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-colors"
+                        onClick={() => setIsPropertiesOpen(false)}
+                      >
+                        {t(key)}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <Link href={`/${locale}/buyer-consultation`} className={linkClass("/buyer-consultation")}>
               {t("imABuyer")}
             </Link>
@@ -73,13 +126,33 @@ export function Navigation() {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-stone-100">
           <div className="px-6 py-6 space-y-4">
-            <Link
-              href={`/${locale}/properties`}
-              className={mobileLinkClass("/properties")}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {t("properties")}
-            </Link>
+            <div>
+              <button
+                className={`flex items-center gap-1 w-full text-left text-sm tracking-wide font-medium ${
+                  isActive("/properties") ? "text-stone-900" : "text-stone-700 hover:text-stone-900"
+                }`}
+                onClick={() => setIsMobilePropertiesOpen(!isMobilePropertiesOpen)}
+              >
+                {t("properties")}
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${isMobilePropertiesOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {isMobilePropertiesOpen && (
+                <div className="mt-2 ml-3 space-y-2 border-l border-stone-200 pl-3">
+                  {PROPERTY_CATEGORIES.map(({ key, param }) => (
+                    <Link
+                      key={param}
+                      href={`/${locale}/properties?category=${param}`}
+                      className="block text-sm text-stone-600 hover:text-stone-900"
+                      onClick={() => { setIsMenuOpen(false); setIsMobilePropertiesOpen(false); }}
+                    >
+                      {capitalizeEachWord(t(key))}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             <Link
               href={`/${locale}/buyer-consultation`}
               className={mobileLinkClass("/buyer-consultation")}

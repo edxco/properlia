@@ -12,6 +12,13 @@ import { PropertyCard, Banner } from "@/components/ui";
 
 const ITEMS_PER_PAGE = 9;
 
+const CATEGORY_TYPES: Record<string, string[]> = {
+  residential: ["house", "department"],
+  commercial: ["retail space", "doctor office", "office"],
+  industrial: ["warehouse"],
+  land: ["land"],
+};
+
 interface Filters {
   rooms?: number;
   bathrooms?: number;
@@ -23,6 +30,7 @@ interface Filters {
   landAreaMax?: number;
   searchQuery?: string;
   listingType?: string;
+  category?: string;
 }
 
 export default function PropertiesClient() {
@@ -35,12 +43,14 @@ export default function PropertiesClient() {
   useEffect(() => {
     const search = searchParams.get("search");
     const type = searchParams.get("type");
+    const category = searchParams.get("category");
 
-    if (search || type) {
+    if (search || type || category) {
       setFilters((prev) => ({
         ...prev,
         searchQuery: search || undefined,
         listingType: type || undefined,
+        category: category || undefined,
       }));
     }
   }, [searchParams]);
@@ -95,6 +105,12 @@ export default function PropertiesClient() {
           return false;
         if (filters.listingType === "buy" && listingTypeName !== "sale")
           return false;
+      }
+
+      if (filters.category) {
+        const allowed = CATEGORY_TYPES[filters.category] ?? [];
+        const typeName = property.property_type?.name?.toLowerCase() ?? "";
+        if (!allowed.includes(typeName)) return false;
       }
 
       // Land area filters (not yet in backend)

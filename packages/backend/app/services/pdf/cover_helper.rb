@@ -31,7 +31,13 @@ module Pdf
 
       begin
         if @property.images.attached? && @property.images.first.present?
-          attachment = @property.images.first
+          attachment =
+            if @property.image_order.present?
+              cover_id = @property.image_order.first.to_s
+              @property.images.find { |img| img.id.to_s == cover_id } || @property.images.first
+            else
+              @property.images.first
+            end
 
           temp = cover_image_for_attachment(
             pdf_width: hero_w,
@@ -73,16 +79,6 @@ module Pdf
         end
       end
 
-      pdf.canvas do
-        pdf.fill_color light_blue
-        pdf.fill_rectangle [306, ref_y.call(255.7490234375)], 263.6533203125, 29.244048595428467
-
-        pdf.fill_color brand_blue
-        pdf.fill_rectangle [306, ref_y.call(284.99310302734375)], 263.583740234375, 46.89190673828125
-
-        pdf.fill_color '000000'
-      end
-
       listing_text =
         if @property.listing_type
           (@locale == :es ? @property.listing_type.es_name : @property.listing_type.name).to_s
@@ -97,42 +93,22 @@ module Pdf
           ''
         end
 
-      pdf.fill_color 'FFFFFF'
       begin
         pdf.font('Lexend', style: :extra_bold)
       rescue StandardError
         nil
       end
 
-      right_edge        = 566.6082153320312
-      listing_box_w     = (566.6082153320312 - 372.1171875)
-      type_box_w        = (566.6123657226562 - 328.5)
-      badge_right_edge  = 306.0 + 263.6533203125
-      title_box_w       = 416.8920135498047
+      right_edge       = 566.6082153320312
+      badge_right_edge = 306.0 + 263.6533203125
+      title_box_w      = 416.8920135498047
 
-      pdf.text_box listing_text.to_s.strip.capitalize,
-                   at: [right_edge - listing_box_w, ref_y.call(262.4990234375)],
-                   width: listing_box_w,
-                   height: 15.0,
-                   size: 12,
-                   overflow: :shrink_to_fit,
-                   align: :right,
-                   single_line: true
-
-      pdf.text_box type_text.to_s.strip.upcase,
-                   at: [right_edge - type_box_w, ref_y.call(298.4930725097656)],
-                   width: type_box_w,
-                   height: 18.75,
-                   size: 15,
-                   overflow: :shrink_to_fit,
-                   align: :right,
-                   single_line: true
-
+      pdf.fill_color 'FFFFFF'
       pdf.text_box @property.title.to_s.strip,
                    at: [badge_right_edge - title_box_w, ref_y.call(334.0053405761719)],
                    width: title_box_w,
                    height: 52.5,
-                   size: 42,
+                   size: 28,
                    align: :right,
                    overflow: :shrink_to_fit
 
@@ -154,11 +130,30 @@ module Pdf
         end
       end
 
+      card_gap     = 20.0
+      card_top_gap = 20.0
+      col_w        = (611.7783813476562 - card_gap * 3) / 2.0
+      left_card_x  = card_gap
+      right_box_x  = left_card_x + col_w + card_gap
+      col_pad      = 24
+      col_h        = 172.0
+      card_y_top   = 408.5099792480469 + card_top_gap
+      l_txt_x      = left_card_x + col_pad
+      r_txt_x      = right_box_x + col_pad
+      txt_w        = col_w - 2 * col_pad
+      section_h    = 750.4647216796875 - 408.5099792480469
+
       pdf.canvas do
-        pdf.fill_color bg_gray
-        pdf.fill_rectangle [0, ref_y.call(408.5099792480469)], 611.7783813476562, (750.4647216796875 - 408.5099792480469)
+        pdf.fill_color 'FFFFFF'
+        pdf.fill_rectangle [0, ref_y.call(408.5099792480469)], 611.7783813476562, section_h
         pdf.fill_color '000000'
       end
+
+      pdf.fill_color bg_gray
+      pdf.rounded_rectangle [left_card_x, ref_y.call(card_y_top)], col_w, col_h, 14
+      pdf.fill
+      pdf.rounded_rectangle [right_box_x, ref_y.call(card_y_top)], col_w, col_h, 14
+      pdf.fill
 
       fmt_int = ->(v) { number_with_delimiter(v.to_i, delimiter: ',') }
       area_str = ->(v) { v.present? ? "#{fmt_int.call(v)}m2" : nil }
@@ -173,9 +168,9 @@ module Pdf
       end
       pdf.fill_color brand_blue
       pdf.text_box @t[:title],
-                   at: [41.67942810058594, ref_y.call(433.300048828125)],
-                   width: (178.079345703125 - 41.67942810058594),
-                   height: (453.29693603515625 - 433.300048828125),
+                   at: [l_txt_x, ref_y.call(420.0 + card_top_gap)],
+                   width: txt_w,
+                   height: 20,
                    size: 16,
                    overflow: :shrink_to_fit
 
@@ -186,22 +181,22 @@ module Pdf
       end
 
       y_lines = [
-        [469.13226318359375, "#{land_area} #{@t[:land_area]}".strip],
-        [485.63226318359375, "#{built_area} #{@t[:built_area]}".strip],
-        [502.13226318359375, (@property.rooms.to_i > 0 ? "#{@property.rooms.to_i} #{@t[:rooms]}:" : nil)],
-        [518.6322631835938,
-         (@property.parking_spaces.to_i > 0 ? "#{@property.parking_spaces.to_i} #{@t[:parking_spaces]}:" : nil)],
-        [535.1322631835938, (@property.bathrooms.to_i > 0 ? "#{@property.bathrooms.to_i} #{@t[:bathrooms]}:" : nil)],
-        [551.6322631835938,
-         (@property.half_bathrooms.to_i > 0 ? "#{@property.half_bathrooms.to_i} #{@t[:half_bathrooms]}:" : nil)]
+        [454.57 + card_top_gap, "#{land_area} #{@t[:land_area]}".strip],
+        [471.07 + card_top_gap, "#{built_area} #{@t[:built_area]}".strip],
+        [487.57 + card_top_gap, (@property.rooms.to_i > 0 ? "#{@property.rooms.to_i} #{@t[:rooms]}" : nil)],
+        [504.07 + card_top_gap,
+         (@property.parking_spaces.to_i > 0 ? "#{@property.parking_spaces.to_i} #{@t[:parking_spaces]}" : nil)],
+        [520.57 + card_top_gap, (@property.bathrooms.to_i > 0 ? "#{@property.bathrooms.to_i} #{@t[:bathrooms]}" : nil)],
+        [537.07 + card_top_gap,
+         (@property.half_bathrooms.to_i > 0 ? "#{@property.half_bathrooms.to_i} #{@t[:half_bathrooms]}" : nil)]
       ]
 
       y_lines.each do |y0, txt|
         next if txt.blank?
 
         pdf.text_box txt,
-                     at: [41.67942810058594, ref_y.call(y0)],
-                     width: 300,
+                     at: [l_txt_x, ref_y.call(y0)],
+                     width: txt_w,
                      height: 16,
                      size: 12,
                      overflow: :shrink_to_fit
@@ -212,15 +207,48 @@ module Pdf
       rescue StandardError
         nil
       end
+      pdf.fill_color brand_blue
+      right_card_title = @locale == :es ? 'Información General' : 'General Information'
+      pdf.text_box right_card_title,
+                   at: [r_txt_x, ref_y.call(420.0 + card_top_gap)],
+                   width: txt_w,
+                   height: 20,
+                   size: 16,
+                   overflow: :shrink_to_fit
+
+      begin
+        pdf.font('Lexend')
+      rescue StandardError
+        nil
+      end
+
+      type_label    = type_text.to_s.strip.capitalize
+      listing_label = listing_text.to_s.strip.capitalize
+      meta_parts    = [type_label, listing_label].reject(&:empty?)
+      unless meta_parts.empty?
+        pdf.fill_color brand_blue
+        pdf.text_box meta_parts.join('  ·  '),
+                     at: [r_txt_x, ref_y.call(454.57 + card_top_gap)],
+                     width: txt_w,
+                     height: 14,
+                     size: 12,
+                     overflow: :shrink_to_fit,
+                     single_line: true
+      end
+
+      begin
+        pdf.font('Lexend')
+      rescue StandardError
+        nil
+      end
       pdf.fill_color text_gray
       price_text = "#{format_price(@property.price)} MXN"
       pdf.text_box price_text,
-                   at: [403.57843017578125, ref_y.call(434.2475280761719)],
-                   width: (568.602783203125 - 403.57843017578125),
-                   height: (464.2475280761719 - 434.2475280761719),
-                   size: 34,
-                   overflow: :shrink_to_fit,
-                   align: :right
+                   at: [r_txt_x, ref_y.call(468.82 + card_top_gap)],
+                   width: txt_w,
+                   height: 30.0,
+                   size: 12,
+                   overflow: :shrink_to_fit
 
       begin
         pdf.font('Lexend')
@@ -229,28 +257,29 @@ module Pdf
       end
       pdf.fill_color brand_blue
 
-      addr = [@property.address, @property.neighborhood].compact.join(', ')
-      pdf.text_box addr,
-                   at: [398.4977111816406, ref_y.call(467.1249694824219)],
-                   width: (568.6176147460938 - 398.4977111816406),
-                   height: 20,
-                   size: 12,
-                   overflow: :shrink_to_fit,
-                   align: :right
+      addr_line_h = 16.0
+      addr_y0     = 501.69 + card_top_gap
 
-      city_state = [@property.city, @property.state].compact.join(' / ')
-      pdf.text_box city_state,
-                   at: [484.0152893066406, ref_y.call(491.2999572753906)],
-                   width: (569.6115112304688 - 484.0152893066406),
-                   height: 20,
-                   size: 16,
-                   overflow: :shrink_to_fit,
-                   align: :right
+      [
+        @property.address.presence,
+        @property.neighborhood.presence,
+        [@property.city, @property.state].compact.join(', ').presence
+      ].compact.each_with_index do |line, i|
+        pdf.text_box line,
+                     at: [r_txt_x, ref_y.call(addr_y0 + i * addr_line_h)],
+                     width: txt_w,
+                     height: addr_line_h,
+                     size: 12,
+                     overflow: :shrink_to_fit
+      end
 
       pdf.fill_color '000000'
 
-      # Property Features section
       if @property.property_features.any?
+        feat_y_top   = 408.5099792480469 + card_top_gap + col_h + 15.0
+        feat_full_w  = right_box_x + col_w - col_pad - l_txt_x
+        feat_line_h  = 16.0
+
         begin
           pdf.font('Lexend', style: :extra_bold)
         rescue StandardError
@@ -259,8 +288,8 @@ module Pdf
         pdf.fill_color brand_blue
         features_label = @locale == :es ? 'Características' : 'Features'
         pdf.text_box features_label,
-                     at: [41.67942810058594, ref_y.call(580)],
-                     width: 200,
+                     at: [l_txt_x, ref_y.call(feat_y_top)],
+                     width: feat_full_w,
                      height: 20,
                      size: 16,
                      overflow: :shrink_to_fit
@@ -275,27 +304,14 @@ module Pdf
           (@locale == :es ? f.es_name : f.name).to_s.strip
         end.reject(&:blank?)
 
-        # Display features in columns (2 columns)
-        feature_names.each_slice(2).with_index do |pair, idx|
-          y_pos = 605 + (idx * 18)
-          break if y_pos > 720 # Don't overflow into footer
-
+        feature_names.first(4).each_with_index do |name, i|
           pdf.fill_color text_gray
-          pdf.text_box "• #{pair[0]}",
-                       at: [41.67942810058594, ref_y.call(y_pos)],
-                       width: 250,
-                       height: 16,
-                       size: 11,
+          pdf.text_box name,
+                       at: [l_txt_x, ref_y.call(feat_y_top + 22.0 + i * feat_line_h)],
+                       width: feat_full_w,
+                       height: feat_line_h,
+                       size: 12,
                        overflow: :shrink_to_fit
-
-          if pair[1]
-            pdf.text_box "• #{pair[1]}",
-                         at: [300, ref_y.call(y_pos)],
-                         width: 250,
-                         height: 16,
-                         size: 11,
-                         overflow: :shrink_to_fit
-          end
         end
       end
 
