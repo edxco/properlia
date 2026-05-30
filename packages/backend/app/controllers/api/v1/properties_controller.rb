@@ -94,6 +94,8 @@ module Api
 
         property = Property.new(property_params)
         if property.save
+          ProcessPropertyImagesJob.perform_later(property.id) if params.dig(:property, :images).present?
+
           # Send confirmation email asynchronously
           begin
             EmailService.send_property_confirmation(property: property)
@@ -126,6 +128,8 @@ module Api
           # Append new media if provided (doesn't remove existing ones)
           @property.images.attach(new_images) if new_images.present?
           @property.videos.attach(new_videos) if new_videos.present?
+
+          ProcessPropertyImagesJob.perform_later(@property.id) if new_images.present?
 
           render json: property_json(@property), status: :ok
         else
