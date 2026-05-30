@@ -79,6 +79,14 @@ module Pdf
         end
       end
 
+      pdf.canvas do
+        pdf.fill_color '000000'
+        pdf.transparent(0.4) do
+          pdf.fill_rectangle [0, ref_y.call(334.0053405761719 - 25)], hero_w, (hero_h - 334.0053405761719 + 25)
+        end
+        pdf.fill_color '000000'
+      end
+
       listing_text =
         if @property.listing_type
           (@locale == :es ? @property.listing_type.es_name : @property.listing_type.name).to_s
