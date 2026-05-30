@@ -5,7 +5,14 @@ module Pdf
     def add_images_section(pdf, max_images: 10)
       return unless @property.images.attached?
 
-      images = @property.images.drop(1).first(max_images)
+      images = if @property.image_order.present?
+        order = @property.image_order.map(&:to_s)
+        ordered = order.filter_map { |id| @property.images.find { |img| img.id.to_s == id } }
+        unordered = @property.images.reject { |img| order.include?(img.id.to_s) }
+        (ordered + unordered).drop(1).first(max_images)
+      else
+        @property.images.drop(1).first(max_images)
+      end
       return if images.empty?
 
       per_page = 2
