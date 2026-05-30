@@ -2,7 +2,7 @@
 
 module Pdf
   module ImagesHelper
-    def add_images_section(pdf, max_images: 10)
+    def add_images_section(pdf, max_images: 5)
       return unless @property.images.attached?
 
       images = if @property.image_order.present?
