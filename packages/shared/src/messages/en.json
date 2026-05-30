@@ -484,5 +484,9 @@
   "servicesService5Item3": "Connect with qualified buyers",
   "servicesService5Tagline": "More reach = more chances to close.",
 
-  "servicesCta": "Ready to get started?"
+  "servicesCta": "Ready to get started?",
+  
+  "deleteAll": "Delete all",
+  "confirm": "Confirm",
+  "deleteAllConfirmation": "Are you sure you want to delete all items?"
 }

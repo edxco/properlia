@@ -484,5 +484,9 @@
   "servicesService5Item3": "Conectar con compradores calificados",
   "servicesService5Tagline": "Más alcance = más probabilidades de cerrar.",
 
-  "servicesCta": "¿Listo para empezar?"
+  "servicesCta": "¿Listo para empezar?",
+
+  "deleteAll": "Eliminar todo",
+  "confirm": "Confirmar",
+  "deleteAllConfirmation": "¿Estás seguro de que deseas eliminar todos los elementos?"
 }
