@@ -58,7 +58,7 @@ module Pdf
           x_cursor += icon_size + 6
 
           begin
-            pdf.font('Lexend', style: :semi_bold)
+            pdf.font('Lexend')
           rescue StandardError
             nil
           end
