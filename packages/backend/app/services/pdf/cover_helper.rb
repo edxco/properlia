@@ -356,7 +356,12 @@ module Pdf
             nil
           end
         end
-        phone = @general_info&.phone.to_s.presence || '222 255 9549'
+        raw_phone = @general_info&.phone.to_s.gsub(/\D/, '').presence || '2222559549'
+        phone = if raw_phone.length == 10
+                  "(#{raw_phone[0..2]}) #{raw_phone[3..5]} #{raw_phone[6..7]} #{raw_phone[8..9]}"
+                else
+                  @general_info&.phone.to_s.presence || '(222) 255 95 49'
+                end
         pdf.text_box "#{phone}   |",
                      at: [380.1168518066406, ref_y.call(763.6965942382812)],
                      width: 110,
