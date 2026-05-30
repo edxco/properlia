@@ -167,7 +167,7 @@ module Pdf
       area_str = ->(v) { v.present? ? "#{fmt_int.call(v)}m2" : nil }
 
       land_area  = area_str.call(@property.land_area)
-      built_area = area_str.call(@property.built_area)
+      built_area = @property.built_area.to_i > 0 ? area_str.call(@property.built_area) : nil
 
       begin
         pdf.font('Lexend', style: :extra_bold)
@@ -190,7 +190,7 @@ module Pdf
 
       y_lines = [
         [454.57 + card_top_gap, "#{land_area} #{@t[:land_area]}".strip],
-        [471.07 + card_top_gap, "#{built_area} #{@t[:built_area]}".strip],
+        [471.07 + card_top_gap, (built_area ? "#{built_area} #{@t[:built_area]}".strip : nil)],
         [487.57 + card_top_gap, (@property.rooms.to_i > 0 ? "#{@property.rooms.to_i} #{@t[:rooms]}" : nil)],
         [504.07 + card_top_gap,
          (@property.parking_spaces.to_i > 0 ? "#{@property.parking_spaces.to_i} #{@t[:parking_spaces]}" : nil)],
