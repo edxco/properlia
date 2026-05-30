@@ -3,7 +3,7 @@
 module Pdf
   module FormatHelper
     def format_price(price)
-      "$#{number_with_delimiter(price, delimiter: ',')}"
+      "$#{number_with_delimiter(price.to_i, delimiter: ',')}"
     end
 
     def number_with_delimiter(number, delimiter: ',')
