@@ -43,7 +43,13 @@ module Pdf
           pdf.fill_color text_gray
           title_text = @property.title.to_s.strip
           title_text = title_text[0, 93] + '...' if title_text.length > 93
-          pdf.draw_text title_text, at: [12, pdf.bounds.top - 20], size: 14
+          pdf.text_box title_text,
+                       at: [12, pdf.bounds.top - 10],
+                       width: pdf.bounds.width - 24,
+                       height: 18,
+                       size: 14,
+                       single_line: true,
+                       overflow: :truncate
 
           # Row 2 left: location
           location_parts = []
@@ -58,7 +64,13 @@ module Pdf
           end
 
           pdf.fill_color text_gray
-          pdf.draw_text location_text, at: [12, pdf.bounds.top - 40], size: 9
+          pdf.text_box location_text,
+                       at: [12, pdf.bounds.top - 34],
+                       width: pdf.bounds.width / 2,
+                       height: 12,
+                       size: 9,
+                       single_line: true,
+                       overflow: :truncate
 
           # Row 2 right: listing type | property type
           begin
@@ -79,7 +91,13 @@ module Pdf
 
           pdf.fill_color brand_blue
           type_width = pdf.width_of(type_line, size: 9)
-          pdf.draw_text type_line, at: [pdf.bounds.width - type_width - 12, pdf.bounds.top - 40], size: 9
+          pdf.text_box type_line,
+                       at: [pdf.bounds.width - type_width - 12, pdf.bounds.top - 34],
+                       width: type_width + 12,
+                       height: 12,
+                       size: 9,
+                       single_line: true,
+                       overflow: :truncate
 
           pdf.fill_color '000000'
         end

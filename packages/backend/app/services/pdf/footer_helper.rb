@@ -42,7 +42,13 @@ module Pdf
               nil
             end
           end
-          pdf.draw_text "Properlia © #{Time.current.year}", at: [12, 16]
+          pdf.text_box "Properlia © #{Time.current.year}",
+                       at: [12, 25],
+                       width: 200,
+                       height: 14,
+                       size: 12,
+                       single_line: true,
+                       overflow: :truncate
 
           icon_size = 12
           icon_y = 13
@@ -62,7 +68,13 @@ module Pdf
           rescue StandardError
             nil
           end
-          pdf.draw_text "#{phone}   |", at: [x_cursor, 16]
+          pdf.text_box "#{phone}   |",
+                       at: [x_cursor, 25],
+                       width: 150,
+                       height: 14,
+                       size: 12,
+                       single_line: true,
+                       overflow: :truncate
 
           begin
             pdf.font('Lexend')
@@ -70,7 +82,13 @@ module Pdf
             nil
           end
           pdf.fill_color 'F6F6F6'
-          pdf.draw_text website, at: [pdf.bounds.width - 120, 16]
+          pdf.text_box website,
+                       at: [pdf.bounds.width - 120, 25],
+                       width: 130,
+                       height: 14,
+                       size: 12,
+                       single_line: true,
+                       overflow: :truncate
         end
       end
     end
