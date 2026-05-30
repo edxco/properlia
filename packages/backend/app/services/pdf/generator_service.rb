@@ -186,7 +186,6 @@ module Pdf
         add_images_section(pdf)
 
         pdf.move_down 15
-        add_location_section(pdf)
       end.render
     end
   end
