@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   X,
@@ -9,7 +9,7 @@ import {
   Video as VideoIcon,
   Check,
 } from "lucide-react";
-import type { Property, PropertyPayload } from "@properlia/shared/types";
+import type { Attachment, Property, PropertyPayload } from "@properlia/shared/types";
 
 import {
   useCreateProperty,
@@ -85,6 +85,140 @@ const emptyForm: FormState = {
   videos: [],
 };
 
+interface NewImageCardProps {
+  index: number;
+  file: File;
+  objectUrl: string;
+  isDragging: boolean;
+  isDropTarget: boolean;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onDragEnd: () => void;
+  onDragEnter: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onRemove: (index: number) => void;
+}
+
+const NewImageCard = memo(function NewImageCard({
+  index,
+  file,
+  objectUrl,
+  isDragging,
+  isDropTarget,
+  onDragStart,
+  onDragEnd,
+  onDragEnter,
+  onDragLeave,
+  onDragOver,
+  onDrop,
+  onRemove,
+}: NewImageCardProps) {
+  return (
+    <div
+      draggable
+      onDragStart={(e) => onDragStart(e, index)}
+      onDragEnd={onDragEnd}
+      onDragEnter={(e) => onDragEnter(e, index)}
+      onDragLeave={onDragLeave}
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, index)}
+      className={`relative group cursor-grab active:cursor-grabbing transition-all ${
+        isDragging ? "opacity-40 scale-95" : "opacity-100"
+      } ${isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}
+    >
+      <img
+        src={objectUrl}
+        alt={file.name}
+        className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
+        draggable={false}
+      />
+      {index === 0 && (
+        <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+          Cover
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => onRemove(index)}
+        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
+      >
+        <X className="h-3 w-3" />
+      </button>
+      <p className="text-xs text-gray-500 mt-1 truncate pointer-events-none">
+        {file.name}
+      </p>
+    </div>
+  );
+});
+
+interface ExistingImageCardProps {
+  index: number;
+  image: Attachment;
+  isDragging: boolean;
+  isDropTarget: boolean;
+  deletingAttachment: boolean;
+  reorderingImages: boolean;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onDragEnd: () => void;
+  onDragEnter: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onDelete: (id: string) => void;
+}
+
+const ExistingImageCard = memo(function ExistingImageCard({
+  index,
+  image,
+  isDragging,
+  isDropTarget,
+  deletingAttachment,
+  reorderingImages,
+  onDragStart,
+  onDragEnd,
+  onDragEnter,
+  onDragLeave,
+  onDragOver,
+  onDrop,
+  onDelete,
+}: ExistingImageCardProps) {
+  return (
+    <div
+      draggable
+      onDragStart={(e) => onDragStart(e, index)}
+      onDragEnd={onDragEnd}
+      onDragEnter={(e) => onDragEnter(e, index)}
+      onDragLeave={onDragLeave}
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, index)}
+      className={`relative group cursor-grab active:cursor-grabbing transition-all ${
+        isDragging ? "opacity-40 scale-95" : "opacity-100"
+      } ${isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}
+    >
+      <img
+        src={getAbsoluteImageUrl(image.url)}
+        alt={image.filename}
+        className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
+        draggable={false}
+      />
+      {index === 0 && (
+        <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+          Cover
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => onDelete(image.id)}
+        disabled={deletingAttachment || reorderingImages}
+        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:opacity-50 z-10"
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </div>
+  );
+});
+
 interface PropertyFormProps {
   editingProperty: Property | null;
   onCancelEdit: () => void;
@@ -118,6 +252,35 @@ export default function PropertyForm({
   const [featureSearch, setFeatureSearch] = useState("");
   const [featureOpen, setFeatureOpen] = useState(false);
   const featureRef = useRef<HTMLDivElement>(null);
+  const draggedIndexRef = useRef<number | null>(null);
+  const existingDraggedIndexRef = useRef<number | null>(null);
+
+  const objectUrlCacheRef = useRef<Map<File, string>>(new Map());
+
+  const getObjectUrl = useCallback((file: File): string => {
+    const cache = objectUrlCacheRef.current;
+    if (!cache.has(file)) cache.set(file, URL.createObjectURL(file));
+    return cache.get(file)!;
+  }, []);
+
+  useEffect(() => {
+    const cache = objectUrlCacheRef.current;
+    const current = new Set(form.images);
+    for (const [file, url] of cache.entries()) {
+      if (!current.has(file)) {
+        URL.revokeObjectURL(url);
+        cache.delete(file);
+      }
+    }
+  }, [form.images]);
+
+  useEffect(() => {
+    const cache = objectUrlCacheRef.current;
+    return () => {
+      for (const url of cache.values()) URL.revokeObjectURL(url);
+      cache.clear();
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -296,55 +459,59 @@ export default function PropertyForm({
     }
   };
 
-  const removeFile = (field: "images" | "videos", index: number) => {
+  const removeFile = useCallback((field: "images" | "videos", index: number) => {
     setForm((prev) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
     }));
-  };
+  }, []);
+
+  const handleRemoveNewImage = useCallback((index: number) => {
+    removeFile("images", index);
+  }, [removeFile]);
 
   // Image reordering handlers
-  const handleDragStart = (
+  const handleDragStart = useCallback((
     e: React.DragEvent<HTMLDivElement>,
     index: number
   ) => {
+    draggedIndexRef.current = index;
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/html", index.toString());
-    // Prevent image from being dragged
     e.dataTransfer.setDragImage(e.currentTarget, 0, 0);
-  };
+  }, []);
 
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
+    draggedIndexRef.current = null;
     setDraggedIndex(null);
     setDragOverIndex(null);
-  };
+  }, []);
 
-  const handleDragEnter = (
+  const handleDragEnter = useCallback((
     e: React.DragEvent<HTMLDivElement>,
     index: number
   ) => {
     e.preventDefault();
-    if (draggedIndex !== null && draggedIndex !== index) {
+    if (draggedIndexRef.current !== null && draggedIndexRef.current !== index) {
       setDragOverIndex(index);
     }
-  };
+  }, []);
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    // Only clear if we're leaving the container, not a child element
     if (e.currentTarget === e.target) {
       setDragOverIndex(null);
     }
-  };
+  }, []);
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
-  };
+  }, []);
 
-  const handleDrop = (
+  const handleDrop = useCallback((
     e: React.DragEvent<HTMLDivElement>,
     dropIndex: number
   ) => {
@@ -352,11 +519,12 @@ export default function PropertyForm({
     e.stopPropagation();
 
     const dragIndex =
-      draggedIndex !== null
-        ? draggedIndex
+      draggedIndexRef.current !== null
+        ? draggedIndexRef.current
         : parseInt(e.dataTransfer.getData("text/html"));
 
-    if (dragIndex === dropIndex || dragIndex === null) {
+    if (dragIndex === dropIndex || draggedIndexRef.current === null) {
+      draggedIndexRef.current = null;
       setDraggedIndex(null);
       setDragOverIndex(null);
       return;
@@ -369,50 +537,53 @@ export default function PropertyForm({
       return { ...prev, images: newImages };
     });
 
+    draggedIndexRef.current = null;
     setDraggedIndex(null);
     setDragOverIndex(null);
-  };
+  }, []);
 
   // Existing images reordering handlers
-  const handleExistingDragStart = (
+  const handleExistingDragStart = useCallback((
     e: React.DragEvent<HTMLDivElement>,
     index: number
   ) => {
+    existingDraggedIndexRef.current = index;
     setExistingDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/html", index.toString());
     e.dataTransfer.setDragImage(e.currentTarget, 0, 0);
-  };
+  }, []);
 
-  const handleExistingDragEnd = () => {
+  const handleExistingDragEnd = useCallback(() => {
+    existingDraggedIndexRef.current = null;
     setExistingDraggedIndex(null);
     setExistingDragOverIndex(null);
-  };
+  }, []);
 
-  const handleExistingDragEnter = (
+  const handleExistingDragEnter = useCallback((
     e: React.DragEvent<HTMLDivElement>,
     index: number
   ) => {
     e.preventDefault();
-    if (existingDraggedIndex !== null && existingDraggedIndex !== index) {
+    if (existingDraggedIndexRef.current !== null && existingDraggedIndexRef.current !== index) {
       setExistingDragOverIndex(index);
     }
-  };
+  }, []);
 
-  const handleExistingDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleExistingDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.currentTarget === e.target) {
       setExistingDragOverIndex(null);
     }
-  };
+  }, []);
 
-  const handleExistingDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleExistingDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
-  };
+  }, []);
 
-  const handleExistingDrop = async (
+  const handleExistingDrop = useCallback(async (
     e: React.DragEvent<HTMLDivElement>,
     dropIndex: number
   ) => {
@@ -420,41 +591,54 @@ export default function PropertyForm({
     e.stopPropagation();
 
     const dragIndex =
-      existingDraggedIndex !== null
-        ? existingDraggedIndex
+      existingDraggedIndexRef.current !== null
+        ? existingDraggedIndexRef.current
         : parseInt(e.dataTransfer.getData("text/html"));
 
-    if (dragIndex === dropIndex || dragIndex === null || !editingProperty) {
+    if (dragIndex === dropIndex || existingDraggedIndexRef.current === null || !editingProperty) {
+      existingDraggedIndexRef.current = null;
       setExistingDraggedIndex(null);
       setExistingDragOverIndex(null);
       return;
     }
 
-    // Update local state immediately for responsive UI
-    const newOrder = [...existingImageOrder];
-    const [removed] = newOrder.splice(dragIndex, 1);
-    newOrder.splice(dropIndex, 0, removed);
-    setExistingImageOrder(newOrder);
-
+    existingDraggedIndexRef.current = null;
     setExistingDraggedIndex(null);
     setExistingDragOverIndex(null);
 
-    // Save the new order to the backend
+    let newOrder: string[] = [];
+    setExistingImageOrder((prev) => {
+      const updated = [...prev];
+      const [removed] = updated.splice(dragIndex, 1);
+      updated.splice(dropIndex, 0, removed);
+      newOrder = updated;
+      return updated;
+    });
+
     try {
       await reorderImages({
         propertyId: editingProperty.id,
         imageIds: newOrder,
       });
     } catch (error: any) {
-      // Revert to original order on error
       setExistingImageOrder(editingProperty.images.map((img) => img.id));
       setFormError(error?.message || "Failed to reorder images");
     }
-  };
+  }, [editingProperty, reorderImages]);
 
-  const visibleExistingImages = existingImageOrder.filter(
-    (id) => !deletedAttachmentIds.has(id)
+  const visibleExistingImages = useMemo(
+    () => existingImageOrder.filter((id) => !deletedAttachmentIds.has(id)),
+    [existingImageOrder, deletedAttachmentIds]
   );
+
+  const visibleExistingAttachments = useMemo(
+    () =>
+      visibleExistingImages
+        .map((id) => editingProperty?.images.find((i) => i.id === id) ?? null)
+        .filter((img): img is Attachment => img !== null),
+    [visibleExistingImages, editingProperty]
+  );
+
   const totalImages = visibleExistingImages.length + form.images.length;
 
   const handleDeleteAllImages = async () => {
@@ -1163,56 +1347,24 @@ export default function PropertyForm({
                   the cover):
                 </p>
                 <div className="grid grid-cols-3 gap-2">
-                  {existingImageOrder
-                    .filter((id) => !deletedAttachmentIds.has(id))
-                    .map((imageId, index) => {
-                      const img = editingProperty.images.find(
-                        (i) => i.id === imageId
-                      );
-                      if (!img) return null;
-                      const isDragging = existingDraggedIndex === index;
-                      const isDropTarget = existingDragOverIndex === index;
-
-                      return (
-                        <div
-                          key={img.id}
-                          draggable
-                          onDragStart={(e) => handleExistingDragStart(e, index)}
-                          onDragEnd={handleExistingDragEnd}
-                          onDragEnter={(e) => handleExistingDragEnter(e, index)}
-                          onDragLeave={handleExistingDragLeave}
-                          onDragOver={handleExistingDragOver}
-                          onDrop={(e) => handleExistingDrop(e, index)}
-                          className={`relative group cursor-grab active:cursor-grabbing transition-all ${
-                            isDragging ? "opacity-40 scale-95" : "opacity-100"
-                          } ${
-                            isDropTarget
-                              ? "ring-2 ring-blue-500 ring-offset-2"
-                              : ""
-                          }`}
-                        >
-                          <img
-                            src={getAbsoluteImageUrl(img.url)}
-                            alt={img.filename}
-                            className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
-                            draggable={false}
-                          />
-                          {index === 0 && (
-                            <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
-                              Cover
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteAttachment(img.id)}
-                            disabled={deletingAttachment || reorderingImages}
-                            className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:opacity-50 z-10"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      );
-                    })}
+                  {visibleExistingAttachments.map((img, index) => (
+                    <ExistingImageCard
+                      key={img.id}
+                      index={index}
+                      image={img}
+                      isDragging={existingDraggedIndex === index}
+                      isDropTarget={existingDragOverIndex === index}
+                      deletingAttachment={deletingAttachment}
+                      reorderingImages={reorderingImages}
+                      onDragStart={handleExistingDragStart}
+                      onDragEnd={handleExistingDragEnd}
+                      onDragEnter={handleExistingDragEnter}
+                      onDragLeave={handleExistingDragLeave}
+                      onDragOver={handleExistingDragOver}
+                      onDrop={handleExistingDrop}
+                      onDelete={handleDeleteAttachment}
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -1268,50 +1420,23 @@ export default function PropertyForm({
                 Drag to reorder images (first image will be the cover)
               </p>
               <div className="grid grid-cols-3 gap-2">
-                {form.images.map((file, index) => {
-                  const isDragging = draggedIndex === index;
-                  const isDropTarget = dragOverIndex === index;
-
-                  return (
-                    <div
-                      key={index}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, index)}
-                      onDragEnd={handleDragEnd}
-                      onDragEnter={(e) => handleDragEnter(e, index)}
-                      onDragLeave={handleDragLeave}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, index)}
-                      className={`relative group cursor-grab active:cursor-grabbing transition-all ${
-                        isDragging ? "opacity-40 scale-95" : "opacity-100"
-                      } ${
-                        isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""
-                      }`}
-                    >
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={file.name}
-                        className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
-                        draggable={false}
-                      />
-                      {index === 0 && (
-                        <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
-                          Cover
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeFile("images", index)}
-                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                      <p className="text-xs text-gray-500 mt-1 truncate pointer-events-none">
-                        {file.name}
-                      </p>
-                    </div>
-                  );
-                })}
+                {form.images.map((file, index) => (
+                  <NewImageCard
+                    key={index}
+                    index={index}
+                    file={file}
+                    objectUrl={getObjectUrl(file)}
+                    isDragging={draggedIndex === index}
+                    isDropTarget={dragOverIndex === index}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onRemove={handleRemoveNewImage}
+                  />
+                ))}
               </div>
             </div>
           )}
