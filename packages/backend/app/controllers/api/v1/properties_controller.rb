@@ -126,10 +126,15 @@ module Api
         # Update other attributes
         if @property.update(property_params.except(:images, :videos))
           # Append new media if provided (doesn't remove existing ones)
-          @property.images.attach(new_images) if new_images.present?
+          if new_images.present?
+            @property.images.attach(new_images)
+            # Append newly attached IDs to image_order so they sort after existing images
+            existing_order = @property.image_order.map(&:to_s)
+            new_ids = @property.images.pluck(:id).map(&:to_s) - existing_order
+            @property.update_column(:image_order, existing_order + new_ids) if new_ids.any?
+            ProcessPropertyImagesJob.perform_later(@property.id)
+          end
           @property.videos.attach(new_videos) if new_videos.present?
-
-          ProcessPropertyImagesJob.perform_later(@property.id) if new_images.present?
 
           render json: property_json(@property), status: :ok
         else
