@@ -308,31 +308,16 @@ export default function PropertyForm({
   const { mutateAsync: reorderImages, isPending: reorderingImages } =
     useReorderImages();
 
+  // Initialize form state and image order when the editing property changes.
+  // Intentionally excludes propertyTypes/statuses to avoid resetting image order
+  // when those queries resolve after the user has already started editing.
   useEffect(() => {
-    // Reset deleted attachments and existing image order when property changes
     setDeletedAttachmentIds(new Set());
     setExistingImageOrder(editingProperty?.images.map((img) => img.id) ?? []);
 
     if (editingProperty) {
-      // Get existing category IDs from the property
-      let categoryIds =
+      const categoryIds =
         editingProperty.property_categories?.map((c) => c.id) ?? [];
-
-      // If no categories assigned, auto-assign if property type has exactly one category
-      if (
-        categoryIds.length === 0 &&
-        editingProperty.property_type_id &&
-        propertyTypes
-      ) {
-        const propertyType = propertyTypes.find(
-          (pt) => pt.id === editingProperty.property_type_id
-        );
-        const availableCategories = propertyType?.property_categories ?? [];
-        if (availableCategories.length === 1) {
-          categoryIds = [availableCategories[0].id];
-        }
-      }
-
       setForm({
         title: editingProperty.title ?? "",
         address: editingProperty.address ?? "",
@@ -362,16 +347,39 @@ export default function PropertyForm({
         videos: [],
       });
     } else {
-      // Set default status to "active" when creating a new property
-      const activeStatus = statuses?.find(
-        (s) => s.name.toLowerCase() === "active"
-      );
-      setForm({
-        ...emptyForm,
-        status_id: activeStatus?.id ?? "",
-      });
+      setForm(emptyForm);
     }
-  }, [editingProperty, propertyTypes, statuses]);
+  }, [editingProperty]);
+
+  // Auto-assign category when propertyTypes loads if property has none assigned yet.
+  useEffect(() => {
+    if (!editingProperty || !propertyTypes) return;
+    const hasCategories =
+      (editingProperty.property_categories?.length ?? 0) > 0;
+    if (!hasCategories && editingProperty.property_type_id) {
+      const propertyType = propertyTypes.find(
+        (pt) => pt.id === editingProperty.property_type_id
+      );
+      const availableCategories = propertyType?.property_categories ?? [];
+      if (availableCategories.length === 1) {
+        setForm((prev) => ({
+          ...prev,
+          property_category_ids: [availableCategories[0].id],
+        }));
+      }
+    }
+  }, [editingProperty, propertyTypes]);
+
+  // Set default "active" status when creating a new property once statuses load.
+  useEffect(() => {
+    if (editingProperty) return;
+    const activeStatus = statuses?.find(
+      (s) => s.name.toLowerCase() === "active"
+    );
+    if (activeStatus) {
+      setForm((prev) => ({ ...prev, status_id: activeStatus.id }));
+    }
+  }, [editingProperty, statuses]);
 
   const handleChange = (
     field: keyof FormState,
@@ -708,6 +716,9 @@ export default function PropertyForm({
           : undefined,
       images: form.images.length > 0 ? form.images : undefined,
       videos: form.videos.length > 0 ? form.videos : undefined,
+      image_order: editingProperty && visibleExistingImages.length > 0
+        ? visibleExistingImages.map(String)
+        : undefined,
     };
 
     // Validate required fields

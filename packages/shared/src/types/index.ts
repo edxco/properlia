@@ -109,6 +109,7 @@ export interface PropertyPayload {
   property_feature_ids?: string[];
   images?: File[];
   videos?: File[];
+  image_order?: string[];
 }
 
 export type CreatePropertyDto = PropertyPayload;

@@ -123,8 +123,12 @@ module Api
         new_images = params.dig(:property, :images)
         new_videos = params.dig(:property, :videos)
 
+        # Normalize image_order IDs to strings to prevent integer/string mismatch
+        update_params = property_params.except(:images, :videos)
+        update_params[:image_order] = update_params[:image_order].map(&:to_s) if update_params[:image_order].present?
+
         # Update other attributes
-        if @property.update(property_params.except(:images, :videos))
+        if @property.update(update_params)
           # Append new media if provided (doesn't remove existing ones)
           if new_images.present?
             @property.images.attach(new_images)
@@ -197,9 +201,9 @@ module Api
       end
 
       def property_params
-        permitted_columns = Property.column_names.map(&:to_sym) - %i[id created_at updated_at images]
+        permitted_columns = Property.column_names.map(&:to_sym) - %i[id created_at updated_at images image_order]
         params.require(:property).permit(*permitted_columns, images: [], videos: [], property_category_ids: [],
-                                                             property_feature_ids: [])
+                                                             property_feature_ids: [], image_order: [])
       end
 
       def property_json(property)
