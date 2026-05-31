@@ -167,6 +167,9 @@ module Api
           return render json: { error: 'image_ids must be an array' }, status: :bad_request
         end
 
+        # Normalize to strings to avoid integer/string type mismatch in JSONB
+        image_ids = image_ids.map(&:to_s)
+
         # Validate that all IDs belong to this property's images
         existing_ids = @property.images.pluck(:id).map(&:to_s)
         invalid_ids = image_ids - existing_ids
@@ -236,7 +239,7 @@ module Api
                         end
                         # Sort by image_order if present, otherwise keep original order
                         if property.image_order.present?
-                          order_map = property.image_order.each_with_index.to_h
+                          order_map = property.image_order.map(&:to_s).each_with_index.to_h
                           images_data.sort_by { |img| order_map[img[:id].to_s] || Float::INFINITY }
                         else
                           images_data
