@@ -7,11 +7,11 @@ module Pdf
       pdf.move_down 5
 
       location_parts = []
-      location_parts << @property.address if @property.address.present?
-      location_parts << @property.neighborhood if @property.neighborhood.present?
-      location_parts << @property.city if @property.city.present?
-      location_parts << @property.state if @property.state.present?
-      location_parts << @property.zip_code if @property.zip_code.present?
+      location_parts << sanitize_for_pdf(@property.address) if @property.address.present?
+      location_parts << sanitize_for_pdf(@property.neighborhood) if @property.neighborhood.present?
+      location_parts << sanitize_for_pdf(@property.city) if @property.city.present?
+      location_parts << sanitize_for_pdf(@property.state) if @property.state.present?
+      location_parts << sanitize_for_pdf(@property.zip_code) if @property.zip_code.present?
 
       pdf.text location_parts.join(', '), size: 10
     end

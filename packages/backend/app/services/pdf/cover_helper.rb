@@ -112,7 +112,7 @@ module Pdf
       title_box_w      = 416.8920135498047
 
       pdf.fill_color 'FFFFFF'
-      pdf.text_box @property.title.to_s.strip,
+      pdf.text_box sanitize_for_pdf(@property.title),
                    at: [badge_right_edge - title_box_w, ref_y.call(334.0053405761719)],
                    width: title_box_w,
                    height: 52.5,
@@ -269,9 +269,9 @@ module Pdf
       addr_y0     = 501.69 + card_top_gap
 
       [
-        @property.address.presence,
-        @property.neighborhood.presence,
-        [@property.city, @property.state].compact.join(', ').presence
+        sanitize_for_pdf(@property.address).presence,
+        sanitize_for_pdf(@property.neighborhood).presence,
+        [sanitize_for_pdf(@property.city), sanitize_for_pdf(@property.state)].reject(&:blank?).join(', ').presence
       ].compact.each_with_index do |line, i|
         pdf.text_box line,
                      at: [r_txt_x, ref_y.call(addr_y0 + i * addr_line_h)],
@@ -309,7 +309,7 @@ module Pdf
         end
 
         feature_names = @property.property_features.map do |f|
-          (@locale == :es ? f.es_name : f.name).to_s.strip
+          sanitize_for_pdf(@locale == :es ? f.es_name : f.name)
         end.reject(&:blank?)
 
         feature_names.first(4).each_with_index do |name, i|

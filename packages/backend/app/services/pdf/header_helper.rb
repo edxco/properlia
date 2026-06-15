@@ -41,7 +41,7 @@ module Pdf
           end
 
           pdf.fill_color text_gray
-          title_text = @property.title.to_s.strip
+          title_text = sanitize_for_pdf(@property.title)
           title_text = title_text[0, 93] + '...' if title_text.length > 93
           pdf.text_box title_text,
                        at: [12, pdf.bounds.top - 10],
@@ -53,8 +53,8 @@ module Pdf
 
           # Row 2 left: location
           location_parts = []
-          location_parts << @property.address if @property.exclusive_listing && @property.address.present?
-          location_parts += [@property.neighborhood, @property.city, @property.state].compact.reject(&:blank?)
+          location_parts << sanitize_for_pdf(@property.address) if @property.exclusive_listing && @property.address.present?
+          location_parts += [@property.neighborhood, @property.city, @property.state].compact.reject(&:blank?).map { |s| sanitize_for_pdf(s) }
           location_text = location_parts.join(', ')
 
           begin

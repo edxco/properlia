@@ -58,7 +58,7 @@ module Pdf
         # ignore
       end
 
-      desc_text = @property.description.to_s.strip
+      desc_text = sanitize_for_pdf(@property.description)
       if desc_text.present?
         pdf.fill_color text_gray
         pdf.text_box desc_text,

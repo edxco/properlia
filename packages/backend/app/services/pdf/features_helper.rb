@@ -16,7 +16,7 @@ module Pdf
         pdf.fill_color '000000'
 
         pdf.pad(15) do
-          pdf.text features.join(' • '), size: 12, align: :center, style: :bold
+          pdf.text features.join(' | '), size: 12, align: :center, style: :bold
         end
       end
     end
@@ -35,7 +35,7 @@ module Pdf
         pdf.fill_color '000000'
 
         pdf.pad(15) do
-          pdf.text features.join(' • '), size: 12, align: :center, style: :bold
+          pdf.text features.join(' | '), size: 12, align: :center, style: :bold
         end
       end
     end
