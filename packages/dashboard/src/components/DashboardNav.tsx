@@ -22,6 +22,11 @@ export function DashboardNav({ locale }: DashboardNavProps) {
   const dropdownItems = useMemo(() => {
     const items = [
       {
+        href: `${localePrefix}/dashboard`,
+        labelKey: 'overview',
+        icon: Home,
+      },
+      {
         href: `${localePrefix}/dashboard/properties`,
         labelKey: 'properties',
         icon: Building2,
@@ -83,22 +88,6 @@ export function DashboardNav({ locale }: DashboardNavProps) {
 
   return (
     <nav className="flex items-center space-x-1">
-      {/* Overview Link */}
-      <Link
-        href={`${localePrefix}/dashboard`}
-        className={`
-          flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors
-          ${
-            isActive(`${localePrefix}/dashboard`)
-              ? 'bg-blue-50 text-blue-700'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-          }
-        `}
-      >
-        <Home className="h-4 w-4" />
-        <span>{t('overview')}</span>
-      </Link>
-
       {/* Properties Dropdown */}
       <div className="relative" ref={dropdownRef}>
         <button

@@ -66,9 +66,5 @@ export default function PropertyPage() {
     );
   }
 
-  return (
-    <div className="p-6">
-      <PropertyDetail property={property} locale={locale} />
-    </div>
-  );
+  return <PropertyDetail property={property} locale={locale} />;
 }
