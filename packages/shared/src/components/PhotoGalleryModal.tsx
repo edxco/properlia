@@ -2,6 +2,7 @@
 
 import React from 'react';
 import styles from './styles/PhotoGalleryModal.module.css';
+import { useT } from './TranslationProvider';
 
 export interface CarouselImage {
   url: string;
@@ -21,8 +22,10 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
   images,
   title,
 }) => {
+  const t = useT();
   const closeBtnRef = React.useRef<HTMLButtonElement | null>(null);
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  const touchStartX = React.useRef<number | null>(null);
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
@@ -30,6 +33,19 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(delta) > 50) {
+      delta > 0 ? goToNext() : goToPrevious();
+    }
+    touchStartX.current = null;
   };
 
   React.useEffect(() => {
@@ -72,7 +88,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
       className={styles.modalOverlay}
       role="dialog"
       aria-modal="true"
-      aria-label={`${title} photo gallery`}
+      aria-label={`${title} ${t('galleryAriaLabel')}`}
     >
       {/* Backdrop */}
       <div
@@ -91,7 +107,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
                 {title}
               </h2>
               <p className={styles.photoCount}>
-                {currentIndex + 1} / {images.length} photo
+                {currentIndex + 1} / {images.length} {t('galleryPhoto')}
               </p>
             </div>
 
@@ -101,18 +117,22 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
               onClick={onClose}
               className={styles.closeButton}
             >
-              Close
+              {t('galleryClose')}
             </button>
           </div>
 
           {/* Carousel area */}
-          <div className={styles.carouselArea}>
+          <div
+            className={styles.carouselArea}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {/* Previous button */}
             <button
               type="button"
               onClick={goToPrevious}
               className={styles.navButton}
-              aria-label="Previous photo"
+              aria-label={t('galleryPrevious')}
             >
               ‹
             </button>
@@ -127,11 +147,6 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
                   loading="lazy"
                 />
               </div>
-              {(currentImage.filename || '').trim().length > 0 && (
-                <p className={styles.caption}>
-                  {currentImage.filename}
-                </p>
-              )}
             </div>
 
             {/* Next button */}
@@ -139,14 +154,17 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
               type="button"
               onClick={goToNext}
               className={styles.navButton}
-              aria-label="Next photo"
+              aria-label={t('galleryNext')}
             >
               ›
             </button>
           </div>
 
           <p className={styles.footer}>
-            Press <span>Esc</span> to close • <span>←</span> <span>→</span> to navigate
+            {(() => {
+              const [p0, p1, p2, p3] = t('galleryFooter').split(/\{esc\}|\{left\}|\{right\}/);
+              return <>{p0}<span>Esc</span>{p1}<span>←</span>{p2}<span>→</span>{p3}</>;
+            })()}
           </p>
         </div>
       </div>

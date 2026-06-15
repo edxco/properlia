@@ -91,10 +91,10 @@
 
 .carouselArea {
   flex: 1;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
   border-radius: 0 0 16px 16px;
   background: rgba(255, 255, 255, 0.95);
   padding: 16px;
@@ -106,7 +106,10 @@
 }
 
 .navButton {
-  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
   width: 48px;
   height: 48px;
   display: flex;
@@ -122,13 +125,21 @@
   user-select: none;
 }
 
+.navButton:first-child {
+  left: 24px;
+}
+
+.navButton:last-child {
+  right: 24px;
+}
+
 .navButton:hover {
   background: rgba(0, 0, 0, 0.7);
-  transform: scale(1.1);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .navButton:active {
-  transform: scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .imageContainer {

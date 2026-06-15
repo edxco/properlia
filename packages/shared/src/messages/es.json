@@ -488,5 +488,12 @@
 
   "deleteAll": "Eliminar todo",
   "confirm": "Confirmar",
-  "deleteAllConfirmation": "¿Estás seguro de que deseas eliminar todos los elementos?"
+  "deleteAllConfirmation": "¿Estás seguro de que deseas eliminar todos los elementos?",
+
+  "galleryClose": "Cerrar",
+  "galleryPhoto": "foto",
+  "galleryPrevious": "Foto anterior",
+  "galleryNext": "Foto siguiente",
+  "galleryAriaLabel": "galería de fotos",
+  "galleryFooter": "Presiona {esc} para cerrar • {left} {right} para navegar"
 }

@@ -488,5 +488,12 @@
   
   "deleteAll": "Delete all",
   "confirm": "Confirm",
-  "deleteAllConfirmation": "Are you sure you want to delete all items?"
+  "deleteAllConfirmation": "Are you sure you want to delete all items?",
+
+  "galleryClose": "Close",
+  "galleryPhoto": "photo",
+  "galleryPrevious": "Previous photo",
+  "galleryNext": "Next photo",
+  "galleryAriaLabel": "photo gallery",
+  "galleryFooter": "Press {esc} to close • {left} {right} to navigate"
 }
