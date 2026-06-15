@@ -1,21 +1,7 @@
 .propertyDetailContainer {
-  max-width: 80rem;
   margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-@media (min-width: 640px) {
-  .propertyDetailContainer {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .propertyDetailContainer {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
+  padding: 0;
+  overflow-x: hidden;
 }
 
 .breadcrumbsWrapper {
