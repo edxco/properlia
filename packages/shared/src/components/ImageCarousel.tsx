@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import styles from "./styles/ImageCarousel.module.css";
 import { PhotoGalleryModal, CarouselImage } from "./PhotoGalleryModal";
@@ -19,10 +19,18 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
   className = "",
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [loadedImages, setLoadedImages] = React.useState<Set<number>>(new Set());
 
   const preview = React.useMemo(() => images.slice(0, 5), [images]);
   const main = preview[0];
-  const grid = preview.slice(1, 5);
+
+  React.useEffect(() => {
+    setLoadedImages(new Set());
+  }, [images]);
+
+  const markLoaded = (index: number) => {
+    setLoadedImages((prev) => new Set([...prev, index]));
+  };
 
   const open = () => setIsOpen(true);
   const close = () => setIsOpen(false);
@@ -33,7 +41,10 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
         <div className={styles.layout}>
           <section className={styles.left}>
             {main ? (
-              <img src={main.url} alt={title} loading="lazy" />
+              <>
+                {!loadedImages.has(0) && <div className={styles.skeleton} />}
+                <img src={main.url} alt={title} loading="lazy" onLoad={() => markLoaded(0)} />
+              </>
             ) : (
               <div className="flex h-full w-full items-center justify-center text-sm text-zinc-500">
                 No image
@@ -52,22 +63,26 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
           <section className={styles.right}>
             {preview[1] && (
               <div className={`${styles.card} ${styles.green}`}>
-                <img src={preview[1].url} alt={title} loading="lazy" />
+                {!loadedImages.has(1) && <div className={styles.skeleton} />}
+                <img src={preview[1].url} alt={title} loading="lazy" onLoad={() => markLoaded(1)} />
               </div>
             )}
             {preview[2] && (
               <div className={`${styles.card} ${styles.yellow}`}>
-                <img src={preview[2].url} alt={title} loading="lazy" />
+                {!loadedImages.has(2) && <div className={styles.skeleton} />}
+                <img src={preview[2].url} alt={title} loading="lazy" onLoad={() => markLoaded(2)} />
               </div>
             )}
             {preview[3] && (
               <div className={`${styles.card} ${styles.red}`}>
-                <img src={preview[3].url} alt={title} loading="lazy" />
+                {!loadedImages.has(3) && <div className={styles.skeleton} />}
+                <img src={preview[3].url} alt={title} loading="lazy" onLoad={() => markLoaded(3)} />
               </div>
             )}
             {preview[4] && (
               <div className={`${styles.card} ${styles.purple}`}>
-                <img src={preview[4].url} alt={title} loading="lazy" />
+                {!loadedImages.has(4) && <div className={styles.skeleton} />}
+                <img src={preview[4].url} alt={title} loading="lazy" onLoad={() => markLoaded(4)} />
               </div>
             )}
           </section>
