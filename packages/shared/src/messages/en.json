@@ -108,7 +108,7 @@
   "landArea_m2": "land area (m²)",
   "parking": "Parking",
   "guestBath": "guest bath",
-  "land": "land",
+  "land": "Land",
   "rooms": "rooms",
   "baths": "baths",
   "download": "Download",
@@ -204,6 +204,7 @@
   "desiredLocation": "Desired location",
   "propertiesPerPage": "Properties per page",
 
+  "allProperties": "All Properties",
   "residential": "Residential",
   "commercial": "Commercial",
   "industrial": "Industrial",

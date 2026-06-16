@@ -10,6 +10,7 @@ import { useT, useLocale } from "@properlia/shared/components/TranslationProvide
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
 
 const PROPERTY_CATEGORIES = [
+  { key: "allProperties", param: "" },
   { key: "residential", param: "residential" },
   { key: "commercial", param: "commercial" },
   { key: "land", param: "land" },
@@ -85,12 +86,12 @@ export function Navigation() {
                   <div className="bg-white border border-stone-100 rounded-lg shadow-lg py-1.5 min-w-[160px]">
                     {PROPERTY_CATEGORIES.map(({ key, param }) => (
                       <Link
-                        key={param}
-                        href={`/${locale}/properties?category=${param}`}
+                        key={key}
+                        href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
                         className="block px-4 py-2 text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-colors"
                         onClick={() => setIsPropertiesOpen(false)}
                       >
-                        {t(key)}
+                        {capitalizeEachWord(t(key))}
                       </Link>
                     ))}
                   </div>
@@ -142,8 +143,8 @@ export function Navigation() {
                 <div className="mt-2 ml-3 space-y-2 border-l border-stone-200 pl-3">
                   {PROPERTY_CATEGORIES.map(({ key, param }) => (
                     <Link
-                      key={param}
-                      href={`/${locale}/properties?category=${param}`}
+                      key={key}
+                      href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
                       className="block text-sm text-stone-600 hover:text-stone-900"
                       onClick={() => { setIsMenuOpen(false); setIsMobilePropertiesOpen(false); }}
                     >

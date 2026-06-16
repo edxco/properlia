@@ -120,7 +120,7 @@
   "landArea_m2": "terreno m²",
   "parking": "Estacionamiento",
   "guestBath": "medio baño",
-  "land": "terreno",
+  "land": "Terreno",
   "rooms": "recamaras",
   "baths": "baños",
   "moreFilters": "más filtros",
@@ -204,6 +204,7 @@
   "desiredLocation": "Ubicación deseada",
   "propertiesPerPage": "Propiedades por página",
 
+  "allProperties": "Todas las Propiedades",
   "residential": "Residencial",
   "commercial": "Comercial",
   "industrial": "Industrial",
