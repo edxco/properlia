@@ -32,20 +32,18 @@ export default function PropertiesClient() {
   const [filters, setFilters] = useState<Filters>({});
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Initialize filters from URL params
+  // Sync filters from URL params
   useEffect(() => {
     const search = searchParams.get("search");
     const type = searchParams.get("type");
     const category = searchParams.get("category");
 
-    if (search || type || category) {
-      setFilters((prev) => ({
-        ...prev,
-        searchQuery: search || undefined,
-        listingType: type || undefined,
-        category: category || undefined,
-      }));
-    }
+    setFilters((prev) => ({
+      ...prev,
+      searchQuery: search || undefined,
+      listingType: type || undefined,
+      category: category || undefined,
+    }));
   }, [searchParams]);
 
   // Build API query params from filters
