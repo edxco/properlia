@@ -47,14 +47,14 @@ export default function PropertyActionsDropdown({
               onClick={() => setIsOpen(false)}
             />
             <div className="absolute right-0 mt-2 rounded-md shadow-lg bg-white ring ring-gray-400 ring-opacity-5 z-50">
-              <div className="flex items-center divide-x divide-gray-400">
+              <div className="flex flex-col divide-y divide-gray-200">
                 <button
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     window.location.href = `/dashboard/properties/${property.id}/edit`;
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-l-md cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-md cursor-pointer"
                 >
                   <EditIcon className="h-4 w-4" />
                   {t("edit")}
@@ -112,7 +112,7 @@ export default function PropertyActionsDropdown({
                       }
                     }
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-r-md cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-md cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" />
                   {t("suspend")}

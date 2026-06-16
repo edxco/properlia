@@ -174,11 +174,11 @@ export default function PropertiesTable({
                     href={`/dashboard/properties/${property.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-6 py-4 pr-16 hover:bg-gray-100 transition-colors"
+                    className="block px-3 py-3 pr-16 sm:px-6 sm:py-4 hover:bg-gray-100 transition-colors"
                   >
                     <div className="space-y-2">
                       {/* Row 1: Title and Price */}
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                         <div className="flex-1 flex gap-1 items-center">
                           <h3
                             className={`font-semibold text-base ${
@@ -205,7 +205,7 @@ export default function PropertiesTable({
                       </div>
 
                       {/* Row 2: Location Details and Status */}
-                      <div className="flex items-center justify-between gap-4 text-sm">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 text-sm">
                         <div className="flex items-center gap-3 text-gray-600 flex-wrap">
                           {property.neighborhood && (
                             <span className="font-medium">
