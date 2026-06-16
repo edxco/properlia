@@ -26,7 +26,7 @@ export default function PropertyActionsDropdown({
   const { mutateAsync: updateProperty } = useUpdateProperty();
 
   return (
-    <div className="absolute top-4 right-6 z-30">
+    <div className="absolute bottom-4 right-3 sm:bottom-auto sm:top-4 sm:right-6">
       <div className="relative">
         <button
           onClick={(e) => {

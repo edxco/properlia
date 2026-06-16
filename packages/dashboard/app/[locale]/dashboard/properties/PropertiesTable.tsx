@@ -174,14 +174,14 @@ export default function PropertiesTable({
                     href={`/dashboard/properties/${property.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-3 py-3 pr-16 sm:px-6 sm:py-4 hover:bg-gray-100 transition-colors"
+                    className="block px-3 py-3 pr-14 sm:pl-6 sm:py-4 sm:pr-16 hover:bg-gray-100 transition-colors"
                   >
                     <div className="space-y-2">
                       {/* Row 1: Title and Price */}
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                         <div className="flex-1 flex gap-1 items-center">
                           <h3
-                            className={`font-semibold text-base ${
+                            className={`font-semibold text-base line-clamp-2 sm:line-clamp-none ${
                               property.status_id ===
                               "7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64"
                                 ? "text-gray-500"
@@ -190,21 +190,23 @@ export default function PropertiesTable({
                           >
                             {property.title}
                           </h3>
-                          {property.status &&
-                            property.status_id &&
-                            getBadge(property.status, locale)}
+                          <span className="hidden sm:contents">
+                            {property.status &&
+                              property.status_id &&
+                              getBadge(property.status, locale)}
+                          </span>
                           {property.featured && (
                             <Star className="ml-2 w-5 h-5 fill-amber-400 text-amber-400" />
                           )}
                         </div>
-                        <div className="text-right">
+                        <div className="sm:text-right">
                           <div className="text-lg font-bold text-gray-900">
                             ${Number(property.price || 0).toLocaleString()}
                           </div>
                         </div>
                       </div>
 
-                      {/* Row 2: Location Details and Status */}
+                      {/* Row 2: Location Details and Type Badges */}
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 text-sm">
                         <div className="flex items-center gap-3 text-gray-600 flex-wrap">
                           {property.neighborhood && (
@@ -232,6 +234,13 @@ export default function PropertiesTable({
                             getBadge(property.listing_type, locale)}
                         </div>
                       </div>
+
+                      {/* Row 3: Mobile only — status badge left, dots button aligns right */}
+                      {property.status && property.status_id && (
+                        <div className="flex sm:hidden items-center">
+                          {getBadge(property.status, locale)}
+                        </div>
+                      )}
                     </div>
                   </a>
 
