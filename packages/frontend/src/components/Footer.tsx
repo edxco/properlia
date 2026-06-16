@@ -131,7 +131,7 @@ export function Footer() {
             </div>
 
             {/* Properties by Type */}
-            <nav aria-label="Properties by type" className="text-right">
+            <nav aria-label="Properties by type" className="hidden md:block text-right">
               <h3 className="font-semibold text-lg mb-4">{t("properties")}</h3>
               <ul className="space-y-2">
                 <li>
@@ -162,7 +162,7 @@ export function Footer() {
             </nav>
 
             {/* Services */}
-            <nav aria-label="Services" className="text-right">
+            <nav aria-label="Services" className="hidden md:block text-right">
               <h3 className="font-semibold text-lg mb-4">{t("services")}</h3>
               <ul className="space-y-2">
                 <li>
@@ -193,14 +193,14 @@ export function Footer() {
             </nav>
 
             {/* Contact */}
-            <div className="text-right">
+            <div className="text-center md:text-right">
               <h3 className="font-semibold text-lg mb-4">{t("contact")}</h3>
               <address className="not-italic space-y-2 text-sm text-white/80">
                 {generalInfo?.whatsapp && (
                   <p>
                     <a
                       href={`mailto:${generalInfo.whatsapp}`}
-                      className="flex justify-end content-center items-center hover:text-white transition-colors"
+                      className="flex justify-center md:justify-end content-center items-center hover:text-white transition-colors"
                     >
                       {formatPhone(generalInfo.whatsapp)}
                       <MessageCircle className="h-4 w-4 ml-2" />
@@ -211,7 +211,7 @@ export function Footer() {
                   <p>
                     <a
                       href={`tel:${generalInfo.phone}`}
-                      className="flex justify-end content-center items-center hover:text-white transition-colors"
+                      className="flex justify-center md:justify-end content-center items-center hover:text-white transition-colors"
                     >
                       {formatPhone(generalInfo.phone)}
                       <Smartphone className="h-4 w-4 ml-2" />
@@ -222,7 +222,7 @@ export function Footer() {
                   <p>
                     <a
                       href={`mailto:${generalInfo.email_contact}`}
-                      className="flex justify-end content-center items-center text-xs hover:text-white transition-colors"
+                      className="flex justify-center md:justify-end content-center items-center text-xs hover:text-white transition-colors"
                     >
                       {generalInfo.email_contact}
                       <Mail className="h-4 w-4 ml-2" />
