@@ -148,7 +148,7 @@ export const PropertyCard = ({
   return (
     <Link
       href={propertyPath}
-      className="flex flex-col bg-white mb-4 mx-4 rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 h-full"
+      className="flex flex-col bg-white mb-4 rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 h-full"
     >
       <div
         className="relative h-42 bg-gray-200 group"
@@ -255,9 +255,9 @@ export const PropertyCard = ({
         {/* Top content - grows to push bottom elements down */}
         <div className="px-4 pt-5 pb-3 flex-grow">
           <div></div>
-          <div className="text-2xl font-light text-gray-900">
+          <div className="text-xl font-light text-gray-900">
             <span>{formatPrice(price)}</span>
-            <span className="text-sm text-gray-500 ml-1"> MXN</span>
+            <span className="text-xs text-gray-500 ml-1"> MXN</span>
           </div>
           {(neighborhood || city || state) && (
             <div className="flex items-start gap-1.5 text-gray-500 text-xs mt-2">
