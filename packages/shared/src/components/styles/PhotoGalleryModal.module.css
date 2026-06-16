@@ -142,6 +142,12 @@
   transform: translateY(-50%) scale(0.95);
 }
 
+.navButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .imageContainer {
   flex: 1;
   display: flex;
@@ -153,7 +159,9 @@
 }
 
 .imageWrapper {
+  position: relative;
   width: 100%;
+  min-height: 300px;
   max-height: 70vh;
   display: flex;
   align-items: center;
@@ -170,6 +178,26 @@
   height: auto;
   object-fit: contain;
   display: block;
+  transition: opacity 0.25s ease;
+}
+
+.imageHidden {
+  opacity: 0;
+}
+
+.imageSkeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #ececec 25%, #d8d8d8 50%, #ececec 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .caption {

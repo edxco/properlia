@@ -25,13 +25,16 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
   const t = useT();
   const closeBtnRef = React.useRef<HTMLButtonElement | null>(null);
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [isImageLoading, setIsImageLoading] = React.useState(true);
   const touchStartX = React.useRef<number | null>(null);
 
   const goToNext = () => {
+    setIsImageLoading(true);
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
   const goToPrevious = () => {
+    setIsImageLoading(true);
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
@@ -76,6 +79,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       setCurrentIndex(0);
+      setIsImageLoading(true);
     }
   }, [isOpen]);
 
@@ -133,6 +137,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
               onClick={goToPrevious}
               className={styles.navButton}
               aria-label={t('galleryPrevious')}
+              disabled={isImageLoading}
             >
               ‹
             </button>
@@ -140,11 +145,14 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
             {/* Current image */}
             <div className={styles.imageContainer}>
               <div className={styles.imageWrapper}>
+                {isImageLoading && <div className={styles.imageSkeleton} />}
                 <img
+                  key={currentImage.url}
                   src={currentImage.url}
                   alt={currentImage.filename || title}
-                  className={styles.image}
+                  className={`${styles.image}${isImageLoading ? ` ${styles.imageHidden}` : ''}`}
                   loading="lazy"
+                  onLoad={() => setIsImageLoading(false)}
                 />
               </div>
             </div>
@@ -155,6 +163,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
               onClick={goToNext}
               className={styles.navButton}
               aria-label={t('galleryNext')}
+              disabled={isImageLoading}
             >
               ›
             </button>
