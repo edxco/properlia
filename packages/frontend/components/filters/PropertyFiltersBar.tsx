@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeFirstWord } from "@properlia/shared";
@@ -41,6 +41,31 @@ export function PropertyFiltersBar({
 }: PropertyFiltersBarProps) {
   const t = useT();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [priceMinDisplay, setPriceMinDisplay] = useState(
+    filters.priceMin ? filters.priceMin.toLocaleString() : ""
+  );
+  const [priceMaxDisplay, setPriceMaxDisplay] = useState(
+    filters.priceMax ? filters.priceMax.toLocaleString() : ""
+  );
+
+  useEffect(() => {
+    if (!filters.priceMin) setPriceMinDisplay("");
+  }, [filters.priceMin]);
+
+  useEffect(() => {
+    if (!filters.priceMax) setPriceMaxDisplay("");
+  }, [filters.priceMax]);
+
+  const handlePriceChange = (
+    key: "priceMin" | "priceMax",
+    raw: string,
+    setDisplay: (v: string) => void
+  ) => {
+    const digits = raw.replace(/[^0-9]/g, "");
+    const num = digits ? Number(digits) : undefined;
+    setDisplay(num !== undefined ? num.toLocaleString() : "");
+    onFilterChange(key, num);
+  };
 
   // Build location text
   const locationText = () => {
@@ -68,27 +93,19 @@ export function PropertyFiltersBar({
           {/* Price Range */}
           <div className="flex gap-1 items-center">
           <input
-            type="number"
-            value={filters.priceMin || ""}
-            onChange={(e) =>
-              onFilterChange(
-                "priceMin",
-                e.target.value ? Number(e.target.value) : undefined
-              )
-            }
+            type="text"
+            inputMode="numeric"
+            value={priceMinDisplay}
+            onChange={(e) => handlePriceChange("priceMin", e.target.value, setPriceMinDisplay)}
             placeholder={t("minPrice") || "Min $"}
             className="w-28 px-2 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900"
           />
           <span className="text-gray-400 text-xs">-</span>
           <input
-            type="number"
-            value={filters.priceMax || ""}
-            onChange={(e) =>
-              onFilterChange(
-                "priceMax",
-                e.target.value ? Number(e.target.value) : undefined
-              )
-            }
+            type="text"
+            inputMode="numeric"
+            value={priceMaxDisplay}
+            onChange={(e) => handlePriceChange("priceMax", e.target.value, setPriceMaxDisplay)}
             placeholder={t("maxPrice") || "Max $"}
             className="w-28 px-2 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900"
           />
