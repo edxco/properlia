@@ -57,8 +57,12 @@ module Api
         properties = properties.where('bathrooms >= ?', params[:bathrooms_min].to_i) if params[:bathrooms_min].present?
 
         # Filter by category slug (residential, commercial, industrial)
+        # Exclude land property type — land belongs to all categories in the DB but
+        # should only appear when explicitly filtered via property_type_name=land
         if params[:category_slug].present?
           properties = properties.by_category_slug(params[:category_slug])
+                                 .joins(:property_type)
+                                 .where.not(property_types: { name: 'land' })
         end
 
         # Filter by property type name (used for e.g. "land" which has no category slug)
