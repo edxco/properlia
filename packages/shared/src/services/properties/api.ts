@@ -26,6 +26,9 @@ type PropertyQueryParams = {
   bathrooms_min?: number;
   // Text search
   search?: string;
+  // Category filters
+  category_slug?: string;
+  property_type_name?: string;
 };
 
 const buildAuthHeaders = (token?: string) => {
@@ -95,6 +98,9 @@ export const propertyApi = {
     if (params?.bathrooms_min !== undefined) query.set('bathrooms_min', String(params.bathrooms_min));
     // Text search
     if (params?.search) query.set('search', params.search);
+    // Category filters
+    if (params?.category_slug) query.set('category_slug', params.category_slug);
+    if (params?.property_type_name) query.set('property_type_name', params.property_type_name);
 
     const queryString = query.toString();
     const endpoint = queryString ? `/properties?${queryString}` : '/properties';

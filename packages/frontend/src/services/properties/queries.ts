@@ -22,6 +22,9 @@ type PropertyFilters = {
   bathrooms_min?: number;
   // Text search
   search?: string;
+  // Category filters
+  category_slug?: string;
+  property_type_name?: string;
 };
 
 // Query hook for fetching all properties
