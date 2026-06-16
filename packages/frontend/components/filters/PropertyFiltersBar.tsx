@@ -72,7 +72,7 @@ export function PropertyFiltersBar({
     const parts: string[] = [];
     if (filters.city) parts.push(filters.city);
     if (filters.state) parts.push(filters.state);
-    return parts.length > 0 ? ` in ${parts.join(", ")}` : "";
+    return parts.length > 0 ? ` ${t("in") || "in"} ${parts.join(", ")}` : "";
   };
 
   return (
