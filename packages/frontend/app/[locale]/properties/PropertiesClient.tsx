@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { PropertyFiltersBar } from "@/components/filters/PropertyFiltersBar";
+import { PropertyFiltersSidebar } from "@/components/filters/PropertyFiltersSidebar";
 import { NoResultsAlert } from "@/components/alerts/NoResultsAlert";
 import { useProperties } from "@/src/services/properties/queries";
 import { useT } from "@properlia/shared/components/TranslationProvider";
@@ -153,145 +154,162 @@ export default function PropertiesClient() {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const sharedFilterProps = {
+    filters,
+    onFilterChange: handleFilterChange,
+    onClearFilters: clearFilters,
+    activeFilterCount,
+    currentCount: propertiesToDisplay.length,
+    totalCount: propertiesData?.data.length || 0,
+    cities,
+    states,
+  };
+
   return (
     <section className="py-12 bg-gray-50 min-h-screen">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-        <PropertyFiltersBar
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onClearFilters={clearFilters}
-          activeFilterCount={activeFilterCount}
-          advancedFilterCount={advancedFilterCount}
-          currentCount={propertiesToDisplay.length}
-          totalCount={propertiesData?.data.length || 0}
-          cities={cities}
-          states={states}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
-          <Banner
-            title={t("bannerSearchTitle")}
-            description={t("bannerSearchDescription")}
-            icon={
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-              </svg>
-            }
-          />
-          <Banner
-            title={t("bannerGuidanceTitle")}
-            description={t("bannerGuidanceDescription")}
-            icon={
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-              </svg>
-            }
+        {/* Mobile filter bar */}
+        <div className="lg:hidden">
+          <PropertyFiltersBar
+            {...sharedFilterProps}
+            advancedFilterCount={advancedFilterCount}
           />
         </div>
 
-        {hasNoResults && (
-          <NoResultsAlert
-            filters={filters}
-            onClearFilters={clearFilters}
-            autoDismissSeconds={10}
-          />
-        )}
+        <div className="lg:flex lg:gap-8 lg:items-start">
+          {/* Desktop sidebar */}
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <PropertyFiltersSidebar {...sharedFilterProps} />
+          </aside>
 
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="text-stone-600">
-              {t("loading") || "Loading properties"}...
-            </div>
-          </div>
-        ) : isError ? (
-          <div className="text-center py-12">
-            <div className="text-red-600">
-              {t("errorLoading") || "Error loading properties"}
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {propertiesToDisplay.map((property: Property) => (
-                <PropertyCard
-                  key={property.id}
-                  id={property.id}
-                  title={property.title}
-                  property_type={
-                    property?.property_type ?? {
-                      id: "",
-                      name: "Unknown",
-                      es_name: "Desconocido",
-                    }
-                  }
-                  status={
-                    property?.status ?? {
-                      id: "",
-                      name: "Unknown",
-                      es_name: "Desconocido",
-                    }
-                  }
-                  listing_types={
-                    property?.listing_type ?? {
-                      id: "",
-                      name: "Unknown",
-                      es_name: "Desconocido",
-                    }
-                  }
-                  images={property.images.map((img) => getAbsoluteImageUrl(img.url))}
-                  landArea={property.land_area ?? 0}
-                  builtArea={property.built_area ?? 0}
-                  price={property.price}
-                  rooms={property.rooms}
-                  bathrooms={property.bathrooms}
-                  compact={true}
-                  half_bathrooms={property.half_bathrooms}
-                  property_features={property.property_features}
-                  property_categories={property.property_categories}
-                  neighborhood={property.neighborhood}
-                  city={property.city}
-                  state={property.state}
-                />
-              ))}
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <Banner
+                title={t("bannerSearchTitle")}
+                description={t("bannerSearchDescription")}
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                  </svg>
+                }
+              />
+              <Banner
+                title={t("bannerGuidanceTitle")}
+                description={t("bannerGuidanceDescription")}
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                  </svg>
+                }
+              />
             </div>
 
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-8">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t("previous") || "Previous"}
-                </button>
+            {hasNoResults && (
+              <NoResultsAlert
+                filters={filters}
+                onClearFilters={clearFilters}
+                autoDismissSeconds={10}
+              />
+            )}
 
-                <div className="flex gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-10 h-10 rounded-lg border ${
-                        currentPage === page
-                          ? "bg-stone-800 text-white border-stone-800"
-                          : "bg-white text-stone-700 border-stone-300 hover:bg-stone-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="text-stone-600">
+                  {t("loading") || "Loading properties"}...
+                </div>
+              </div>
+            ) : isError ? (
+              <div className="text-center py-12">
+                <div className="text-red-600">
+                  {t("errorLoading") || "Error loading properties"}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {propertiesToDisplay.map((property: Property) => (
+                    <PropertyCard
+                      key={property.id}
+                      id={property.id}
+                      title={property.title}
+                      property_type={
+                        property?.property_type ?? {
+                          id: "",
+                          name: "Unknown",
+                          es_name: "Desconocido",
+                        }
+                      }
+                      status={
+                        property?.status ?? {
+                          id: "",
+                          name: "Unknown",
+                          es_name: "Desconocido",
+                        }
+                      }
+                      listing_types={
+                        property?.listing_type ?? {
+                          id: "",
+                          name: "Unknown",
+                          es_name: "Desconocido",
+                        }
+                      }
+                      images={property.images.map((img) => getAbsoluteImageUrl(img.url))}
+                      landArea={property.land_area ?? 0}
+                      builtArea={property.built_area ?? 0}
+                      price={property.price}
+                      rooms={property.rooms}
+                      bathrooms={property.bathrooms}
+                      compact={true}
+                      half_bathrooms={property.half_bathrooms}
+                      property_features={property.property_features}
+                      property_categories={property.property_categories}
+                      neighborhood={property.neighborhood}
+                      city={property.city}
+                      state={property.state}
+                    />
                   ))}
                 </div>
 
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t("next") || "Next"}
-                </button>
-              </div>
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-8">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t("previous") || "Previous"}
+                    </button>
+
+                    <div className="flex gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-10 h-10 rounded-lg border ${
+                            currentPage === page
+                              ? "bg-stone-800 text-white border-stone-800"
+                              : "bg-white text-stone-700 border-stone-300 hover:bg-stone-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t("next") || "Next"}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </section>
   );
