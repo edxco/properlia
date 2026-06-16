@@ -56,6 +56,17 @@ module Api
 
         properties = properties.where('bathrooms >= ?', params[:bathrooms_min].to_i) if params[:bathrooms_min].present?
 
+        # Filter by category slug (residential, commercial, industrial)
+        if params[:category_slug].present?
+          properties = properties.by_category_slug(params[:category_slug])
+        end
+
+        # Filter by property type name (used for e.g. "land" which has no category slug)
+        if params[:property_type_name].present?
+          properties = properties.joins(:property_type)
+                                 .where('LOWER(property_types.name) = ?', params[:property_type_name].downcase)
+        end
+
         # Text search on title, description, address, city, state, and neighborhood
         if params[:search].present?
           search_term = "%#{params[:search].downcase}%"

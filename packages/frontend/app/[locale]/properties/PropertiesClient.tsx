@@ -12,13 +12,6 @@ import { PropertyCard, Banner } from "@/components/ui";
 
 const ITEMS_PER_PAGE = 9;
 
-const CATEGORY_TYPES: Record<string, string[]> = {
-  residential: ["house", "department"],
-  commercial: ["retail space", "doctor office", "office"],
-  industrial: ["warehouse"],
-  land: ["land"],
-};
-
 interface Filters {
   rooms?: number;
   bathrooms?: number;
@@ -67,6 +60,14 @@ export default function PropertiesClient() {
     if (filters.rooms) params.rooms_min = filters.rooms;
     if (filters.bathrooms) params.bathrooms_min = filters.bathrooms;
 
+    if (filters.category) {
+      if (filters.category === "land") {
+        params.property_type_name = "land";
+      } else {
+        params.category_slug = filters.category;
+      }
+    }
+
     return params;
   }, [filters]);
 
@@ -105,12 +106,6 @@ export default function PropertiesClient() {
           return false;
         if (filters.listingType === "buy" && listingTypeName !== "sale")
           return false;
-      }
-
-      if (filters.category) {
-        const allowed = CATEGORY_TYPES[filters.category] ?? [];
-        const typeName = property.property_type?.name?.toLowerCase() ?? "";
-        if (!allowed.includes(typeName)) return false;
       }
 
       // Land area filters (not yet in backend)
