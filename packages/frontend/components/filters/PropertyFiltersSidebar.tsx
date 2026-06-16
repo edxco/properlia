@@ -64,7 +64,7 @@ export function PropertyFiltersSidebar({
   };
 
   return (
-    <div className="sticky top-6">
+    <div>
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

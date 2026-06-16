@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Fragment } from "react";
 import { useSearchParams } from "next/navigation";
 import { PropertyFiltersBar } from "@/components/filters/PropertyFiltersBar";
 import { PropertyFiltersSidebar } from "@/components/filters/PropertyFiltersSidebar";
@@ -9,7 +9,7 @@ import { useProperties } from "@/src/services/properties/queries";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import { Property } from "@properlia/shared/types";
 import { getAbsoluteImageUrl } from "@properlia/shared";
-import { PropertyCard, Banner } from "@/components/ui";
+import { PropertyCard, BannerSlideshow } from "@/components/ui";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -165,6 +165,29 @@ export default function PropertiesClient() {
     states,
   };
 
+  const banners = [
+    {
+      title: t("bannerSearchTitle"),
+      description: t("bannerSearchDescription"),
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+        </svg>
+      ),
+    },
+    {
+      title: t("bannerGuidanceTitle"),
+      description: t("bannerGuidanceDescription"),
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+        </svg>
+      ),
+    },
+  ];
+
+  const mobileBannerIndex = Math.ceil(propertiesToDisplay.length / 2);
+
   return (
     <section className="py-12 bg-gray-50 min-h-screen">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
@@ -178,33 +201,15 @@ export default function PropertiesClient() {
 
         <div className="lg:flex lg:gap-8 lg:items-start">
           {/* Desktop sidebar */}
-          <aside className="hidden lg:block w-64 flex-shrink-0">
+          <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-6 self-start">
             <PropertyFiltersSidebar {...sharedFilterProps} />
+            <div className="mt-4">
+              <BannerSlideshow banners={banners} />
+            </div>
           </aside>
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <Banner
-                title={t("bannerSearchTitle")}
-                description={t("bannerSearchDescription")}
-                icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                  </svg>
-                }
-              />
-              <Banner
-                title={t("bannerGuidanceTitle")}
-                description={t("bannerGuidanceDescription")}
-                icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                  </svg>
-                }
-              />
-            </div>
-
             {hasNoResults && (
               <NoResultsAlert
                 filters={filters}
@@ -228,46 +233,52 @@ export default function PropertiesClient() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {propertiesToDisplay.map((property: Property) => (
-                    <PropertyCard
-                      key={property.id}
-                      id={property.id}
-                      title={property.title}
-                      property_type={
-                        property?.property_type ?? {
-                          id: "",
-                          name: "Unknown",
-                          es_name: "Desconocido",
+                  {propertiesToDisplay.map((property: Property, index: number) => (
+                    <Fragment key={property.id}>
+                      {index === mobileBannerIndex && (
+                        <div className="col-span-full lg:hidden py-2">
+                          <BannerSlideshow banners={banners} />
+                        </div>
+                      )}
+                      <PropertyCard
+                        id={property.id}
+                        title={property.title}
+                        property_type={
+                          property?.property_type ?? {
+                            id: "",
+                            name: "Unknown",
+                            es_name: "Desconocido",
+                          }
                         }
-                      }
-                      status={
-                        property?.status ?? {
-                          id: "",
-                          name: "Unknown",
-                          es_name: "Desconocido",
+                        status={
+                          property?.status ?? {
+                            id: "",
+                            name: "Unknown",
+                            es_name: "Desconocido",
+                          }
                         }
-                      }
-                      listing_types={
-                        property?.listing_type ?? {
-                          id: "",
-                          name: "Unknown",
-                          es_name: "Desconocido",
+                        listing_types={
+                          property?.listing_type ?? {
+                            id: "",
+                            name: "Unknown",
+                            es_name: "Desconocido",
+                          }
                         }
-                      }
-                      images={property.images.map((img) => getAbsoluteImageUrl(img.url))}
-                      landArea={property.land_area ?? 0}
-                      builtArea={property.built_area ?? 0}
-                      price={property.price}
-                      rooms={property.rooms}
-                      bathrooms={property.bathrooms}
-                      compact={true}
-                      half_bathrooms={property.half_bathrooms}
-                      property_features={property.property_features}
-                      property_categories={property.property_categories}
-                      neighborhood={property.neighborhood}
-                      city={property.city}
-                      state={property.state}
-                    />
+                        images={property.images.map((img) => getAbsoluteImageUrl(img.url))}
+                        landArea={property.land_area ?? 0}
+                        builtArea={property.built_area ?? 0}
+                        price={property.price}
+                        rooms={property.rooms}
+                        bathrooms={property.bathrooms}
+                        compact={true}
+                        half_bathrooms={property.half_bathrooms}
+                        property_features={property.property_features}
+                        property_categories={property.property_categories}
+                        neighborhood={property.neighborhood}
+                        city={property.city}
+                        state={property.state}
+                      />
+                    </Fragment>
                   ))}
                 </div>
 
