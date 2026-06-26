@@ -6,7 +6,7 @@ import { QueryProvider } from "@/src/providers/QueryProvider";
 import { TranslationProvider } from "@properlia/shared/components/TranslationProvider";
 import { Navigation } from "@/src/components/Navigation";
 import { Footer } from "@/src/components/Footer";
-import { GoogleAnalytics } from "@properlia/shared";
+import { GoogleAnalytics, GoogleTagManager } from "@properlia/shared";
 import { buildMetadata } from "@/src/lib/metadata";
 
 const SUPPORTED_LOCALES = ["es", "en"] as const;
@@ -71,6 +71,7 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }) {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
   const { locale } = await params;
 
   const normalizedLocale = SUPPORTED_LOCALES.includes(locale as Locale)
@@ -88,6 +89,7 @@ export default async function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <GoogleTagManager gtmId={gtmId} />
         <GoogleAnalytics gaId={gaId} />
         <QueryProvider>
           <TranslationProvider dictionary={dict} locale={normalizedLocale}>
