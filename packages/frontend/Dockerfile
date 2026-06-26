@@ -24,8 +24,10 @@ WORKDIR /monorepo
 # Build arguments - MUST be set during docker build
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_GA_ID
+ARG NEXT_PUBLIC_GTM_ID
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
+ENV NEXT_PUBLIC_GTM_ID=${NEXT_PUBLIC_GTM_ID}
 
 # Copy dependencies
 COPY --from=deps /monorepo/node_modules ./node_modules
