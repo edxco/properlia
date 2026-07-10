@@ -112,9 +112,11 @@ export default function SellPropertyClient() {
       setIsSuccess(true);
       setFormData(initialFormData);
     } catch (error: any) {
-      setErrors({
-        general: error?.errors?.join(", ") || t("formError"),
-      });
+      const message =
+        error?.errors?.join(", ") ||
+        error?.message ||
+        t("formError");
+      setErrors({ general: message });
     }
   };
 
