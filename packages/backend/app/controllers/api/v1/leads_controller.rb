@@ -126,6 +126,8 @@ module Api
         else
           render json: { errors: lead.errors.full_messages }, status: :unprocessable_entity
         end
+      rescue ActiveRecord::RecordNotUnique
+        render json: { errors: ['Contact information already has a consultation request'] }, status: :unprocessable_entity
       end
 
       private
