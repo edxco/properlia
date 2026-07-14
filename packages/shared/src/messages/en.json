@@ -4,7 +4,7 @@
   "propertiesMetaTitle": "Properties for Sale in Puebla | Properlia",
   "propertiesMetaDescription": "Browse houses, apartments, land, and commercial spaces for sale in Puebla. Filter by location, price, and property type.",
   "buyerMetaTitle": "Buyer Consultation | Properlia Puebla",
-  "buyerMetaDescription": "Book a free consultation and receive personalized property options in Puebla within 24 hours.",
+  "buyerMetaDescription": "Book a free consultation with Properlia and get a list of properties in Puebla matched to your budget and goals.",
   "sellerMetaTitle": "Sell Your Property in Puebla | Properlia",
   "sellerMetaDescription": "Fill out the form and an advisor will help you sell your property at the best price in Puebla.",
   "hi": "hola",
@@ -14,10 +14,8 @@
   "contact": "Contact",
   "all": "All",
   "modernApartmentInLomas": "Modern Apartment in Lomas",
-
   "createForm": "Fill out the form to create a property listing.",
   "updateForm": "Fill out the form to update a property listing.",
-
   "helpU": "We help you",
   "buySellInvest": "buy, sell, or invest in",
   "buy": "buy",
@@ -25,7 +23,6 @@
   "sell": "sell",
   "invest": "invest",
   "residentialCommercialIndustrial": "residential, commercial, and industrial properties",
-
   "heroStaticH1": "Real Estate in Puebla",
   "heroBadge": "Real Estate in Puebla",
   "heroLine1": "Your next property in Puebla",
@@ -37,7 +34,6 @@
   "heroMicroTrust": "+200 deals closed in Puebla and surrounding areas",
   "letsGetYourPropertySold": "Let's Get Your Property Sold",
   "readyToInvest": "Ready to Invest? We'll Guide You Every Step",
-
   "built": "built",
   "car": "car",
   "address": "Address",
@@ -61,26 +57,22 @@
   "featured": "Featured",
   "exclusiveListing": "Exclusive listing",
   "streetNumberNeighborhood": "Street and number",
-
   "search": "Search",
   "searchByCityOrLocation": "City, neighborhood, or area",
   "doYouWantToSellYourProperty": "Do you want to sell your property?",
   "generalInformation": "General Information",
   "phone": "Phone",
   "email": "Email",
-
-  "properliaBriefTitle": "Buying, selling, and investing in Puebla properties. With data, not promises.",
+  "properliaBriefTitle": "Properlia is a real estate agency in Puebla helping families and investors make informed, data-driven decisions, with over 200 closed transactions to back it up.",
   "properliaBriefDescription": "At Properlia, we analyze every property with real market data: price per m², projected appreciation, and area comparisons. Our clients make informed decisions, not rushed ones.",
   "mainAboutCtaPrimary": "Book a free consultation",
   "mainAboutCtaSecondary": "Browse properties for sale",
-
   "featuredProperties": "Featured properties",
   "viewFullDetails": "View Full Details",
   "viewDetails": "View details",
   "sendProperty": "Send property",
   "contactMe": "contactar",
   "generateInfoInSpanish": "PDF in spanish?",
-
   "dashboard": "Dashboard",
   "overview": "Overview",
   "properties": "Properties",
@@ -88,7 +80,6 @@
   "manageProperties": "Manage Properties",
   "logout": "Logout",
   "imageGenerator": "Image Generator",
-
   "uploadImages": "Upload images",
   "uploadVideos": "Upload videos",
   "addProperty": "Add Property",
@@ -99,10 +90,8 @@
   "propertiesControlPanel": "Properties Control Panel",
   "preview": "preview",
   "pdfPreview": "This is a preview of how your information will appear in the PDF",
-
   "updating": "Updating",
   "updatedPropertiesInDataBase": "Updated properties in database",
-
   "propertyDetails": "",
   "builtArea_m2": "built area (m²)",
   "landArea_m2": "land area (m²)",
@@ -112,7 +101,6 @@
   "rooms": "rooms",
   "baths": "baths",
   "download": "Download",
-
   "edit": "Edit",
   "details": "Details",
   "delete": "Delete",
@@ -146,17 +134,29 @@
   "noPropertiesFoundLooking": "No properties were found to",
   "showingAllProperties": "Showing all properties",
   "createdAt": "Created at",
-
   "title": "Title",
   "subtitle": "Create and manage your property listings",
   "viewAllProperties": "View All Properties",
   "englishName": "In english",
   "spanishName": "In spanish",
-
   "sellYourProperty": "Sell Your Property",
   "sellPageTitle": "Sell Your Property with Properlia",
   "sellPageSubtitle": "Fill out the form and an advisor will contact you to help sell your property at the best price.",
   "sellFormTitle": "Tell us about your property",
+  "sellerHeroEyebrow": "Seller advisory · Puebla",
+  "sellerHeroCta": "Request my valuation",
+  "sellerHeroStat2Value": "90 days",
+  "sellerHeroStat2Label": "average time to sell",
+  "sellerRailTitle": "Your sale",
+  "sellerMethodTitle": "How we handle your sale",
+  "sellerMethod1Title": "A price backed by data",
+  "sellerMethod1Description": "We set the asking price using comparables from your neighborhood and real absorption times. You know why it's worth what it's worth before it's listed.",
+  "sellerMethod2Title": "Paperwork ready before listing",
+  "sellerMethod2Description": "We review the deed, property tax, lien-free certificate, and ownership regime from the start. Fewer deals that fall through at signing.",
+  "sellerMethod3Title": "Qualified buyers, not window-shoppers",
+  "sellerMethod3Description": "We verify payment capacity and financing scheme before scheduling a visit. Fewer showings, with real intent.",
+  "sellerMethod4Title": "A single point of contact",
+  "sellerMethod4Description": "From valuation to signing before the notary, you work with the same person. No handoffs between departments.",
   "fullName": "Full name",
   "enterFullName": "Enter your full name",
   "enterEmail": "Enter your email address",
@@ -189,7 +189,6 @@
   "benefit3Description": "Your property will be seen by qualified buyers.",
   "benefit4Title": "Fair Prices",
   "benefit4Description": "We help you get the best price for your property.",
-
   "propertyFeatures": "Property Features",
   "propertyFeaturesDescription": "Manage property features like pool, garden, gym, etc.",
   "addPropertyFeature": "Add Feature",
@@ -200,7 +199,6 @@
   "name": "Name",
   "save": "Save",
   "actions": "Actions",
-
   "leads": "Leads",
   "leadsControlPanel": "Leads Control Panel",
   "leadsDescription": "View and manage your leads from the CRM.",
@@ -215,7 +213,6 @@
   "page": "Page",
   "desiredLocation": "Desired location",
   "propertiesPerPage": "Properties per page",
-
   "allProperties": "All Properties",
   "residential": "Residential",
   "commercial": "Commercial",
@@ -246,75 +243,85 @@
   "sitemapServices": "Services",
   "sitemapBuyerConsultation": "Buyer Consultation",
   "sitemapSellerConsultation": "Seller Consultation",
-
   "bannerSearchTitle": "Looking for something specific?",
   "bannerSearchDescription": "Can't find your ideal property? We have a unique exclusive representation process to professionally guide you through the purchase of your home.",
   "bannerGuidanceTitle": "New to buying property?",
   "bannerGuidanceDescription": "We've got you covered — from financing options to closing, we'll guide you every step of the way.",
-
-  "buyerPageTitle": "Find your ideal property in Puebla",
-  "buyerPageSubtitle": "Fill out the form and an advisor will contact you within 24 hours with personalized options.",
+  "buyerPageTitle": "Buy well advised, not well sold.",
+  "buyerPageSubtitle": "Book a free consultation and get options matched to your budget and goals.",
+  "buyerHeroCta": "I want my consultation",
+  "buyerHeroEyebrow": "Buyer advisory · Angelópolis, Puebla",
+  "proofStat1Value": "200+",
+  "proofStat1Label": "transactions closed in Puebla",
+  "proofStat2Value": "Free",
+  "proofStat2Label": "initial consultation",
+  "buyerHeroStat3Value": "3 min",
+  "buyerHeroStat3Label": "to tell us what you're looking for",
+  "buyerRailTitle": "Your consultation",
   "buyerFormTitle": "What type of property are you looking for?",
-
+  "buyerAdvantagesTitle": "Why buy with Properlia?",
+  "buyerTrustStripPart1": "200+ transactions closed in Puebla",
+  "buyerTrustStripPart2": "Free initial consultation",
+  "buyerFormSectionTitle": "Tell us what you're looking for",
+  "buyerFormSectionText": "Four steps, under 3 minutes. With this information we prepare your consultation and arrive with concrete options, not more questions.",
+  "buyerFormSuccess": "Thank you, {{buyer_name}}\nWe've received your request. Our team will be in touch shortly.",
+  "buyerSuccessBrowseCta": "Browse properties in the meantime",
+  "buyerSuccessWhatsAppCta": "Chat with us on WhatsApp",
+  "buyerWhatsAppMessage": "Hi, I just booked a buyer consultation and would like to talk about my property search.",
+  "buyerStepperLabel1": "Contact",
+  "buyerStepperLabel2": "Profile",
+  "buyerStepperLabel3": "Property",
+  "buyerStepperLabel4": "Goals",
+  "buyerStepPrefix": "Step",
+  "buyerStepConnector": "of",
   "buyerFullName": "Full name",
   "buyerEmail": "Email address",
-
   "buyerPropertyType": "What type of property are you looking for?",
   "buyerPropertyTypeResidential": "Residential",
   "buyerPropertyTypeCommercial": "Commercial",
   "buyerPropertyTypeIndustrial": "Industrial",
   "buyerPropertyTypeMixed": "Mixed-use",
-
   "buyerPurchaseGoal": "What is the main goal of this purchase?",
   "buyerGoalLiving": "Living in the property",
   "buyerGoalInvestment": "Long-term investment",
   "buyerGoalCashFlow": "Cash flow",
   "buyerGoalBusiness": "Business operation or expansion",
-
   "buyerMaxBudget": "Maximum budget",
   "buyerMaxBudgetPlaceholder": "Enter your maximum budget",
-
   "buyerDesiredLocation": "Desired location",
-
   "buyerPaymentMethod": "Payment method",
   "buyerPaymentMethodPlaceholder": "e.g., Cash, Financing, Mixed",
-
   "buyerEssentialCriteria": "Essential criteria (non-negotiable)",
   "buyerEssentialCriteriaHelper": "List 3–5 must-have requirements.",
   "buyerEssentialCriteriaPlaceholder": "e.g., 3 bedrooms minimum, garage for 2 cars, near schools...",
-
   "buyerDecisionTimeframe": "When would you like to make a decision?",
   "buyerTimeframe0to3": "0–3 months",
   "buyerTimeframe3to6": "3–6 months",
   "buyerTimeframe6to12": "6–12 months",
-
   "buyerAlignmentQuestion": "Are you open to working with a team that represents your interests?",
   "buyerAlignmentYes": "Yes, I'm looking for professional representation",
   "buyerAlignmentEvaluating": "I'm evaluating my options",
-
-  "buyerSubmitButton": "Request private consultation",
-
-  "buyerBenefit1Title": "Exclusive Representation",
-  "buyerBenefit1Description": "We work exclusively for you, negotiating the best terms and protecting your interests.",
-  "buyerBenefit2Title": "Market Intelligence",
-  "buyerBenefit2Description": "Access to off-market opportunities and deep market insights before they go public.",
-  "buyerBenefit3Title": "Due Diligence Support",
-  "buyerBenefit3Description": "Comprehensive property analysis and verification to ensure a secure investment.",
-  "buyerBenefit4Title": "End-to-End Guidance",
-  "buyerBenefit4Description": "From property search to closing, we handle every detail so you can focus on your decision.",
-
-  "buyerStep1Title": "Contact & Starting Point",
-  "buyerStep1Description": "Let's start with your contact information",
+  "buyerSubmitButton": "Get my options",
+  "buyerBenefit1Title": "Stop scrolling through listings that aren't for you",
+  "buyerBenefit1Description": "We don't send you entire portals. We analyze your requirements and hand you a short list of properties that actually match your budget, area, and goal.",
+  "buyerBenefit2Title": "Exclusive buyer representation",
+  "buyerBenefit2Description": "Our contractual commitment is to you. We negotiate price, terms, and timelines defending a single interest: yours.",
+  "buyerBenefit3Title": "We know the area",
+  "buyerBenefit3Description": "We know Angelópolis street by street: real appreciation, developments underway, and what each neighborhood offers. We tell you where to buy and where not to, backed by data.",
+  "buyerBenefit4Title": "Documented due diligence",
+  "buyerBenefit4Description": "We verify deeds, liens, land use, and the legal status of the property you're interested in.",
+  "buyerBenefit5Title": "From the first tour to closing",
+  "buyerBenefit5Description": "We coordinate appraisals, financing, notary, and closing. You make the decisions; we execute every step.",
+  "buyerStep1Title": "Your contact details",
+  "buyerStep1Description": "We only use them to send you your options. No pushy calls.",
   "buyerStep2Title": "Buyer Profile",
   "buyerStep2Description": "Tell us about yourself and how you'll be purchasing",
   "buyerStep3Title": "Property, Location & Budget",
   "buyerStep3Description": "Define what you're looking for and your investment range",
   "buyerStep4Title": "Criteria, Goals & Commitment",
   "buyerStep4Description": "Help us understand your priorities and timeline",
-
   "buyerNext": "Next",
   "buyerBack": "Back",
-
   "buyerWhatsAppSwitch": "This phone number has WhatsApp",
   "buyerHowDidYouHear": "How did you hear about Properlia?",
   "buyerHearReferral": "Referral",
@@ -324,57 +331,44 @@
   "buyerHearOther": "Other",
   "buyerSpecifyOther": "Please specify",
   "buyerSpecifyOtherPlaceholder": "Tell us more...",
-
   "buyerProfileQuestion": "How would you describe yourself as a buyer?",
   "buyerProfileSingle": "Single / Individual",
   "buyerProfileFamily": "Family",
   "buyerProfileInvestor": "Investor",
   "buyerProfileCompany": "Company",
   "buyerProfileOther": "Other",
-
   "buyerBuyingAsQuestion": "Are you buying as:",
   "buyerBuyingAsIndividual": "Individual (persona física)",
   "buyerBuyingAsCompany": "Company / Entity (persona moral)",
-
   "buyerProcessStage": "Where are you in the buying process?",
   "buyerStageExploring": "Just exploring",
   "buyerStageClearIdea": "I have a clear idea of what I want",
   "buyerStageVisited": "I have visited properties",
   "buyerStageDecideSoon": "I need to decide soon",
-
   "buyerPriorityZones": "Priority zones / neighborhoods",
   "buyerPriorityZonesHelper": "Enter the areas or neighborhoods you're interested in",
   "buyerPriorityZonesPlaceholder": "e.g., La Vista, Angelópolis, Zavaleta...",
-
   "buyerOpenToOtherZones": "Are you open to other zones?",
-
   "buyerPaymentCash": "Cash",
   "buyerPaymentMortgage": "Mortgage / Financing",
   "buyerPaymentMixed": "Mixed (Cash + Financing)",
   "buyerPaymentNotDefined": "Not defined yet",
-
   "buyerCreditPreApproval": "Do you have credit pre-approval?",
-
   "buyerDealBreakers": "Deal breakers",
   "buyerDealBreakersPlaceholder": "What would make you reject a property? (optional)",
-
   "buyerPrimaryGoal": "What is the primary goal of this purchase?",
   "buyerGoalHome": "Home / Primary residence",
   "buyerGoalOther": "Other",
-
   "buyerPriorExperience": "Have you purchased property before?",
   "buyerFrustration": "What was most frustrating about that experience?",
   "buyerFrustrationPlaceholder": "Tell us what didn't work well...",
-
   "buyerConsultationExpectations": "What would you like to get out of this consultation?",
   "buyerConsultationExpectationsHelper": "This is a 30-minute session",
   "buyerConsultationExpectationsPlaceholder": "Share your expectations for our meeting...",
-
   "buyerCommitmentQuestion": "Are you committed to buying once you find the right property?",
   "buyerCommitmentYes": "Yes, I'm ready to buy",
   "buyerCommitmentEvaluating": "I'm evaluating it",
   "buyerCommitmentInfoOnly": "I only want information for now",
-
   "users": "Users",
   "usersManagement": "Users Management",
   "usersDescription": "Manage system users.",
@@ -400,7 +394,6 @@
   "password": "Password",
   "enterPassword": "Enter password",
   "searchByEmailOrName": "Search by email or name",
-
   "serviceTileBuyTitle": "LOOKING TO BUY",
   "serviceTileBuySubtitle": "Access exclusive properties before other buyers",
   "serviceTileBuyButton": "Book a buyer consultation",
@@ -410,7 +403,6 @@
   "serviceTileInvestTitle": "LOOKING TO INVEST",
   "serviceTileInvestSubtitle": "Projected returns of 8-12% annually in Puebla",
   "serviceTileInvestButton": "Explore investment opportunities",
-
   "termsMetaTitle": "Terms and Conditions | Properlia",
   "termsMetaDescription": "Read the terms and conditions for using Properlia's real estate platform and services.",
   "termsTitle": "Terms and Conditions",
@@ -433,7 +425,6 @@
   "termsSection8Body": "We may update these terms at any time. Continued use of our platform after changes constitutes acceptance of the new terms.",
   "termsContactTitle": "Questions?",
   "termsContactBody": "Contact us at",
-
   "privacyMetaTitle": "Privacy Notice | Properlia",
   "privacyMetaDescription": "Learn how Properlia collects, uses, and protects your personal data in accordance with Mexican data protection law.",
   "privacyTitle": "Privacy Notice",
@@ -456,16 +447,13 @@
   "privacySection8Body": "We may update this privacy notice at any time. The updated version will be posted on this page with the revision date.",
   "privacyContactTitle": "Contact",
   "privacyContactBody": "For privacy-related questions, reach us at",
-
   "servicesMetaTitle": "Real Estate Services in Puebla | Properlia",
   "servicesMetaDescription": "Strategy, marketing, prospect filtering, legal guidance, and advisor network. This is how Properlia helps you buy or sell better in Puebla.",
   "servicesPageTitle": "Services",
   "servicesPageSubtitle": "Buy and sell your property with expert guidance",
-
   "servicesService1Title": "Strategy to buy or sell better",
   "servicesService1Lead": "We define with you the right price, the ideal buyer profile, and the most efficient path to your goal.",
   "servicesService1Tagline": "Not intuition. Market-based strategy.",
-
   "servicesService2Title": "Real estate marketing that generates real interest",
   "servicesService2Lead": "We create materials that make your property stand out:",
   "servicesService2Item1": "Conversion-optimized images",
@@ -473,7 +461,6 @@
   "servicesService2Item3": "Clear and persuasive descriptions",
   "servicesService2Item4": "Publication on key channels",
   "servicesService2Tagline": "Your property doesn't compete… it stands out.",
-
   "servicesService3Title": "Real prospect filtering",
   "servicesService3Lead": "Stop wasting time with tire-kickers.",
   "servicesService3SubLead": "We handle:",
@@ -481,14 +468,12 @@
   "servicesService3Item2": "Following up",
   "servicesService3Item3": "Coordinating effective visits",
   "servicesService3Tagline": "You only talk to people who can actually close.",
-
   "servicesService4Title": "Legal guidance and a secure process",
   "servicesService4Lead": "We guide you through every step to avoid costly mistakes.",
   "servicesService4Item1": "Document review",
   "servicesService4Item2": "Contract support",
   "servicesService4Item3": "Accompaniment through closing",
   "servicesService4Tagline": "Total security in every decision.",
-
   "servicesService5Title": "Advisor network that multiplies your opportunities",
   "servicesService5Lead": "Your property doesn't depend on a single person.",
   "servicesService5SubLead": "We work with an advisor network to:",
@@ -496,13 +481,10 @@
   "servicesService5Item2": "Accelerate results",
   "servicesService5Item3": "Connect with qualified buyers",
   "servicesService5Tagline": "More reach = more chances to close.",
-
   "servicesCta": "Ready to get started?",
-  
   "deleteAll": "Delete all",
   "confirm": "Confirm",
   "deleteAllConfirmation": "Are you sure you want to delete all items?",
-
   "galleryClose": "Close",
   "galleryPhoto": "photo",
   "galleryPrevious": "Previous photo",
