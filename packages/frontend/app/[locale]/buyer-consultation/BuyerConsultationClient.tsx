@@ -1,23 +1,57 @@
 "use client";
 
-import { useState } from "react";
-import { useT } from "@properlia/shared/components/TranslationProvider";
+import { Fragment, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { AnimatePresence, motion, MotionConfig } from "motion/react";
+import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
 import { PriceInput } from "@properlia/shared/components";
 import { parsePriceInput } from "@properlia/shared";
 import { useCreatePublicLead } from "@/src/services/leads/mutations";
+import { useGeneralInfo } from "@/src/services/general-info/queries";
 import { CreatePublicLeadDto } from "@properlia/shared/services/leads/api";
 import {
-  Shield,
-  TrendingUp,
-  Search,
-  Handshake,
-  CheckCircle,
-  ChevronRight,
-  ChevronLeft,
-} from "lucide-react";
+  IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
+  IconBrandWhatsapp,
+} from "@tabler/icons-react";
+import { BuyerHero } from "./_components/BuyerHero";
+import { BuyerAdvantages } from "./_components/BuyerAdvantages";
+import { ProofStrip } from "@/src/components/consultation/ProofStrip";
+import { BuyerStepper } from "./_components/BuyerStepper";
+
+declare global {
+  interface Window {
+    dataLayer?: Record<string, unknown>[];
+  }
+}
 
 // Step configuration
 const TOTAL_STEPS = 4;
+
+const labelClass =
+  "block font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] mb-1.5";
+const helperTextClass =
+  "font-[family-name:var(--font-editorial-body)] text-xs text-slate-400 mb-2";
+const errorTextClass =
+  "mt-1.5 font-[family-name:var(--font-editorial-body)] text-sm text-red-600";
+const requiredMarkClass = "text-red-500";
+const radioOptionClass = "flex items-center gap-3 cursor-pointer";
+const radioInputClass = "h-4 w-4 accent-[#214C9B] border-slate-300";
+const radioLabelClass = "font-[family-name:var(--font-editorial-body)] text-sm text-slate-700";
+const checkboxInputClass = "h-4 w-4 accent-[#214C9B] border-slate-300 rounded";
+
+function fieldClass(hasError?: boolean) {
+  return `w-full h-12 px-4 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-[#1A3A5C] placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:border-[#214C9B] ${
+    hasError ? "border-red-400" : "border-slate-300"
+  }`;
+}
+
+function textareaClass(hasError?: boolean) {
+  return `w-full px-4 py-3 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-[#1A3A5C] placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:border-[#214C9B] resize-none ${
+    hasError ? "border-red-400" : "border-slate-300"
+  }`;
+}
 
 interface FormData {
   // Step 1: Contact & starting point
@@ -119,7 +153,9 @@ const getDesiredDate = (timeframe: string): string => {
 
 export default function BuyerConsultationClient() {
   const t = useT();
+  const locale = useLocale();
   const createLead = useCreatePublicLead();
+  const { data: generalInfo } = useGeneralInfo();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -127,6 +163,17 @@ export default function BuyerConsultationClient() {
     Partial<Record<keyof FormData | "general", string>>
   >({});
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedName, setSubmittedName] = useState("");
+
+  // Move focus to the step heading when the step changes (keyboard/AT users)
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  const prevStepRef = useRef(currentStep);
+  useEffect(() => {
+    if (prevStepRef.current !== currentStep) {
+      stepHeadingRef.current?.focus();
+      prevStepRef.current = currentStep;
+    }
+  }, [currentStep]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -336,6 +383,13 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
     try {
       await createLead.mutateAsync(leadData);
       setIsSuccess(true);
+      setSubmittedName(formData.full_name.trim());
+      window.dataLayer?.push({
+        event: "buyer_consultation_submit",
+        event_category: "lead_generation",
+        event_label: "buyer_consultation",
+        form_name: "buyer_consultation",
+      });
       setFormData(initialFormData);
       setCurrentStep(1);
     } catch (error: any) {
@@ -345,27 +399,11 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
     }
   };
 
-  const benefits = [
-    {
-      icon: Shield,
-      title: t("buyerBenefit1Title"),
-      description: t("buyerBenefit1Description"),
-    },
-    {
-      icon: TrendingUp,
-      title: t("buyerBenefit2Title"),
-      description: t("buyerBenefit2Description"),
-    },
-    {
-      icon: Search,
-      title: t("buyerBenefit3Title"),
-      description: t("buyerBenefit3Description"),
-    },
-    {
-      icon: Handshake,
-      title: t("buyerBenefit4Title"),
-      description: t("buyerBenefit4Description"),
-    },
+  const stepperLabels = [
+    t("buyerStepperLabel1"),
+    t("buyerStepperLabel2"),
+    t("buyerStepperLabel3"),
+    t("buyerStepperLabel4"),
   ];
 
   const stepTitles = [
@@ -377,21 +415,51 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
   if (isSuccess) {
     return (
-      <section className="py-16 bg-gray-50 min-h-screen">
-        <div className="max-w-2xl mx-auto px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+      <section className="flex min-h-[60vh] items-center bg-[#EEF1F5] py-24 font-[family-name:var(--font-editorial-body)]">
+        <div className="mx-auto w-full max-w-xl px-6 lg:px-8">
+          <div className="border-t-2 border-[#C4A44A] bg-white px-8 py-12 text-center shadow-[0_24px_64px_-32px_rgba(26,58,92,0.35)] md:px-12 md:py-14">
+            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#1A3A5C]">
+              <IconCheck size={30} stroke={2} className="text-[#C4A44A]" />
             </div>
-            <h2 className="text-2xl font-semibold text-stone-900 mb-4">
-              {t("formSuccess")}
+            <h2 className="font-[family-name:var(--font-editorial-display)] text-2xl font-semibold leading-snug text-[#1A3A5C] md:text-3xl">
+              {t("buyerFormSuccess")
+                .replace("{{buyer_name}}", submittedName)
+                .split("\n")
+                .map((line: string, index: number) => (
+                  <Fragment key={index}>
+                    {index > 0 && <br />}
+                    {line}
+                  </Fragment>
+                ))}
             </h2>
             <button
               onClick={() => setIsSuccess(false)}
-              className="mt-6 px-6 py-3 bg-stone-900 text-white hover:bg-stone-800 transition-colors"
+              className="mt-10 inline-flex h-12 items-center bg-[#1A3A5C] px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-[#214C9B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
             >
               {t("buyerSubmitButton")}
             </button>
+
+            <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href={`/${locale}/properties`}
+                className="inline-flex h-12 items-center border border-[#1A3A5C]/25 px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] transition-colors hover:border-[#1A3A5C] hover:bg-[#1A3A5C]/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+              >
+                {t("buyerSuccessBrowseCta")}
+              </Link>
+              {generalInfo?.whatsapp && (
+                <a
+                  href={`https://wa.me/${generalInfo.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
+                    t("buyerWhatsAppMessage")
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-12 items-center gap-2 bg-[#C4A44A] px-8 font-[family-name:var(--font-editorial-body)] text-sm font-semibold text-[#1A3A5C] transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+                >
+                  <IconBrandWhatsapp size={18} stroke={1.75} aria-hidden="true" />
+                  {t("buyerSuccessWhatsAppCta")}
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -406,11 +474,8 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           <div className="space-y-6">
             {/* Full Name */}
             <div>
-              <label
-                htmlFor="full_name"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
-                {t("buyerFullName")} <span className="text-red-500">*</span>
+              <label htmlFor="full_name" className={labelClass}>
+                {t("buyerFullName")} <span className={requiredMarkClass}>*</span>
               </label>
               <input
                 type="text"
@@ -419,23 +484,16 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.full_name}
                 onChange={handleChange}
                 placeholder={t("enterFullName")}
-                className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
-                  errors.full_name ? "border-red-500" : "border-stone-200"
-                }`}
+                className={fieldClass(!!errors.full_name)}
               />
-              {errors.full_name && (
-                <p className="mt-1 text-sm text-red-600">{errors.full_name}</p>
-              )}
+              {errors.full_name && <p className={errorTextClass}>{errors.full_name}</p>}
             </div>
 
             {/* Email & Phone */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  {t("buyerEmail")} <span className="text-red-500">*</span>
+                <label htmlFor="email" className={labelClass}>
+                  {t("buyerEmail")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <input
                   type="email"
@@ -444,20 +502,13 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.email}
                   onChange={handleChange}
                   placeholder={t("enterEmail")}
-                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
-                    errors.email ? "border-red-500" : "border-stone-200"
-                  }`}
+                  className={fieldClass(!!errors.email)}
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                )}
+                {errors.email && <p className={errorTextClass}>{errors.email}</p>}
               </div>
               <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  {t("phone")} <span className="text-red-500">*</span>
+                <label htmlFor="phone" className={labelClass}>
+                  {t("phone")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <input
                   type="tel"
@@ -466,13 +517,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder={t("enterPhone")}
-                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
-                    errors.phone ? "border-red-500" : "border-stone-200"
-                  }`}
+                  className={fieldClass(!!errors.phone)}
                 />
-                {errors.phone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-                )}
+                {errors.phone && <p className={errorTextClass}>{errors.phone}</p>}
               </div>
             </div>
 
@@ -488,29 +535,25 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                     phone_has_whatsapp: !prev.phone_has_whatsapp,
                   }))
                 }
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-stone-900 focus:ring-offset-2 ${
-                  formData.phone_has_whatsapp ? "bg-stone-900" : "bg-stone-200"
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:ring-offset-2 ${
+                  formData.phone_has_whatsapp ? "bg-[#1A3A5C]" : "bg-slate-200"
                 }`}
               >
                 <span
                   className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    formData.phone_has_whatsapp
-                      ? "translate-x-5"
-                      : "translate-x-0"
+                    formData.phone_has_whatsapp ? "translate-x-5" : "translate-x-0"
                   }`}
                 />
               </button>
-              <label className="text-sm text-stone-700">
+              <label className="flex items-center gap-1.5 font-[family-name:var(--font-editorial-body)] text-sm text-slate-700">
+                <IconBrandWhatsapp size={18} stroke={1.75} className="text-[#1A3A5C]" />
                 {t("buyerWhatsAppSwitch")}
               </label>
             </div>
 
             {/* How did you hear about us */}
             <div>
-              <label
-                htmlFor="how_did_you_hear"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
+              <label htmlFor="how_did_you_hear" className={labelClass}>
                 {t("buyerHowDidYouHear")}
               </label>
               <select
@@ -518,7 +561,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 name="how_did_you_hear"
                 value={formData.how_did_you_hear}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
+                className={fieldClass()}
               >
                 <option value="">{t("select")}</option>
                 <option value="referral">{t("buyerHearReferral")}</option>
@@ -532,11 +575,8 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {/* Conditional Other input */}
             {formData.how_did_you_hear === "other" && (
               <div>
-                <label
-                  htmlFor="how_did_you_hear_other"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  {t("buyerSpecifyOther")} <span className="text-red-500">*</span>
+                <label htmlFor="how_did_you_hear_other" className={labelClass}>
+                  {t("buyerSpecifyOther")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <input
                   type="text"
@@ -545,16 +585,10 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.how_did_you_hear_other}
                   onChange={handleChange}
                   placeholder={t("buyerSpecifyOtherPlaceholder")}
-                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
-                    errors.how_did_you_hear_other
-                      ? "border-red-500"
-                      : "border-stone-200"
-                  }`}
+                  className={fieldClass(!!errors.how_did_you_hear_other)}
                 />
                 {errors.how_did_you_hear_other && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.how_did_you_hear_other}
-                  </p>
+                  <p className={errorTextClass}>{errors.how_did_you_hear_other}</p>
                 )}
               </div>
             )}
@@ -566,8 +600,8 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           <div className="space-y-6">
             {/* Buyer Profile */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerProfileQuestion")} <span className="text-red-500">*</span>
+              <label className={`${labelClass} mb-3`}>
+                {t("buyerProfileQuestion")} <span className={requiredMarkClass}>*</span>
               </label>
               <div className="space-y-2">
                 {[
@@ -577,35 +611,27 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   { value: "company", label: t("buyerProfileCompany") },
                   { value: "other", label: t("buyerProfileOther") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
+                  <label key={option.value} className={radioOptionClass}>
                     <input
                       type="radio"
                       name="buyer_profile"
                       value={option.value}
                       checked={formData.buyer_profile === option.value}
                       onChange={handleChange}
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                      className={radioInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
-              {errors.buyer_profile && (
-                <p className="mt-1 text-sm text-red-600">{errors.buyer_profile}</p>
-              )}
+              {errors.buyer_profile && <p className={errorTextClass}>{errors.buyer_profile}</p>}
             </div>
 
             {/* Conditional Other input */}
             {formData.buyer_profile === "other" && (
               <div>
-                <label
-                  htmlFor="buyer_profile_other"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  {t("buyerSpecifyOther")} <span className="text-red-500">*</span>
+                <label htmlFor="buyer_profile_other" className={labelClass}>
+                  {t("buyerSpecifyOther")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <input
                   type="text"
@@ -614,49 +640,38 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.buyer_profile_other}
                   onChange={handleChange}
                   placeholder={t("buyerSpecifyOtherPlaceholder")}
-                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
-                    errors.buyer_profile_other
-                      ? "border-red-500"
-                      : "border-stone-200"
-                  }`}
+                  className={fieldClass(!!errors.buyer_profile_other)}
                 />
                 {errors.buyer_profile_other && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.buyer_profile_other}
-                  </p>
+                  <p className={errorTextClass}>{errors.buyer_profile_other}</p>
                 )}
               </div>
             )}
 
             {/* Buying As */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerBuyingAsQuestion")} <span className="text-red-500">*</span>
+              <label className={`${labelClass} mb-3`}>
+                {t("buyerBuyingAsQuestion")} <span className={requiredMarkClass}>*</span>
               </label>
               <div className="space-y-2">
                 {[
                   { value: "individual", label: t("buyerBuyingAsIndividual") },
                   { value: "company", label: t("buyerBuyingAsCompany") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
+                  <label key={option.value} className={radioOptionClass}>
                     <input
                       type="radio"
                       name="buying_as"
                       value={option.value}
                       checked={formData.buying_as === option.value}
                       onChange={handleChange}
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                      className={radioInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
-              {errors.buying_as && (
-                <p className="mt-1 text-sm text-red-600">{errors.buying_as}</p>
-              )}
+              {errors.buying_as && <p className={errorTextClass}>{errors.buying_as}</p>}
             </div>
           </div>
         );
@@ -666,8 +681,8 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           <div className="space-y-6">
             {/* Property Types (Checkbox Group) */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerPropertyType")} <span className="text-red-500">*</span>
+              <label className={`${labelClass} mb-3`}>
+                {t("buyerPropertyType")} <span className={requiredMarkClass}>*</span>
               </label>
               <div className="space-y-2">
                 {[
@@ -676,31 +691,28 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   { value: "industrial", label: t("buyerPropertyTypeIndustrial") },
                   { value: "mixed", label: t("buyerPropertyTypeMixed") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
+                  <label key={option.value} className={radioOptionClass}>
                     <input
                       type="checkbox"
                       checked={formData.property_types.includes(option.value)}
                       onChange={() =>
                         handleCheckboxGroupChange("property_types", option.value)
                       }
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300 rounded"
+                      className={checkboxInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
               {errors.property_types && (
-                <p className="mt-1 text-sm text-red-600">{errors.property_types}</p>
+                <p className={errorTextClass}>{errors.property_types}</p>
               )}
             </div>
 
             {/* Process Stage */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerProcessStage")} <span className="text-red-500">*</span>
+              <label className={`${labelClass} mb-3`}>
+                {t("buyerProcessStage")} <span className={requiredMarkClass}>*</span>
               </label>
               <div className="space-y-2">
                 {[
@@ -709,38 +721,28 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   { value: "visited", label: t("buyerStageVisited") },
                   { value: "decide_soon", label: t("buyerStageDecideSoon") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
+                  <label key={option.value} className={radioOptionClass}>
                     <input
                       type="radio"
                       name="process_stage"
                       value={option.value}
                       checked={formData.process_stage === option.value}
                       onChange={handleChange}
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                      className={radioInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
-              {errors.process_stage && (
-                <p className="mt-1 text-sm text-red-600">{errors.process_stage}</p>
-              )}
+              {errors.process_stage && <p className={errorTextClass}>{errors.process_stage}</p>}
             </div>
 
             {/* Priority Zones */}
             <div>
-              <label
-                htmlFor="priority_zones"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
+              <label htmlFor="priority_zones" className={labelClass}>
                 {t("buyerPriorityZones")}
               </label>
-              <p className="text-xs text-stone-400 mb-2">
-                {t("buyerPriorityZonesHelper")}
-              </p>
+              <p className={helperTextClass}>{t("buyerPriorityZonesHelper")}</p>
               <textarea
                 id="priority_zones"
                 name="priority_zones"
@@ -748,46 +750,38 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.priority_zones}
                 onChange={handleChange}
                 placeholder={t("buyerPriorityZonesPlaceholder")}
-                className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 resize-none"
+                className={textareaClass()}
               />
             </div>
 
             {/* Open to Other Zones */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerOpenToOtherZones")}
-              </label>
+              <label className={`${labelClass} mb-3`}>{t("buyerOpenToOtherZones")}</label>
               <div className="flex gap-6">
                 {[
                   { value: "yes", label: t("yes") },
                   { value: "no", label: t("no") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <label key={option.value} className="flex cursor-pointer items-center gap-2">
                     <input
                       type="radio"
                       name="open_to_other_zones"
                       value={option.value}
                       checked={formData.open_to_other_zones === option.value}
                       onChange={handleChange}
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                      className={radioInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             {/* Budget & Payment Method */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label
-                  htmlFor="max_budget"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  {t("buyerMaxBudget")} <span className="text-red-500">*</span>
+                <label htmlFor="max_budget" className={labelClass}>
+                  {t("buyerMaxBudget")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <PriceInput
                   id="max_budget"
@@ -800,27 +794,21 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                     }
                   }}
                   placeholder={t("buyerMaxBudgetPlaceholder")}
-                  className={`w-full pl-8 pr-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
-                    errors.max_budget ? "border-red-500" : "border-stone-200"
-                  }`}
-                  symbolClassName="text-stone-500"
+                  className={`${fieldClass(!!errors.max_budget)} pl-8 pr-4`}
+                  symbolClassName="text-slate-500"
                   hasError={!!errors.max_budget}
                 />
-                {errors.max_budget && (
-                  <p className="mt-1 text-sm text-red-600">{errors.max_budget}</p>
-                )}
+                {errors.max_budget && <p className={errorTextClass}>{errors.max_budget}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
-                  {t("buyerPaymentMethod")} <span className="text-red-500">*</span>
+                <label className={labelClass}>
+                  {t("buyerPaymentMethod")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <select
                   name="payment_method"
                   value={formData.payment_method}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
-                    errors.payment_method ? "border-red-500" : "border-stone-200"
-                  }`}
+                  className={fieldClass(!!errors.payment_method)}
                 >
                   <option value="">{t("select")}</option>
                   <option value="cash">{t("buyerPaymentCash")}</option>
@@ -829,7 +817,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   <option value="not_defined">{t("buyerPaymentNotDefined")}</option>
                 </select>
                 {errors.payment_method && (
-                  <p className="mt-1 text-sm text-red-600">{errors.payment_method}</p>
+                  <p className={errorTextClass}>{errors.payment_method}</p>
                 )}
               </div>
             </div>
@@ -838,34 +826,29 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {(formData.payment_method === "mortgage" ||
               formData.payment_method === "mixed") && (
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-3">
-                  {t("buyerCreditPreApproval")} <span className="text-red-500">*</span>
+                <label className={`${labelClass} mb-3`}>
+                  {t("buyerCreditPreApproval")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <div className="flex gap-6">
                   {[
                     { value: "yes", label: t("yes") },
                     { value: "no", label: t("no") },
                   ].map((option) => (
-                    <label
-                      key={option.value}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
+                    <label key={option.value} className="flex cursor-pointer items-center gap-2">
                       <input
                         type="radio"
                         name="credit_pre_approval"
                         value={option.value}
                         checked={formData.credit_pre_approval === option.value}
                         onChange={handleChange}
-                        className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                        className={radioInputClass}
                       />
-                      <span className="text-sm text-stone-700">{option.label}</span>
+                      <span className={radioLabelClass}>{option.label}</span>
                     </label>
                   ))}
                 </div>
                 {errors.credit_pre_approval && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.credit_pre_approval}
-                  </p>
+                  <p className={errorTextClass}>{errors.credit_pre_approval}</p>
                 )}
               </div>
             )}
@@ -877,15 +860,10 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           <div className="space-y-6">
             {/* Essential Criteria */}
             <div>
-              <label
-                htmlFor="essential_criteria"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
-                {t("buyerEssentialCriteria")} <span className="text-red-500">*</span>
+              <label htmlFor="essential_criteria" className={labelClass}>
+                {t("buyerEssentialCriteria")} <span className={requiredMarkClass}>*</span>
               </label>
-              <p className="text-xs text-stone-400 mb-2">
-                {t("buyerEssentialCriteriaHelper")}
-              </p>
+              <p className={helperTextClass}>{t("buyerEssentialCriteriaHelper")}</p>
               <textarea
                 id="essential_criteria"
                 name="essential_criteria"
@@ -893,23 +871,16 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.essential_criteria}
                 onChange={handleChange}
                 placeholder={t("buyerEssentialCriteriaPlaceholder")}
-                className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 resize-none ${
-                  errors.essential_criteria ? "border-red-500" : "border-stone-200"
-                }`}
+                className={textareaClass(!!errors.essential_criteria)}
               />
               {errors.essential_criteria && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.essential_criteria}
-                </p>
+                <p className={errorTextClass}>{errors.essential_criteria}</p>
               )}
             </div>
 
             {/* Deal Breakers */}
             <div>
-              <label
-                htmlFor="deal_breakers"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
+              <label htmlFor="deal_breakers" className={labelClass}>
                 {t("buyerDealBreakers")}
               </label>
               <textarea
@@ -919,14 +890,14 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.deal_breakers}
                 onChange={handleChange}
                 placeholder={t("buyerDealBreakersPlaceholder")}
-                className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 resize-none"
+                className={textareaClass()}
               />
             </div>
 
             {/* Primary Goal */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerPrimaryGoal")} <span className="text-red-500">*</span>
+              <label className={`${labelClass} mb-3`}>
+                {t("buyerPrimaryGoal")} <span className={requiredMarkClass}>*</span>
               </label>
               <div className="space-y-2">
                 {[
@@ -936,35 +907,27 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   { value: "business", label: t("buyerGoalBusiness") },
                   { value: "other", label: t("buyerGoalOther") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
+                  <label key={option.value} className={radioOptionClass}>
                     <input
                       type="radio"
                       name="primary_goal"
                       value={option.value}
                       checked={formData.primary_goal === option.value}
                       onChange={handleChange}
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                      className={radioInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
-              {errors.primary_goal && (
-                <p className="mt-1 text-sm text-red-600">{errors.primary_goal}</p>
-              )}
+              {errors.primary_goal && <p className={errorTextClass}>{errors.primary_goal}</p>}
             </div>
 
             {/* Conditional Other input */}
             {formData.primary_goal === "other" && (
               <div>
-                <label
-                  htmlFor="primary_goal_other"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  {t("buyerSpecifyOther")} <span className="text-red-500">*</span>
+                <label htmlFor="primary_goal_other" className={labelClass}>
+                  {t("buyerSpecifyOther")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <input
                   type="text"
@@ -973,24 +936,18 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.primary_goal_other}
                   onChange={handleChange}
                   placeholder={t("buyerSpecifyOtherPlaceholder")}
-                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 ${
-                    errors.primary_goal_other
-                      ? "border-red-500"
-                      : "border-stone-200"
-                  }`}
+                  className={fieldClass(!!errors.primary_goal_other)}
                 />
                 {errors.primary_goal_other && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.primary_goal_other}
-                  </p>
+                  <p className={errorTextClass}>{errors.primary_goal_other}</p>
                 )}
               </div>
             )}
 
             {/* Timeframe */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerDecisionTimeframe")} <span className="text-red-500">*</span>
+              <label className={`${labelClass} mb-3`}>
+                {t("buyerDecisionTimeframe")} <span className={requiredMarkClass}>*</span>
               </label>
               <div className="space-y-2">
                 {[
@@ -998,52 +955,42 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   { value: "3-6", label: t("buyerTimeframe3to6") },
                   { value: "6-12", label: t("buyerTimeframe6to12") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
+                  <label key={option.value} className={radioOptionClass}>
                     <input
                       type="radio"
                       name="decision_timeframe"
                       value={option.value}
                       checked={formData.decision_timeframe === option.value}
                       onChange={handleChange}
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                      className={radioInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
               {errors.decision_timeframe && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.decision_timeframe}
-                </p>
+                <p className={errorTextClass}>{errors.decision_timeframe}</p>
               )}
             </div>
 
             {/* Prior Experience */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerPriorExperience")}
-              </label>
+              <label className={`${labelClass} mb-3`}>{t("buyerPriorExperience")}</label>
               <div className="flex gap-6">
                 {[
                   { value: "yes", label: t("yes") },
                   { value: "no", label: t("no") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <label key={option.value} className="flex cursor-pointer items-center gap-2">
                     <input
                       type="radio"
                       name="prior_experience"
                       value={option.value}
                       checked={formData.prior_experience === option.value}
                       onChange={handleChange}
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                      className={radioInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
@@ -1052,11 +999,8 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {/* Prior Experience Frustration (conditional) */}
             {formData.prior_experience === "yes" && (
               <div>
-                <label
-                  htmlFor="prior_experience_frustration"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  {t("buyerFrustration")} <span className="text-red-500">*</span>
+                <label htmlFor="prior_experience_frustration" className={labelClass}>
+                  {t("buyerFrustration")} <span className={requiredMarkClass}>*</span>
                 </label>
                 <textarea
                   id="prior_experience_frustration"
@@ -1065,31 +1009,20 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.prior_experience_frustration}
                   onChange={handleChange}
                   placeholder={t("buyerFrustrationPlaceholder")}
-                  className={`w-full px-4 py-3 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 resize-none ${
-                    errors.prior_experience_frustration
-                      ? "border-red-500"
-                      : "border-stone-200"
-                  }`}
+                  className={textareaClass(!!errors.prior_experience_frustration)}
                 />
                 {errors.prior_experience_frustration && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.prior_experience_frustration}
-                  </p>
+                  <p className={errorTextClass}>{errors.prior_experience_frustration}</p>
                 )}
               </div>
             )}
 
             {/* Consultation Expectations */}
             <div>
-              <label
-                htmlFor="consultation_expectations"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
+              <label htmlFor="consultation_expectations" className={labelClass}>
                 {t("buyerConsultationExpectations")}
               </label>
-              <p className="text-xs text-stone-400 mb-2">
-                {t("buyerConsultationExpectationsHelper")}
-              </p>
+              <p className={helperTextClass}>{t("buyerConsultationExpectationsHelper")}</p>
               <textarea
                 id="consultation_expectations"
                 name="consultation_expectations"
@@ -1097,14 +1030,14 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.consultation_expectations}
                 onChange={handleChange}
                 placeholder={t("buyerConsultationExpectationsPlaceholder")}
-                className="w-full px-4 py-3 border border-stone-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 resize-none"
+                className={textareaClass()}
               />
             </div>
 
             {/* Commitment Level */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-3">
-                {t("buyerCommitmentQuestion")} <span className="text-red-500">*</span>
+              <label className={`${labelClass} mb-3`}>
+                {t("buyerCommitmentQuestion")} <span className={requiredMarkClass}>*</span>
               </label>
               <div className="space-y-2">
                 {[
@@ -1112,26 +1045,21 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   { value: "evaluating", label: t("buyerCommitmentEvaluating") },
                   { value: "info_only", label: t("buyerCommitmentInfoOnly") },
                 ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
+                  <label key={option.value} className={radioOptionClass}>
                     <input
                       type="radio"
                       name="commitment_level"
                       value={option.value}
                       checked={formData.commitment_level === option.value}
                       onChange={handleChange}
-                      className="h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300"
+                      className={radioInputClass}
                     />
-                    <span className="text-sm text-stone-700">{option.label}</span>
+                    <span className={radioLabelClass}>{option.label}</span>
                   </label>
                 ))}
               </div>
               {errors.commitment_level && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.commitment_level}
-                </p>
+                <p className={errorTextClass}>{errors.commitment_level}</p>
               )}
             </div>
 
@@ -1143,11 +1071,11 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 name="consent_marketing"
                 checked={formData.consent_marketing}
                 onChange={handleChange}
-                className="mt-1 h-4 w-4 text-stone-900 focus:ring-stone-900 border-stone-300 rounded"
+                className={`mt-1 ${checkboxInputClass}`}
               />
               <label
                 htmlFor="consent_marketing"
-                className="ml-3 text-sm text-stone-600"
+                className="ml-3 font-[family-name:var(--font-editorial-body)] text-sm text-slate-600"
               >
                 {t("consentMarketing")}
               </label>
@@ -1161,135 +1089,112 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
   };
 
   return (
-    <section className="py-16 bg-gray-50 min-h-screen">
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-stone-900 mb-4">
-            {t("buyerPageTitle")}
-          </h1>
-          <p className="text-lg text-stone-600 max-w-2xl mx-auto">
-            {t("buyerPageSubtitle")}
-          </p>
-        </div>
+    <MotionConfig reducedMotion="user">
+      <BuyerHero />
+      <BuyerAdvantages />
+      <ProofStrip />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Form */}
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            {/* Step Progress Indicator */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map(
-                  (step) => (
-                    <div key={step} className="flex items-center">
-                      <div
-                        className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors ${
-                          step === currentStep
-                            ? "bg-stone-900 text-white"
-                            : step < currentStep
-                            ? "bg-stone-900 text-white"
-                            : "bg-stone-200 text-stone-500"
-                        }`}
-                      >
-                        {step < currentStep ? (
-                          <CheckCircle className="w-5 h-5" />
-                        ) : (
-                          step
-                        )}
-                      </div>
-                      {step < TOTAL_STEPS && (
-                        <div
-                          className={`w-full h-1 mx-2 rounded ${
-                            step < currentStep ? "bg-stone-900" : "bg-stone-200"
-                          }`}
-                          style={{ width: "40px" }}
-                        />
-                      )}
-                    </div>
-                  )
-                )}
-              </div>
+      <section id="buyer-consultation-form" className="bg-[#EEF1F5] py-20 md:py-28">
+        <div className="mx-auto max-w-6xl px-6 lg:px-8">
+          {/* Editorial section header, aligned with the card */}
+          <div className="max-w-2xl">
+            <h2 className="font-[family-name:var(--font-editorial-display)] text-4xl font-semibold tracking-[-0.01em] text-[#1A3A5C] md:text-5xl">
+              {t("buyerFormSectionTitle")}
+            </h2>
+            <p className="mt-5 font-[family-name:var(--font-editorial-body)] text-lg leading-relaxed text-slate-600">
+              {t("buyerFormSectionText")}
+            </p>
+          </div>
 
+          {/* The consultation card: advisor rail + client side */}
+          <div className="mt-12 grid overflow-hidden border-t-2 border-[#C4A44A] shadow-[0_32px_80px_-40px_rgba(26,58,92,0.4)] lg:grid-cols-[320px_1fr]">
+            <BuyerStepper
+              currentStep={currentStep}
+              totalSteps={TOTAL_STEPS}
+              labels={stepperLabels}
+            />
+
+            <div className="bg-white px-6 py-10 md:px-10 lg:px-14 lg:py-12">
               {/* Step Title & Description */}
-              <div className="text-center">
-                <h2 className="text-xl font-semibold text-stone-900 mb-1">
+              <div className="border-b border-slate-200 pb-6">
+                <p className="font-[family-name:var(--font-editorial-body)] text-xs font-medium uppercase tracking-[0.2em] text-[#214C9B]">
+                  {t("buyerStepPrefix")} {currentStep} {t("buyerStepConnector")} {TOTAL_STEPS}
+                </p>
+                <h3
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                  className="mt-3 font-[family-name:var(--font-editorial-display)] text-2xl font-semibold text-[#1A3A5C] focus:outline-none md:text-[1.7rem]"
+                >
                   {stepTitles[currentStep - 1].title}
-                </h2>
-                <p className="text-sm text-stone-500">
+                </h3>
+                <p className="mt-2 font-[family-name:var(--font-editorial-body)] text-sm leading-relaxed text-slate-500">
                   {stepTitles[currentStep - 1].description}
                 </p>
               </div>
-            </div>
 
-            {errors.general && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded text-red-700">
-                {errors.general}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              {renderStepContent()}
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t border-stone-200">
-                {currentStep > 1 ? (
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    className="flex items-center gap-2 px-6 py-3 border border-stone-300 text-stone-700 hover:bg-stone-50 transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    {t("buyerBack")}
-                  </button>
-                ) : (
-                  <div />
-                )}
-
-                {currentStep < TOTAL_STEPS ? (
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="flex items-center gap-2 px-6 py-3 bg-stone-900 text-white hover:bg-stone-800 transition-colors"
-                  >
-                    {t("buyerNext")}
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={createLead.isPending}
-                    className="flex items-center gap-2 px-6 py-3 bg-stone-900 text-white hover:bg-stone-800 transition-colors disabled:bg-stone-400 disabled:cursor-not-allowed"
-                  >
-                    {createLead.isPending ? t("submitting") : t("buyerSubmitButton")}
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-
-          {/* Benefits Section */}
-          <div>
-            <h2 className="text-2xl font-semibold text-stone-900 mb-8">
-              {t("whyChooseUs")}
-            </h2>
-            <div className="space-y-6">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-stone-100 rounded-lg flex items-center justify-center">
-                    <benefit.icon className="w-6 h-6 text-stone-700" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium text-stone-900 mb-1">
-                      {benefit.title}
-                    </h3>
-                    <p className="text-stone-600">{benefit.description}</p>
-                  </div>
+              {errors.general && (
+                <div
+                  role="alert"
+                  className="mt-6 border-l-2 border-red-500 bg-red-50 p-4 font-[family-name:var(--font-editorial-body)] text-sm text-red-700"
+                >
+                  {errors.general}
                 </div>
-              ))}
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <div className="mt-8 overflow-hidden">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={currentStep}
+                      initial={{ opacity: 0, x: 16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -16 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                    >
+                      {renderStepContent()}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-10 flex justify-between gap-4 border-t border-slate-200 pt-6">
+                  {currentStep > 1 ? (
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      className="flex h-12 items-center gap-2 border border-[#1A3A5C]/25 px-6 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] transition-colors hover:border-[#1A3A5C] hover:bg-[#1A3A5C]/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+                    >
+                      <IconChevronLeft size={16} stroke={2} aria-hidden="true" />
+                      {t("buyerBack")}
+                    </button>
+                  ) : (
+                    <div />
+                  )}
+
+                  {currentStep < TOTAL_STEPS ? (
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      className="flex h-12 items-center gap-2 bg-[#1A3A5C] px-7 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-[#214C9B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+                    >
+                      {t("buyerNext")}
+                      <IconChevronRight size={16} stroke={2} aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={createLead.isPending}
+                      className="flex h-12 items-center gap-2 bg-[#C4A44A] px-7 font-[family-name:var(--font-editorial-body)] text-sm font-semibold text-[#1A3A5C] transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                    >
+                      {createLead.isPending ? t("submitting") : t("buyerSubmitButton")}
+                    </button>
+                  )}
+                </div>
+              </form>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </MotionConfig>
   );
 }
