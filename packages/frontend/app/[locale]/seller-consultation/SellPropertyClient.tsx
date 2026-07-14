@@ -13,6 +13,12 @@ import { ProofStrip } from "@/src/components/consultation/ProofStrip";
 import { SellerHero } from "./_components/SellerHero";
 import { SellerMethod } from "./_components/SellerMethod";
 
+declare global {
+  interface Window {
+    dataLayer?: Record<string, unknown>[];
+  }
+}
+
 const labelClass =
   "block font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] mb-1.5";
 const errorTextClass =
@@ -132,6 +138,12 @@ export default function SellPropertyClient() {
     try {
       await createLead.mutateAsync(leadData);
       setIsSuccess(true);
+      window.dataLayer?.push({
+        event: "seller_consultation_submit",
+        event_category: "lead_generation",
+        event_label: "seller_consultation",
+        form_name: "seller_consultation",
+      });
       setFormData(initialFormData);
     } catch (error: any) {
       const message =
