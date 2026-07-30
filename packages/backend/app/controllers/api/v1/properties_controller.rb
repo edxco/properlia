@@ -2,8 +2,9 @@
 module Api
   module V1
     class PropertiesController < ApplicationController
-      skip_before_action :authenticate_user!, only: %i[index show]
-      skip_before_action :reject_disabled_user!, only: %i[index show]
+      skip_before_action :authenticate_user!, only: %i[index show intake]
+      skip_before_action :reject_disabled_user!, only: %i[index show intake]
+      before_action :authenticate_intake_token!, only: %i[intake]
       before_action :set_property, only: %i[show update delete_attachment destroy reorder_images]
       before_action(only: %i[destroy]) { authorize_any!(:admin) }
       after_action { pagy_headers_merge(@pagy) if @pagy }
@@ -161,6 +162,74 @@ module Api
         end
       end
 
+      # POST /api/v1/properties/intake
+      #
+      # Machine-to-machine endpoint for the Google Apps Script property-intake
+      # pipeline. Not a public/website-facing endpoint — auth is a single shared
+      # secret (PROPERTY_INTAKE_TOKEN), not a user session/JWT, since the caller
+      # is a script, not a signed-in Properlia user.
+      #
+      # Expected body (see Code.gs `sendToWebsite_`):
+      #   title, transaction_type ("sell"|"rent"), specific_property_type
+      #   (one of PropertyType#name), presale (bool, only relevant when
+      #   transaction_type == "sell"), property_categories (array of
+      #   PropertyCategory#slug — e.g. ["residential"]), description_es,
+      #   description_en, price, state, location: { colonia, municipio },
+      #   specs: { land_m2, construction_m2, bedrooms, bathrooms, half_bathrooms,
+      #   parking_spaces, condition — "condition" isn't stored yet, see note below },
+      #   media: { photos: [urls], video: [urls] }
+      #
+      # Note: the properties table has no "levels" (floor count) column and no
+      # place for free-text "condition" outside the description itself — both
+      # get folded into description_es/description_en by the AI step rather
+      # than stored as structured fields. Add columns for them later if you
+      # want to filter/sort listings by either.
+      def intake
+        property_type = PropertyType.find_by('LOWER(name) = ?', intake_params[:specific_property_type].to_s.downcase)
+        listing_type = ListingType.find_by(name: intake_listing_type_name)
+        status = Status.find_by(name: 'active')
+        categories = PropertyCategory.where(slug: Array(intake_params[:property_categories]).map { |s| s.to_s.downcase })
+
+        errors = []
+        errors << "Unknown specific_property_type: #{intake_params[:specific_property_type]}" unless property_type
+        errors << "Unknown transaction_type/presale combination: #{intake_params[:transaction_type]}" unless listing_type
+        errors << 'No "active" status found — check Status seeds' unless status
+        return render json: { errors: errors }, status: :unprocessable_entity if errors.any?
+
+        property = Property.new(
+          title: intake_params[:title],
+          address: intake_params[:title],
+          description: intake_params[:description_es],
+          description_en: intake_params[:description_en],
+          land_area: intake_params.dig(:specs, :land_m2),
+          built_area: intake_params.dig(:specs, :construction_m2),
+          rooms: intake_params.dig(:specs, :bedrooms) || 0,
+          bathrooms: intake_params.dig(:specs, :bathrooms) || 0,
+          half_bathrooms: intake_params.dig(:specs, :half_bathrooms) || 0,
+          parking_spaces: intake_params.dig(:specs, :parking_spaces) || 0,
+          price: intake_params[:price],
+          state: intake_params[:state].presence || 'Puebla',
+          city: intake_params.dig(:location, :municipio),
+          neighborhood: intake_params.dig(:location, :colonia),
+          property_type: property_type,
+          listing_type: listing_type,
+          status: status,
+          exclusive_listing: true
+        )
+        property.property_categories = categories if categories.any?
+
+        if property.save
+          AttachRemoteMediaJob.perform_later(
+            property.id,
+            Array(intake_params.dig(:media, :photos)),
+            Array(intake_params.dig(:media, :video))
+          )
+          render json: { listing_url: listing_url_for(property), id: property.id }, status: :created
+        else
+          render json: { errors: property.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       # DELETE /api/v1/properties/:id
       def destroy
         if @property.destroy
@@ -219,6 +288,56 @@ module Api
         permitted_columns = Property.column_names.map(&:to_sym) - %i[id created_at updated_at images image_order]
         params.require(:property).permit(*permitted_columns, images: [], videos: [], property_category_ids: [],
                                                              property_feature_ids: [], image_order: [])
+      end
+
+      # ---- intake-only helpers ----
+
+      def authenticate_intake_token!
+        expected = ENV['PROPERTY_INTAKE_TOKEN']
+        provided = request.headers['Authorization'].to_s.sub(/\ABearer /, '')
+
+        if expected.blank?
+          Rails.logger.error 'PROPERTY_INTAKE_TOKEN is not set — refusing all /intake requests'
+          return render json: { error: 'Intake endpoint not configured' }, status: :service_unavailable
+        end
+
+        render json: { error: 'Unauthorized' }, status: :unauthorized unless ActiveSupport::SecurityUtils.secure_compare(expected, provided)
+      end
+
+      def intake_params
+        params.permit(
+          :title, :description_es, :description_en, :price, :state,
+          :transaction_type, :specific_property_type, :presale,
+          specs: %i[land_m2 construction_m2 bedrooms bathrooms half_bathrooms parking_spaces condition],
+          location: %i[colonia municipio],
+          media: { photos: [], video: [] },
+          property_categories: []
+        )
+      end
+
+      # transaction_type "rent" -> ListingType "rent"
+      # transaction_type "sell" + presale=true -> "pre-sale", else -> "sale"
+      def intake_listing_type_name
+        return 'rent' if intake_params[:transaction_type].to_s.downcase == 'rent'
+
+        ActiveModel::Type::Boolean.new.cast(intake_params[:presale]) ? 'pre-sale' : 'sale'
+      end
+
+      def listing_url_for(property)
+        base = ENV.fetch('FRONTEND_URL', 'https://properlia.com')
+        state = intake_slugify(property.state)
+        city = intake_slugify(property.city)
+        slug = intake_slugify(property.title)
+        "#{base}/es/properties/#{state}/#{city}/#{property.id}/#{slug}"
+      end
+
+      # Mirrors packages/shared/src/lib/slugify.ts so URLs match what the
+      # frontend itself generates for a given title/state/city.
+      def intake_slugify(text)
+        return 'na' if text.blank?
+
+        text.to_s.unicode_normalize(:nfd).gsub(/[\u0300-\u036f]/, '').downcase
+            .gsub(/[^a-z0-9]+/, '-').gsub(/\A-+|-+\z/, '')
       end
 
       def property_json(property)

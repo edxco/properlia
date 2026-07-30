@@ -24,6 +24,12 @@ Rails.application.routes.draw do
           put 'reorder_images', to: 'properties#reorder_images'
         end
 
+        collection do
+          # Machine-to-machine intake from the Google Apps Script pipeline.
+          # Auth: Authorization: Bearer <PROPERTY_INTAKE_TOKEN>, not a user session.
+          post 'intake', to: 'properties#intake'
+        end
+
         # PDF generation routes
         get 'pdf', to: 'pdfs#show', as: 'pdf'
         post 'pdf/email', to: 'pdfs#email', as: 'email_pdf'
