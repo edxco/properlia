@@ -1,0 +1,258 @@
+.container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mainContent {
+  grid-column: span 1;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .mainContent {
+    grid-column: span 2;
+  }
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .detailsGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 500px) {
+  .detailItem {
+    flex-direction: row;
+    text-align: left;
+  }
+}
+
+@media (min-width: 768px) {
+  .detailItem {
+    padding: 1rem;
+  }
+}
+
+.imagePropertyIcon {
+  margin: 2px auto 0;
+  display: block;
+}
+
+.detailItem div {
+  margin-right: 0;
+  margin-bottom: 4px;
+}
+
+@media (min-width: 500px) {
+  .detailItem div {
+    margin-right: 10px;
+    margin-bottom: 0;
+  }
+}
+
+.detailNumber {
+  font-size: 13px;
+  font-weight: bold;
+  color: #111827;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 500px) {
+  .detailNumber {
+    text-align: left;
+  }
+}
+
+@media (min-width: 768px) {
+  .detailNumber {
+    font-size: 15px;
+  }
+}
+
+.detailLabel {
+  font-size: 11px;
+  color: #4b5563;
+  text-transform: uppercase;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 500px) {
+  .detailLabel {
+    text-align: left;
+  }
+}
+
+@media (min-width: 768px) {
+  .detailLabel {
+    font-size: 14px;
+  }
+}
+
+.descriptionWrapper {
+  position: relative;
+}
+
+.descriptionContent {
+  position: relative;
+  transition: max-height 0.3s ease;
+}
+
+.descriptionContent.collapsed {
+  max-height: 4.5em; /* Approximately 3 lines */
+  overflow: hidden;
+}
+
+.descriptionContent.expanded {
+  max-height: none;
+}
+
+.description {
+  color: #374151;
+  white-space: pre-line;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.descriptionGradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3em;
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none;
+}
+
+.readMoreButton {
+  background: none;
+  border: none;
+  color: #214c9b;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.5rem 0 0 0;
+  margin-top: 0.5rem;
+  transition: color 0.2s;
+}
+
+.readMoreButton:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.sidebar {
+  grid-column: span 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.sidebarCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .sidebarCard {
+    position: sticky;
+    top: 2rem;
+  }
+}
+
+.sidebarTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  min-width: 0;
+}
+
+.infoLabel {
+  color: #4b5563;
+  flex-shrink: 0;
+}
+
+.infoValue {
+  font-weight: 500;
+  text-align: right;
+  word-break: break-word;
+  min-width: 0;
+}
+
+.contactButton {
+  width: 100%;
+  margin-top: 1.5rem;
+  background-color: #214c9b;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.contactButton:hover {
+  background-color: #1d4ed8;
+}

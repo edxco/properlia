@@ -1,0 +1,273 @@
+# This file is auto-generated from the current state of the database. Instead
+# of editing this file, please use the migrations feature of Active Record to
+# incrementally modify your database, and then regenerate this schema definition.
+#
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
+# be faster and is potentially less error prone than running all of your
+# migrations from scratch. Old migrations may fail to apply correctly if those
+# migrations use external dependencies or application code.
+#
+# It's strongly recommended that you check this file into your version control system.
+
+ActiveRecord::Schema[7.0].define(version: 2026_01_30_221118) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pgcrypto"
+  enable_extension "plpgsql"
+
+  create_table "active_storage_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.uuid "record_id", null: false
+    t.uuid "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "general_infos", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "phone", null: false
+    t.string "whatsapp", null: false
+    t.string "email_to", null: false
+    t.integer "singleton_guard", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "instagram"
+    t.string "tiktok"
+    t.string "linkedin"
+    t.string "facebook"
+    t.string "email_contact"
+    t.index ["singleton_guard"], name: "index_general_infos_on_singleton_guard", unique: true
+  end
+
+  create_table "lead_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "lead_id", null: false
+    t.string "event_type", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.uuid "created_by_user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_type", "created_at"], name: "index_lead_events_on_type_created_at"
+    t.index ["lead_id", "created_at"], name: "index_lead_events_on_lead_created_at"
+  end
+
+  create_table "leads", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "full_name", null: false
+    t.string "email"
+    t.string "phone"
+    t.string "email_normalized"
+    t.string "phone_e164"
+    t.string "source", null: false
+    t.jsonb "source_detail", default: {}, null: false
+    t.uuid "property_id"
+    t.string "utm_source"
+    t.string "utm_medium"
+    t.string "utm_campaign"
+    t.string "utm_content"
+    t.string "utm_term"
+    t.text "referrer_url"
+    t.text "landing_url"
+    t.integer "status", default: 0, null: false
+    t.integer "interest_operation", null: false
+    t.string "interest_property_type"
+    t.decimal "min_budget"
+    t.decimal "max_budget"
+    t.integer "score", default: 0, null: false
+    t.text "notes"
+    t.uuid "assigned_to_user_id"
+    t.uuid "created_by_user_id"
+    t.datetime "next_follow_up_at"
+    t.datetime "last_contacted_at"
+    t.integer "contact_attempts", default: 0, null: false
+    t.boolean "consent_marketing", default: false, null: false
+    t.datetime "consent_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.date "desired_date"
+    t.string "neighborhood"
+    t.string "city"
+    t.string "state"
+    t.uuid "property_type_id"
+    t.index ["assigned_to_user_id", "status"], name: "index_leads_on_assigned_status"
+    t.index ["city"], name: "index_leads_on_city"
+    t.index ["email_normalized"], name: "index_leads_unique_email_normalized", unique: true, where: "(email_normalized IS NOT NULL)"
+    t.index ["interest_operation"], name: "index_leads_on_interest_operation"
+    t.index ["next_follow_up_at"], name: "index_leads_on_next_follow_up_at"
+    t.index ["phone_e164"], name: "index_leads_unique_phone_e164", unique: true, where: "(phone_e164 IS NOT NULL)"
+    t.index ["property_id"], name: "index_leads_on_property_id"
+    t.index ["property_type_id"], name: "index_leads_on_property_type_id"
+    t.index ["state"], name: "index_leads_on_state"
+    t.index ["status", "created_at"], name: "index_leads_on_status_created_at"
+    t.index ["utm_campaign"], name: "index_leads_on_utm_campaign"
+    t.check_constraint "(min_budget IS NULL OR min_budget >= 0::numeric) AND (max_budget IS NULL OR max_budget >= 0::numeric)", name: "leads_budget_non_negative"
+    t.check_constraint "email_normalized IS NOT NULL OR phone_e164 IS NOT NULL", name: "leads_require_email_or_phone"
+    t.check_constraint "min_budget IS NULL OR max_budget IS NULL OR min_budget <= max_budget", name: "leads_budget_range_ok"
+  end
+
+  create_table "listing_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["es_name"], name: "index_listing_types_on_es_name", unique: true
+    t.index ["name"], name: "index_listing_types_on_name", unique: true
+  end
+
+  create_table "properties", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "featured", default: false, null: false
+    t.string "title", null: false
+    t.text "description"
+    t.decimal "land_area", precision: 10, scale: 2
+    t.decimal "built_area", precision: 10, scale: 2
+    t.integer "rooms", default: 0, null: false
+    t.integer "bathrooms", default: 0, null: false
+    t.integer "half_bathrooms", default: 0, null: false
+    t.integer "parking_spaces", default: 0, null: false
+    t.decimal "price", precision: 12, scale: 2, null: false
+    t.string "address"
+    t.string "city"
+    t.string "state"
+    t.string "coordinates"
+    t.jsonb "images", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "property_type_id"
+    t.uuid "status_id"
+    t.string "neighborhood"
+    t.string "zip_code"
+    t.uuid "listing_type_id", null: false
+    t.boolean "exclusive_listing", default: true, null: false
+    t.jsonb "image_order", default: [], null: false
+    t.index ["city"], name: "index_properties_on_city"
+    t.index ["featured"], name: "index_properties_on_featured"
+    t.index ["images"], name: "index_properties_on_images", using: :gin
+    t.index ["listing_type_id"], name: "index_properties_on_listing_type_id"
+    t.index ["neighborhood"], name: "index_properties_on_neighborhood"
+    t.index ["price"], name: "index_properties_on_price"
+    t.index ["property_type_id"], name: "index_properties_on_property_type_id"
+    t.index ["state"], name: "index_properties_on_state"
+    t.index ["status_id"], name: "index_properties_on_status_id"
+    t.index ["zip_code"], name: "index_properties_on_zip_code"
+    t.check_constraint "bathrooms >= 0", name: "properties_bathrooms_non_negative"
+    t.check_constraint "built_area >= 0::numeric", name: "properties_built_area_non_negative"
+    t.check_constraint "half_bathrooms >= 0", name: "properties_half_bathrooms_non_negative"
+    t.check_constraint "jsonb_typeof(images) = 'array'::text", name: "properties_images_must_be_array"
+    t.check_constraint "land_area >= 0::numeric", name: "properties_land_area_non_negative"
+    t.check_constraint "parking_spaces >= 0", name: "properties_parking_spaces_non_negative"
+    t.check_constraint "price >= 0::numeric", name: "properties_price_non_negative"
+    t.check_constraint "rooms >= 0", name: "properties_rooms_non_negative"
+  end
+
+  create_table "properties_property_categories", id: false, force: :cascade do |t|
+    t.uuid "property_id", null: false
+    t.uuid "property_category_id", null: false
+    t.index ["property_category_id"], name: "idx_props_prop_cats_on_category"
+    t.index ["property_id", "property_category_id"], name: "idx_props_prop_cats_unique", unique: true
+  end
+
+  create_table "properties_property_features", id: false, force: :cascade do |t|
+    t.uuid "property_id", null: false
+    t.uuid "property_feature_id", null: false
+    t.index ["property_feature_id"], name: "idx_props_prop_features_on_feature"
+    t.index ["property_id", "property_feature_id"], name: "idx_props_prop_features_unique", unique: true
+  end
+
+  create_table "property_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.string "slug", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_property_categories_on_slug", unique: true
+  end
+
+  create_table "property_categories_property_types", id: false, force: :cascade do |t|
+    t.uuid "property_category_id", null: false
+    t.uuid "property_type_id", null: false
+    t.index ["property_category_id", "property_type_id"], name: "idx_prop_cat_prop_type_unique", unique: true
+    t.index ["property_type_id"], name: "idx_prop_cat_prop_type_on_type"
+  end
+
+  create_table "property_features", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.string "slug", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["es_name"], name: "index_property_features_on_es_name", unique: true
+    t.index ["name"], name: "index_property_features_on_name", unique: true
+    t.index ["slug"], name: "index_property_features_on_slug", unique: true
+  end
+
+  create_table "property_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["es_name"], name: "index_property_types_on_es_name", unique: true
+    t.index ["name"], name: "index_property_types_on_name", unique: true
+  end
+
+  create_table "statuses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["es_name"], name: "index_statuses_on_es_name", unique: true
+    t.index ["name"], name: "index_statuses_on_name", unique: true
+  end
+
+  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "name"
+    t.string "role"
+    t.string "jti", null: false
+    t.boolean "enabled", default: true, null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["enabled"], name: "index_users_on_enabled"
+    t.index ["jti"], name: "index_users_on_jti", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "lead_events", "leads"
+  add_foreign_key "lead_events", "users", column: "created_by_user_id"
+  add_foreign_key "leads", "properties"
+  add_foreign_key "leads", "property_types"
+  add_foreign_key "leads", "users", column: "assigned_to_user_id"
+  add_foreign_key "leads", "users", column: "created_by_user_id"
+  add_foreign_key "properties", "listing_types"
+  add_foreign_key "properties", "property_types"
+  add_foreign_key "properties", "statuses"
+  add_foreign_key "properties_property_categories", "properties"
+  add_foreign_key "properties_property_categories", "property_categories"
+  add_foreign_key "properties_property_features", "properties"
+  add_foreign_key "properties_property_features", "property_features"
+  add_foreign_key "property_categories_property_types", "property_categories"
+  add_foreign_key "property_categories_property_types", "property_types"
+end

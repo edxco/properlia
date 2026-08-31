@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: properlia2025_development
     ports:
       - "5432:5432"
     healthcheck:
@@ -16,35 +14,111 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
-  web:
-    build: .
+  backend:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
     volumes:
-      - .:/app
+      - ./packages/backend:/app
       - bundle_cache:/usr/local/bundle
       - storage_data:/app/storage
     ports:
       - "3000:3000"
     environment:
       PORT: 3000
-      DATABASE_URL: ${POSTGRES_URL}
-      RAILS_ENV: ${RAILS_ENV}
+      DATABASE_URL: postgres://postgres:postgres@db:5432/properlia2025_development
+      RAILS_ENV: development
       RAILS_MAX_THREADS: 5
-      # Active Storage configuration for local development
       ACTIVE_STORAGE_SERVICE: local
-      # Add your AWS credentials for staging/production
-      # AWS_ACCESS_KEY_ID: your_access_key
-      # AWS_SECRET_ACCESS_KEY: your_secret_key
-      # AWS_REGION: us-east-1
-      # AWS_BUCKET: your-bucket-name
+      DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
     depends_on:
       db:
         condition: service_healthy
     stdin_open: true
     tty: true
+    networks:
+      - app-network
+
+  frontend:
+    image: node:20-slim
+    working_dir: /monorepo
+    command: bash -c "apt-get update && apt-get install -y python3 make g++ && npm ci && npm rebuild lightningcss && cd packages/frontend && npm run dev"
+    volumes:
+      - .:/monorepo
+      - /monorepo/node_modules
+      - /monorepo/packages/frontend/node_modules
+      - /monorepo/packages/dashboard/node_modules
+      - /monorepo/packages/shared/node_modules
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+      NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID}
+      INTERNAL_API_URL: http://backend:3000/api/v1
+    depends_on:
+      - backend
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+  dashboard:
+    image: node:20-slim
+    working_dir: /monorepo
+    command: bash -c "apt-get update && apt-get install -y python3 make g++ && npm ci && cd packages/dashboard && npm run dev"
+    volumes:
+      - .:/monorepo
+      - /monorepo/node_modules
+      - /monorepo/packages/frontend/node_modules
+      - /monorepo/packages/dashboard/node_modules
+      - /monorepo/packages/shared/node_modules
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+      INTERNAL_API_URL: http://backend:3000/api/v1
+    depends_on:
+      - backend
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+  links:
+    image: node:20-slim
+    working_dir: /monorepo
+    command: bash -c "apt-get update && apt-get install -y python3 make g++ && npm ci && cd packages/links && npm run dev"
+    volumes:
+      - .:/monorepo
+      - /monorepo/node_modules
+      - /monorepo/packages/links/node_modules
+      - /monorepo/packages/shared/node_modules
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
   bundle_cache:
   storage_data:
+
+networks:
+  app-network:
+    driver: bridge

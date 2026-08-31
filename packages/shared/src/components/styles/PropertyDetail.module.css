@@ -1,0 +1,41 @@
+.propertyDetailContainer {
+  margin: 0 auto;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.breadcrumbsWrapper {
+  margin-bottom: 18px;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 2.25rem;
+  }
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #214c9b;
+}
+
+.address {
+  color: #4b5563;
+  margin-top: 0.5rem;
+}
+
+.carouselWrapper {
+  margin-bottom: 2rem;
+}

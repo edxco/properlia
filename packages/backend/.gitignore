@@ -1,0 +1,97 @@
+# Ruby on Rails Backend .gitignore
+
+# Ruby
+*.rbc
+*.gem
+*.rbc
+.rbenv-version
+.ruby-version
+.ruby-gemset
+.rvmrc
+
+# Rails
+capybara-*.html
+.rspec
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/db/*.sqlite3-[0-9]*
+/public/system
+/coverage/
+/spec/tmp
+*.orig
+rerun.txt
+pickle-email-*.html
+
+# Logs and tempfiles
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Ignore pidfiles, but keep the directory
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.keep
+
+# Rails cache
+/tmp/cache/*
+!/tmp/cache/
+!/tmp/cache/.keep
+
+# Storage
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/
+!/tmp/storage/.keep
+/public/uploads
+
+# Credentials and secrets
+config/initializers/secret_token.rb
+config/master.key
+/config/credentials/*.key
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Environment normalization
+/.bundle
+/vendor/bundle
+
+# Byebug
+.byebug_history
+
+# Node modules (if using Webpacker or similar)
+node_modules/
+/public/packs
+/public/packs-test
+/public/assets
+
+# Yarn
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test coverage
+/coverage/
+
+# Database dumps
+*.dump
+*.sql
+
+# Ignore uploaded files in development
+/public/uploads/*
+!/public/uploads/.keep

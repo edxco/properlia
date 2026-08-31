@@ -1,0 +1,131 @@
+/* ImageCarousel.module.css */
+
+.wrapper {
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 0;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Left big block */
+.left {
+  position: relative;
+  height: 260px;
+  width: 100%;
+  max-width: 700px;
+  border-radius: 16px;
+  background: #222;
+  overflow: hidden;
+}
+
+.left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Right 2x2 grid */
+.right {
+  height: 260px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f4f4f5;
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Colors just for visibility (swap/remove as you want) */
+.green {
+  background: #E5E4E2;
+}
+.yellow {
+  background: #E5E4E2;
+}
+.red {
+  background: #E5E4E2;
+}
+.purple {
+  background: #E5E4E2;
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, #ececec 25%, #d8d8d8 50%, #ececec 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* See all photos button */
+.seeAllButton {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.seeAllButton:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.seeAllButton:active {
+  transform: translateY(0);
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .layout {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .left {
+    flex: 2;        /* big area */
+    height: 320px;
+  }
+
+  .right {
+    flex: 1;        /* smaller area */
+    height: 320px;
+  }
+}

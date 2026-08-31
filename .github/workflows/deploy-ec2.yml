@@ -5,14 +5,19 @@ on:
     branches: ["stage", "prod"]
 
 env:
-  AWS_REGION: us-east-1 # <-- change if needed
-  ECR_REPO: edxco/properlia # <-- your ECR repo name (no registry URL)
-  IMAGE_NAME: properlia-web # local image name for tagging
+  AWS_REGION: us-east-1
+  ECR_REPO: edxco/properlia
+  BACKEND_IMAGE_NAME: properlia-backend
+  FRONTEND_IMAGE_NAME: properlia-frontend
+  DASHBOARD_IMAGE_NAME: properlia-dashboard
+  LINKS_IMAGE_NAME: properlia-links
+  NGINX_IMAGE_NAME: properlia-nginx
   DOCKER_BUILDKIT: 1
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # environment: ${{ github.ref_name }}
 
     permissions:
       id-token: write # for AWS OIDC
@@ -21,6 +26,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug ref and actor
+        run: |
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_REF_NAME=${GITHUB_REF_NAME}"
+          echo "Expect trust policy sub=repo:${{ github.repository }}:ref:refs/heads/${GITHUB_REF_NAME}"
+
+        # --- Fail-fast guard (before AWS credentials setup) ---
+      - name: Assert AWS_ROLE_ARN is present
+        run: |
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ]; then
+            echo "❌ Missing AWS_ROLE_ARN secret"; exit 1
+          else
+            echo "✅ AWS_ROLE_ARN secret found"
+          fi
 
       # --- AWS login via OIDC (recommended) ---
       - name: Configure AWS credentials
@@ -42,14 +62,42 @@ jobs:
             echo "EC2_USER=${{ secrets.EC2_SSH_USER }}" >> $GITHUB_OUTPUT
             echo "EC2_PATH=${{ secrets.STAGE_EC2_PATH }}" >> $GITHUB_OUTPUT
             echo "ENV_FILE=.env.stage" >> $GITHUB_OUTPUT
-            echo "PORT=3000" >> $GITHUB_OUTPUT
+            echo "COMPOSE_FILE=docker-compose.stage.yml" >> $GITHUB_OUTPUT
+            echo "BACKEND_PORT=3000" >> $GITHUB_OUTPUT
+            echo "FRONTEND_PORT=3001" >> $GITHUB_OUTPUT
+            echo "DASHBOARD_PORT=3002" >> $GITHUB_OUTPUT
+            echo "NEXT_PUBLIC_API_URL=${{ secrets.STAGE_API_URL }}" >> $GITHUB_OUTPUT
+            echo "NEXT_PUBLIC_GA_ID=${{ secrets.STAGE_GA_ID }}" >> $GITHUB_OUTPUT
+            echo "NEXT_PUBLIC_GTM_ID=${{ secrets.STAGE_GTM_ID }}" >> $GITHUB_OUTPUT
           else
             echo "ENV_NAME=prod" >> $GITHUB_OUTPUT
             echo "EC2_HOST=${{ secrets.PROD_EC2_HOST }}" >> $GITHUB_OUTPUT
             echo "EC2_USER=${{ secrets.EC2_SSH_USER }}" >> $GITHUB_OUTPUT
             echo "EC2_PATH=${{ secrets.PROD_EC2_PATH }}" >> $GITHUB_OUTPUT
             echo "ENV_FILE=.env.prod" >> $GITHUB_OUTPUT
-            echo "PORT=3000" >> $GITHUB_OUTPUT
+            echo "COMPOSE_FILE=docker-compose.prod.yml" >> $GITHUB_OUTPUT
+            echo "BACKEND_PORT=3000" >> $GITHUB_OUTPUT
+            echo "FRONTEND_PORT=3001" >> $GITHUB_OUTPUT
+            echo "DASHBOARD_PORT=3002" >> $GITHUB_OUTPUT
+            echo "NEXT_PUBLIC_API_URL=${{ secrets.PROD_API_URL }}" >> $GITHUB_OUTPUT
+            echo "NEXT_PUBLIC_GA_ID=${{ secrets.PROD_GA_ID }}" >> $GITHUB_OUTPUT
+            echo "NEXT_PUBLIC_GTM_ID=${{ secrets.PROD_GTM_ID }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify deploy artifacts exist
+        id: check
+        run: |
+          set -e
+          echo "Expecting compose file: ${{ steps.envmap.outputs.COMPOSE_FILE }}"
+          ls -la
+          test -f "./${{ steps.envmap.outputs.COMPOSE_FILE }}" || (echo "❌ Missing compose file at repo root"; exit 1)
+
+          if [ -f "./${{ steps.envmap.outputs.ENV_FILE }}" ]; then
+            echo "✅ Found env file in repo: ${{ steps.envmap.outputs.ENV_FILE }}"
+            echo "COPY_ENV=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ℹ️ Env file not in repo: ${{ steps.envmap.outputs.ENV_FILE }} (will create on EC2)"
+            echo "COPY_ENV=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Compute image tags
@@ -57,27 +105,118 @@ jobs:
         run: |
           SHA_SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
           REGISTRY="${{ steps.ecr.outputs.registry }}"
-          IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:${GITHUB_REF_NAME}-${SHA_SHORT}"
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_OUTPUT
+          BACKEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:backend-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          FRONTEND_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:frontend-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          DASHBOARD_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:dashboard-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          LINKS_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:links-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          NGINX_IMAGE_URI="$REGISTRY/${{ env.ECR_REPO }}:nginx-${GITHUB_REF_NAME}-${SHA_SHORT}"
+          echo "BACKEND_IMAGE_URI=$BACKEND_IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "FRONTEND_IMAGE_URI=$FRONTEND_IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "DASHBOARD_IMAGE_URI=$DASHBOARD_IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "LINKS_IMAGE_URI=$LINKS_IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "NGINX_IMAGE_URI=$NGINX_IMAGE_URI" >> $GITHUB_OUTPUT
           echo "SHA_SHORT=$SHA_SHORT" >> $GITHUB_OUTPUT
 
-      # --- Build & push image to ECR ---
+          # Create cache-busting keys based on build args (hash ensures cache invalidates when env vars change)
+          FRONTEND_CACHE_KEY=$(echo "${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}${{ steps.envmap.outputs.NEXT_PUBLIC_GA_ID }}${{ steps.envmap.outputs.NEXT_PUBLIC_GTM_ID }}" | sha256sum | cut -c1-8)
+          DASHBOARD_CACHE_KEY=$(echo "${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}" | sha256sum | cut -c1-8)
+          echo "FRONTEND_CACHE_KEY=$FRONTEND_CACHE_KEY" >> $GITHUB_OUTPUT
+          echo "DASHBOARD_CACHE_KEY=$DASHBOARD_CACHE_KEY" >> $GITHUB_OUTPUT
+
+      # --- Build & push images to ECR ---
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./packages/backend
+          file: ./packages/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.BACKEND_IMAGE_URI }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push frontend image
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./packages/frontend/Dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_GA_ID=${{ steps.envmap.outputs.NEXT_PUBLIC_GA_ID }}
+            NEXT_PUBLIC_GTM_ID=${{ steps.envmap.outputs.NEXT_PUBLIC_GTM_ID }}
+          tags: |
+            ${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}
+          cache-from: type=gha,scope=frontend-${{ steps.vars.outputs.FRONTEND_CACHE_KEY }}
+          cache-to: type=gha,mode=max,scope=frontend-${{ steps.vars.outputs.FRONTEND_CACHE_KEY }}
+
+      - name: Build and push dashboard image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./packages/dashboard/Dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}
+          tags: |
+            ${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}
+          cache-from: type=gha,scope=dashboard-${{ steps.vars.outputs.DASHBOARD_CACHE_KEY }}
+          cache-to: type=gha,mode=max,scope=dashboard-${{ steps.vars.outputs.DASHBOARD_CACHE_KEY }}
+
+      - name: Build and push links image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./packages/links/Dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_GTM_ID=${{ steps.envmap.outputs.NEXT_PUBLIC_GTM_ID }}
+            NEXT_PUBLIC_GA_ID=${{ steps.envmap.outputs.NEXT_PUBLIC_GA_ID }}
+          tags: |
+            ${{ steps.vars.outputs.LINKS_IMAGE_URI }}
+          cache-from: type=gha,scope=links
+          cache-to: type=gha,mode=max,scope=links
+
+      - name: Build and push nginx image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./nginx
+          file: ./nginx/Dockerfile
           push: true
           tags: |
-            ${{ steps.vars.outputs.IMAGE_URI }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ steps.vars.outputs.NGINX_IMAGE_URI }}
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,mode=max,scope=nginx
+
+      # Map SG per branch
+      - name: Map SG per env
+        id: sg
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "stage" ]; then
+            echo "SG_ID=${{ secrets.STAGE_SG_ID }}" >> $GITHUB_OUTPUT
+          else
+            echo "SG_ID=${{ secrets.PROD_SG_ID }}" >> $GITHUB_OUTPUT
+          fi
+
+      # Allow runner IP on port 22
+      - name: Allow SSH from this runner IP
+        if: success()
+        run: |
+          set -e
+          MYIP="$(curl -s https://checkip.amazonaws.com)/32"
+          echo "Allowing ${MYIP} on SG ${SG_ID}"
+          aws ec2 authorize-security-group-ingress \
+            --group-id "${{ steps.sg.outputs.SG_ID }}" \
+            --protocol tcp --port 22 --cidr "${MYIP}" || true
+        env:
+          SG_ID: ${{ steps.sg.outputs.SG_ID }}
 
       # --- Copy deploy files to EC2 (compose + env files, if you keep them in repo) ---
       # (Skip if these already live on the instance)
-      - name: Copy docker-compose.ec2.yml and env to EC2
+      - name: Copy docker-compose and env to EC2
         if: success()
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -85,9 +224,94 @@ jobs:
           username: ${{ steps.envmap.outputs.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: |
-            docker-compose.ec2.yml
-            ${{ steps.envmap.outputs.ENV_FILE }}
+            ./${{ steps.envmap.outputs.COMPOSE_FILE }}
+            ${{ steps.check.outputs.COPY_ENV == 'true' && format('./{0}', steps.envmap.outputs.ENV_FILE) || '' }}
           target: ${{ steps.envmap.outputs.EC2_PATH }}
+          debug: true
+
+      - name: Write env file on EC2 when missing
+        if: steps.check.outputs.COPY_ENV == 'false'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ steps.envmap.outputs.EC2_HOST }}
+          username: ${{ steps.envmap.outputs.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd "${{ steps.envmap.outputs.EC2_PATH }}"
+            echo "Creating env file: ${{ steps.envmap.outputs.ENV_FILE }}"
+            cat > "${{ steps.envmap.outputs.ENV_FILE }}" << 'EOF'
+            # Backend Configuration
+            BACKEND_PORT=${{ steps.envmap.outputs.BACKEND_PORT }}
+            RAILS_ENV=${{ secrets.RAILS_ENV }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
+            RAILS_MAX_THREADS=${{ secrets.RAILS_MAX_THREADS }}
+            RAILS_SERVE_STATIC_FILES=${{ secrets.RAILS_SERVE_STATIC_FILES }}
+            RAILS_LOG_TO_STDOUT=${{ secrets.RAILS_LOG_TO_STDOUT }}
+            ACTIVE_STORAGE_SERVICE=${{ secrets.ACTIVE_STORAGE_SERVICE }}
+            AWS_REGION=${{ env.AWS_REGION }}
+            AWS_BUCKET=${{ secrets.AWS_BUCKET }}
+            DEVISE_JWT_SECRET_KEY=${{ secrets.DEVISE_JWT_SECRET_KEY }}
+            CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+
+            # Database Configuration
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+
+            # Frontend Configuration
+            FRONTEND_PORT=${{ steps.envmap.outputs.FRONTEND_PORT }}
+            NEXT_PUBLIC_API_URL=${{ steps.envmap.outputs.NEXT_PUBLIC_API_URL }}
+
+            # Dashboard Configuration
+            DASHBOARD_PORT=${{ steps.envmap.outputs.DASHBOARD_PORT }}
+            EOF
+            echo "✅ Env file created"
+            cat "${{ steps.envmap.outputs.ENV_FILE }}"
+
+      - name: Debug - Check EC2 IAM Role
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ steps.envmap.outputs.EC2_HOST }}
+          username: ${{ steps.envmap.outputs.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "=== Checking IAM Role Attachment ==="
+            
+            # Check if instance has a role
+            ROLE_NAME=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>/dev/null || echo "FAILED")
+            echo "Role name from metadata: $ROLE_NAME"
+            
+            if [ "$ROLE_NAME" = "FAILED" ] || [ -z "$ROLE_NAME" ]; then
+              echo "❌ METADATA SERVICE NOT ACCESSIBLE OR NO ROLE ATTACHED"
+              
+              # Check if IMDSv2 is required
+              echo "Trying with IMDSv2..."
+              TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" 2>/dev/null)
+              ROLE_NAME_V2=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>/dev/null || echo "FAILED")
+              echo "Role name with IMDSv2: $ROLE_NAME_V2"
+            else
+              echo "✅ Role found: $ROLE_NAME"
+              
+              # Get full credentials
+              echo "Fetching credentials..."
+              CREDS=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE_NAME)
+              echo "Credentials response:"
+              echo "$CREDS" | jq '.' || echo "$CREDS"
+              
+              # Test AWS CLI
+              echo "Testing AWS CLI..."
+              aws --version
+              aws sts get-caller-identity || echo "❌ AWS CLI failed"
+            fi
+            
+            # Check if jq is installed
+            which jq || echo "⚠️ jq not installed, installing..."
+            sudo yum install -y jq || sudo apt-get install -y jq
 
       # --- Deploy on EC2 ---
       - name: Deploy on EC2 (pull, up, migrate)
@@ -100,26 +324,156 @@ jobs:
             set -euo pipefail
             cd "${{ steps.envmap.outputs.EC2_PATH }}"
 
-            # Login to ECR (instance role recommended; fallback uses docker login)
-            aws --version >/dev/null 2>&1 && \
-              aws ecr get-login-password --region ${{ env.AWS_REGION }} \
-              | docker login --username AWS --password-stdin ${{ steps.ecr.outputs.registry }} || true
-
-            export IMAGE="${{ steps.vars.outputs.IMAGE_URI }}"
-            export PORT="${{ steps.envmap.outputs.PORT }}"
+            export BACKEND_IMAGE="${{ steps.vars.outputs.BACKEND_IMAGE_URI }}"
+            export FRONTEND_IMAGE="${{ steps.vars.outputs.FRONTEND_IMAGE_URI }}"
+            export DASHBOARD_IMAGE="${{ steps.vars.outputs.DASHBOARD_IMAGE_URI }}"
+            export LINKS_IMAGE="${{ steps.vars.outputs.LINKS_IMAGE_URI }}"
+            export NGINX_IMAGE="${{ steps.vars.outputs.NGINX_IMAGE_URI }}"
+            export BACKEND_PORT="${{ steps.envmap.outputs.BACKEND_PORT }}"
+            export FRONTEND_PORT="${{ steps.envmap.outputs.FRONTEND_PORT }}"
             export ENV_FILE="${{ steps.envmap.outputs.ENV_FILE }}"
+            export COMPOSE_FILE="${{ steps.envmap.outputs.COMPOSE_FILE }}"
+            REGISTRY="${{ steps.ecr.outputs.registry }}"
 
-            echo "Using IMAGE=$IMAGE"
-            docker pull "$IMAGE"
+            echo "Using BACKEND_IMAGE=$BACKEND_IMAGE"
+            echo "Using FRONTEND_IMAGE=$FRONTEND_IMAGE"
+            echo "Using DASHBOARD_IMAGE=$DASHBOARD_IMAGE"
+            echo "Using LINKS_IMAGE=$LINKS_IMAGE"
+            echo "Using NGINX_IMAGE=$NGINX_IMAGE"
+            echo "Using COMPOSE_FILE=$COMPOSE_FILE"
+            echo "Using ENV_FILE=$ENV_FILE"
 
-            # Ensure compose is present (Compose V2)
-            docker compose version || sudo curl -L "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
+            # Get token for IMDSv2
+            echo "Requesting IMDSv2 token..."
+            TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 
-            # Bring up (remove orphans, recreate changed)
-            docker compose -f docker-compose.ec2.yml --env-file "$ENV_FILE" up -d --remove-orphans
+            # Check if IAM role is attached (using IMDSv2)
+            echo "Checking IAM role..."
+            ROLE_NAME=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/iam/security-credentials/)
+            if [ -z "$ROLE_NAME" ]; then
+              echo "❌ No IAM role attached to this EC2 instance!"
+              exit 1
+            fi
+            echo "✅ IAM role found: $ROLE_NAME"
 
-            # Run DB migrations
-            docker compose -f docker-compose.ec2.yml --env-file "$ENV_FILE" run --rm web bundle exec rails db:migrate
+            # Get temporary credentials from instance metadata (using IMDSv2)
+            echo "Fetching temporary AWS credentials from instance role..."
+            CREDS=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE_NAME)
+            export AWS_ACCESS_KEY_ID=$(echo $CREDS | jq -r '.AccessKeyId')
+            export AWS_SECRET_ACCESS_KEY=$(echo $CREDS | jq -r '.SecretAccessKey')
+            export AWS_SESSION_TOKEN=$(echo $CREDS | jq -r '.Token')
 
-            # Cleanup old images
+            # Verify AWS credentials are working
+            echo "Verifying AWS credentials..."
+            if ! aws sts get-caller-identity --output text 2>&1; then
+              echo "❌ AWS credentials not working"
+              exit 1
+            fi
+            echo "✅ AWS credentials verified"
+
+            # ECR login
+            echo "Logging into ECR..."
+            aws ecr get-login-password --region "${{ env.AWS_REGION }}" \
+              | docker login --username AWS --password-stdin "${REGISTRY}"
+
+            # Ensure compose CLI
+            docker compose version || {
+              echo "Installing Docker Compose..."
+              sudo curl -fsSL "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" \
+                -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            }
+
+            echo "Pulling Docker images..."
+            docker pull "$BACKEND_IMAGE"
+            docker pull "$FRONTEND_IMAGE"
+            docker pull "$DASHBOARD_IMAGE"
+            docker pull "$LINKS_IMAGE"
+            docker pull "$NGINX_IMAGE"
+
+            # Add image URIs to env file (AWS credentials are auto-fetched from EC2 metadata)
+            echo "Adding image URIs to env file..."
+            # Remove old values if they exist
+            sed -i '/^AWS_ACCESS_KEY_ID=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^AWS_SECRET_ACCESS_KEY=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^AWS_SESSION_TOKEN=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^BACKEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^FRONTEND_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^DASHBOARD_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^LINKS_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            sed -i '/^NGINX_IMAGE=/d' "$ENV_FILE" 2>/dev/null || true
+            # Add image URIs only (no AWS credentials - container fetches from EC2 metadata)
+            echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$ENV_FILE"
+            echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$ENV_FILE"
+            echo "DASHBOARD_IMAGE=$DASHBOARD_IMAGE" >> "$ENV_FILE"
+            echo "LINKS_IMAGE=$LINKS_IMAGE" >> "$ENV_FILE"
+            echo "NGINX_IMAGE=$NGINX_IMAGE" >> "$ENV_FILE"
+
+            echo "Starting services with Docker Compose..."
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
+
+            # Wait for services to be ready
+            sleep 5
+
+            echo "Clearing migration locks (if any)..."
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails runner "
+              ActiveRecord::Base.connection.execute('SELECT pg_advisory_unlock_all();')
+            " || echo "No locks to clear"
+
+            echo "Running database migrations..."
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails db:migrate
+
+            echo "Running database seeds..."
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails db:seed
+
+            echo "Cleaning up old images..."
             docker image prune -f
+            
+            echo "✅ Deployment complete!"
+
+      - name: Debug - Check container logs
+        if: failure()
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ steps.envmap.outputs.EC2_HOST }}
+          username: ${{ steps.envmap.outputs.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd "${{ steps.envmap.outputs.EC2_PATH }}"
+            COMPOSE_FILE="${{ steps.envmap.outputs.COMPOSE_FILE }}"
+
+            echo "=== Container Status ==="
+            docker compose -f "$COMPOSE_FILE" ps -a
+
+            echo -e "\n=== Running Images ==="
+            docker compose -f "$COMPOSE_FILE" images
+
+            echo -e "\n=== Database Logs (last 50 lines) ==="
+            docker compose -f "$COMPOSE_FILE" logs --tail=50 db
+
+            echo -e "\n=== Backend Logs (last 100 lines) ==="
+            docker compose -f "$COMPOSE_FILE" logs --tail=100 backend
+
+            echo -e "\n=== Frontend Logs (last 100 lines) ==="
+            docker compose -f "$COMPOSE_FILE" logs --tail=100 frontend
+
+            echo -e "\n=== Nginx Logs (last 100 lines) ==="
+            docker compose -f "$COMPOSE_FILE" logs --tail=100 nginx
+
+            echo -e "\n=== Backend Environment Check ==="
+            docker compose -f "$COMPOSE_FILE" exec -T backend env | grep -E "(RAILS_ENV|DATABASE_URL|AWS_)" | sed 's/=.*/=***/' || true
+
+            echo -e "\n=== Network Connectivity ==="
+            docker compose -f "$COMPOSE_FILE" exec -T backend nc -zv db 5432 || true
+
+      - name: Revoke SSH from this runner IP
+        if: always()
+        run: |
+          set -e
+          MYIP="$(curl -s https://checkip.amazonaws.com)/32"
+          echo "Revoking ${MYIP} on SG ${SG_ID}"
+          aws ec2 revoke-security-group-ingress \
+            --group-id "${{ steps.sg.outputs.SG_ID }}" \
+            --protocol tcp --port 22 --cidr "${MYIP}" || true
+        env:
+          SG_ID: ${{ steps.sg.outputs.SG_ID }}

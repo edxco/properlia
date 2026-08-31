@@ -1,51 +1,116 @@
-version: '3.8'
-
 services:
+  nginx:
+    image: ${NGINX_IMAGE:-properlia-nginx:latest}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/ssl/cloudflare:/etc/ssl/cloudflare:ro
+    depends_on:
+      - frontend
+      - dashboard
+      - links
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
   db:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: properlia2025_production
+      POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
     restart: unless-stopped
+    networks:
+      - app-network
 
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  backend:
+    image: ${BACKEND_IMAGE:-properlia-backend:latest}
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
     volumes:
       - storage_data:/app/storage
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/properlia2025_production
-      RAILS_ENV: production
-      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+      PORT: ${BACKEND_PORT:-3000}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      RAILS_ENV: ${RAILS_ENV:-production}
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      RAILS_SERVE_STATIC_FILES: "true"
-      RAILS_LOG_TO_STDOUT: "true"
-      # Active Storage - use amazon for production
-      ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE:-amazon}
-      # AWS Configuration
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_REGION: ${AWS_REGION:-us-east-1}
+      RAILS_SERVE_STATIC_FILES: ${RAILS_SERVE_STATIC_FILES}
+      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
+      # Active Storage
+      ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE}
+      # AWS Configuration (credentials auto-fetched from EC2 instance metadata)
+      AWS_REGION: ${AWS_REGION}
       AWS_BUCKET: ${AWS_BUCKET}
       # Devise JWT
       DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
+      # CORS Origins
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      # Host URL for Active Storage URLs
+      HOST_URL: ${HOST_URL}
+      # Resend Configuration
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-properlia-frontend:latest}
+    expose:
+      - "3001"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      INTERNAL_API_URL: http://backend:3000/api/v1
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  dashboard:
+    image: ${DASHBOARD_IMAGE:-properlia-dashboard:latest}
+    expose:
+      - "3002"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      INTERNAL_API_URL: http://backend:3000/api/v1
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  links:
+    image: ${LINKS_IMAGE:-properlia-links:latest}
+    expose:
+      - "3003"
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
   storage_data:
+
+networks:
+  app-network:
+    driver: bridge

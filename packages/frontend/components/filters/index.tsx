@@ -1,0 +1,1 @@
+export { PropertyFiltersBar } from './PropertyFiltersBar';

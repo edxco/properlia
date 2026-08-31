@@ -1,0 +1,221 @@
+/* PhotoGalleryModal.module.css */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+}
+
+.panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.modalContent {
+  position: relative;
+  width: 100%;
+  max-width: 72rem;
+  height: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 16px 16px 0 0;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.headerInfo {
+  min-width: 0;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #18181b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photoCount {
+  font-size: 14px;
+  color: #52525b;
+}
+
+.closeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #18181b;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.closeButton:hover {
+  background: #27272a;
+}
+
+.closeButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+}
+
+.carouselArea {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 0 16px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: none;
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 32px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.navButton:first-child {
+  left: 24px;
+}
+
+.navButton:last-child {
+  right: 24px;
+}
+
+.navButton:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.navButton:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.navButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.imageContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 0;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  max-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #f4f4f5;
+}
+
+.image {
+  max-height: 70vh;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.25s ease;
+}
+
+.imageHidden {
+  opacity: 0;
+}
+
+.imageSkeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #ececec 25%, #d8d8d8 50%, #ececec 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.caption {
+  font-size: 13px;
+  color: #52525b;
+  text-align: center;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.footer {
+  flex-shrink: 0;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer span {
+  font-weight: 600;
+}
