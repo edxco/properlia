@@ -52,7 +52,7 @@ export default function PropertyActionsDropdown({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    window.location.href = `/dashboard/properties/${property.id}/edit`;
+                    window.location.href = `/properties/${property.id}/edit`;
                   }}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-md cursor-pointer"
                 >
@@ -64,7 +64,7 @@ export default function PropertyActionsDropdown({
                     e.preventDefault();
                     e.stopPropagation();
                     window.open(
-                      `/dashboard/properties/${property.id}`,
+                      `/properties/${property.id}`,
                       "_blank"
                     );
                     setIsOpen(false);

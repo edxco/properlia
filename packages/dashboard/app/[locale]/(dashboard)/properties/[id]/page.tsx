@@ -56,7 +56,7 @@ export default function PropertyPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Not Found</h1>
           <p className="text-gray-600 mb-4">{error || 'The property you are looking for does not exist.'}</p>
           <button
-            onClick={() => router.push('/dashboard/properties')}
+            onClick={() => router.push('/properties')}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Back to Properties

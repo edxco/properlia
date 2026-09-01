@@ -48,7 +48,7 @@ export default function EditPropertyPage() {
     return (
       <div className="space-y-6">
         <Link
-          href="/dashboard/properties"
+          href="/properties"
           className="text-gray-500 hover:text-gray-700"
         >
           ← {t("properties")}
@@ -64,7 +64,7 @@ export default function EditPropertyPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link
-          href="/dashboard/properties"
+          href="/properties"
           className="text-gray-500 hover:text-gray-700"
         >
           ← {t("properties")}
@@ -75,7 +75,7 @@ export default function EditPropertyPage() {
         <PropertyForm
           editingProperty={property}
           onCancelEdit={() => {
-            window.location.href = "/dashboard/properties";
+            window.location.href = "/properties";
           }}
         />
       </div>

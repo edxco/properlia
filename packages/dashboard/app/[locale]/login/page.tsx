@@ -19,7 +19,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password });
-      router.push('/es/dashboard');
+      router.push('/es');
     } catch (err) {
       setError('Credenciales inválidas. Por favor intenta de nuevo.');
       console.error('Login error:', err);

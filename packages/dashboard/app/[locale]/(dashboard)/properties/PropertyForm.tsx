@@ -776,7 +776,7 @@ export default function PropertyForm({
       } else {
         property = await createProperty(payload);
       }
-      router.push(`/dashboard/properties/${property.id}`);
+      router.push(`/properties/${property.id}`);
     } catch (mutationError: any) {
       setFormError(
         mutationError?.message ||

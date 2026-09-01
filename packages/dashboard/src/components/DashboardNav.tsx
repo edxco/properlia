@@ -22,32 +22,32 @@ export function DashboardNav({ locale }: DashboardNavProps) {
   const dropdownItems = useMemo(() => {
     const items = [
       {
-        href: `${localePrefix}/dashboard`,
+        href: `${localePrefix}`,
         labelKey: 'overview',
         icon: Home,
       },
       {
-        href: `${localePrefix}/dashboard/properties`,
+        href: `${localePrefix}/properties`,
         labelKey: 'properties',
         icon: Building2,
       },
       {
-        href: `${localePrefix}/dashboard/leads`,
+        href: `${localePrefix}/leads`,
         labelKey: 'leads',
         icon: Users,
       },
       {
-        href: `${localePrefix}/dashboard/general-information`,
+        href: `${localePrefix}/general-information`,
         labelKey: 'generalInformation',
         icon: FileText,
       },
       {
-        href: `${localePrefix}/dashboard/property-features`,
+        href: `${localePrefix}/property-features`,
         labelKey: 'propertyFeatures',
         icon: Sparkles,
       },
       {
-        href: `${localePrefix}/dashboard/image-generator`,
+        href: `${localePrefix}/image-generator`,
         labelKey: 'imageGenerator',
         icon: ImageIcon,
       },
@@ -56,7 +56,7 @@ export function DashboardNav({ locale }: DashboardNavProps) {
     // Add Users management option for admin users only
     if (user?.role === 'admin') {
       items.push({
-        href: `${localePrefix}/dashboard/users`,
+        href: `${localePrefix}/users`,
         labelKey: 'users',
         icon: UserCog,
       });
@@ -66,7 +66,7 @@ export function DashboardNav({ locale }: DashboardNavProps) {
   }, [localePrefix, user?.role]);
 
   const isActive = (href: string) => {
-    if (href === `${localePrefix}/dashboard`) {
+    if (href === localePrefix) {
       return pathname === href;
     }
     return pathname?.startsWith(href);

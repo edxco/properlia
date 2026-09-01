@@ -171,7 +171,7 @@ export default function PropertiesTable({
               {properties.map((property) => (
                 <div key={property.id} className="relative group pb-2">
                   <a
-                    href={`/dashboard/properties/${property.id}`}
+                    href={`/properties/${property.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block px-3 py-3 pr-14 sm:pl-6 sm:py-4 sm:pr-16 hover:bg-gray-100 transition-colors"

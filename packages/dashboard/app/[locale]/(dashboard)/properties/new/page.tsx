@@ -11,7 +11,7 @@ export default function NewPropertyPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link
-          href="/dashboard/properties"
+          href="/properties"
           className="text-gray-500 hover:text-gray-700"
         >
           ← {t("properties")}
