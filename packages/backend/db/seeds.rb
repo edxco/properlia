@@ -6,6 +6,28 @@
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
 
+# Admin dummy user (dashboard login) - local development only, never stage/production
+if Rails.env.development?
+  puts "Creating admin user..."
+  admin_email = ENV.fetch("ADMIN_SEED_EMAIL", "admin@properlia.com")
+  admin_password = ENV.fetch("ADMIN_SEED_PASSWORD", "password123")
+
+  admin = User.find_or_initialize_by(email: admin_email)
+  admin.assign_attributes(
+    name: "Admin",
+    role: "admin",
+    enabled: true
+  )
+  if admin.new_record?
+    admin.password = admin_password
+    admin.password_confirmation = admin_password
+  end
+  admin.save!
+  puts "Admin user ready: #{admin.email} / role=#{admin.role}"
+else
+  puts "Skipping admin dummy user seed (Rails.env=#{Rails.env})"
+end
+
 # Property Types with standardized UUIDs
 # These UUIDs will remain consistent across all environments
 puts "Creating property types..."
