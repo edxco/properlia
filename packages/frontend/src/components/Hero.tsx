@@ -1,36 +1,31 @@
 "use client";
 
 import { TypingAnimation } from "@/components/ui/typing-animation";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   useT,
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
 import ProperliaBg from "@/public/properlia-bg.webp";
+import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
 
-type ListingType = "rent" | "buy";
-type PropertyCategory = "all" | "commercial" | "residential" | "industrial";
+const CATEGORIES = [
+  { key: "all", value: undefined },
+  { key: "residential", value: "residential" },
+  { key: "commercial", value: "commercial" },
+  { key: "industrial", value: "industrial" },
+  { key: "land", value: "land" },
+] as const;
 
 export function Hero() {
   const t = useT();
   const locale = useLocale();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<ListingType>("buy");
-  const [activeCategory, setActiveCategory] = useState<PropertyCategory>("all");
-  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) {
-      params.set("search", searchQuery.trim());
-    }
-    params.set("type", activeTab);
-    if (activeCategory !== "all") {
-      params.set("category", activeCategory);
-    }
-    router.push(`/${locale}/properties?${params.toString()}`);
+  const handleCategoryClick = (category?: string) => {
+    const query = category ? `?category=${category}` : "";
+    router.push(`/${locale}/properties${query}`);
   };
 
   return (
@@ -47,12 +42,9 @@ export function Hero() {
 
       <div className="relative z-20 h-full flex items-center">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 w-full">
-          <div className="max-w-3xl">
-            <span className="text-2xl text-white font-semibold tracking-wider bg-primary inline-block px-3 py-1">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-2xl text-white font-semibold tracking-wider bg-primary inline-block px-3 py-1">
               {t("heroBadge")}
-            </span>
-            <h1 className="font-bold text-2xl md:text-5xl lg:text-6xl font-lexend text-white leading-tight tracking-wide">
-              {t("heroStaticH1")}
             </h1>
             <p aria-hidden="true" className="font-bold text-2xl md:text-5xl lg:text-6xl font-lexend text-white leading-tight tracking-wide">
               <TypingAnimation
@@ -65,120 +57,22 @@ export function Hero() {
                 loop
               />
             </p>
-            <h2 className="text-xl md:text-3xl text-white mb-6 inline-block leading-8 md:leading-11">
-              <span className="bg-slate-800/70 px-px">
-                {t("heroSubheadline")}
-              </span>
-            </h2>
 
-            {/* Search Card */}
-            <div className="bg-white/95 backdrop-blur-sm p-6 rounded-lg max-w-3xl">
-              <div className="flex flex-col gap-5">
-                {/* Property Type Filter 
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => setActiveCategory("all")}
-                    className={`text-sm cursor-pointer transition-colors ${
-                      activeCategory === "all"
-                        ? "text-stone-800 border-b-2 border-primary pb-0.5"
-                        : "text-stone-400 hover:text-stone-600"
-                    }`}
-                  >
-                    {capitalizeEachWord(t("all"))}
-                  </button>
-                  <button
-                    onClick={() => setActiveCategory("residential")}
-                    className={`text-sm cursor-pointer transition-colors ${
-                      activeCategory === "residential"
-                        ? "text-stone-800 border-b-2 border-primary pb-0.5"
-                        : "text-stone-400 hover:text-stone-600"
-                    }`}
-                  >
-                    {capitalizeEachWord(t("residential"))}
-                  </button>
-                  <button
-                    onClick={() => setActiveCategory("commercial")}
-                    className={`text-sm cursor-pointer transition-colors ${
-                      activeCategory === "commercial"
-                        ? "text-stone-800 border-b-2 border-primary pb-0.5"
-                        : "text-stone-400 hover:text-stone-600"
-                    }`}
-                  >
-                    {capitalizeEachWord(t("commercial"))}
-                  </button>
-                  <button
-                    onClick={() => setActiveCategory("industrial")}
-                    className={`text-sm cursor-pointer transition-colors ${
-                      activeCategory === "industrial"
-                        ? "text-stone-800 border-b-2 border-primary pb-0.5"
-                        : "text-stone-400 hover:text-stone-600"
-                    }`}
-                  >
-                    {capitalizeEachWord(t("industrial"))}
-                  </button>
-                </div>*/}
-                {/* Location Search Input */}
-                <div className="relative">
-                  <svg
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                    placeholder={t("searchByCityOrLocation")}
-                    className="w-full h-12 pl-10 pr-4 bg-stone-100 rounded-md text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
-                </div>
-
-                {/* Intent Selector (Comprar / Rentar) 
-                <div className="bg-stone-100 p-1 rounded-md inline-flex">
-                  <button
-                    onClick={() => setActiveTab("buy")}
-                    className={`flex-1 px-5 py-2 text-sm font-medium rounded transition-colors cursor-pointer ${
-                      activeTab === "buy"
-                        ? "bg-primary text-white"
-                        : "text-stone-500 hover:text-stone-700"
-                    }`}
-                  >
-                    Comprar
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("rent")}
-                    className={`flex-1 px-5 py-2 text-sm font-medium rounded transition-colors cursor-pointer ${
-                      activeTab === "rent"
-                        ? "bg-primary text-white"
-                        : "text-stone-500 hover:text-stone-700"
-                    }`}
-                  >
-                    Rentar
-                  </button>
-                </div>*/}
-
-                {/* Primary CTA */}
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {CATEGORIES.map((category) => (
                 <button
-                  onClick={handleSearch}
-                  className="w-full h-12 bg-primary text-white font-medium rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
+                  key={category.key}
+                  onClick={() => handleCategoryClick(category.value)}
+                  className="px-5 py-2 text-sm font-medium rounded-full border border-white bg-white/10 backdrop-blur-sm text-white shadow-sm hover:bg-white hover:text-stone-900 transition-colors cursor-pointer"
                 >
-                  {t("heroCtaButton")}
+                  {capitalizeEachWord(t(category.key))}
                 </button>
-
-                <p className="text-xs text-stone-400 text-center">
-                  {t("heroMicroTrust")}
-                </p>
-              </div>
+              ))}
             </div>
+
+            <h2 className="mt-6 text-white font-medium text-base md:text-lg drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+              {t("heroDescription")}
+            </h2>
           </div>
         </div>
       </div>
