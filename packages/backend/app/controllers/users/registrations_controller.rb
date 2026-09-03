@@ -30,12 +30,14 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
   end
 
-  # Permitir campos extra si agregaste name/role
+  # role se excluye a propósito: el auto-registro/edición de perfil nunca debe
+  # permitir que el propio usuario se asigne un rol (p. ej. "admin"). Los roles
+  # se asignan vía Api::V1::Admin::UsersController.
   def sign_up_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :name, :role)
+    params.require(:user).permit(:email, :password, :password_confirmation, :name)
   end
 
   def account_update_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :name, :role)
+    params.require(:user).permit(:email, :password, :password_confirmation, :name)
   end
 end
