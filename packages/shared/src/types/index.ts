@@ -48,7 +48,9 @@ export interface Property {
   featured: boolean;
   exclusive_listing: boolean;
   title: string;
+  title_en?: string | null;
   description?: string | null;
+  description_en?: string | null;
   land_area?: number | null;
   built_area?: number | null;
   rooms: number;
