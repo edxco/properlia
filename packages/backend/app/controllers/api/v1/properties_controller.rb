@@ -239,6 +239,53 @@ module Api
         end
       end
 
+      # POST /api/v1/properties/generate_content
+      #
+      # Drafts a title and description (each in Spanish and English) from the
+      # form's current (not-yet-saved) field values, so it works identically
+      # for create and edit.
+      def generate_content
+        property_type = PropertyType.find_by(id: generate_content_params[:property_type_id])
+        listing_type = ListingType.find_by(id: generate_content_params[:listing_type_id])
+        state = State.find_by(id: generate_content_params[:state_id])
+        city = City.find_by(id: generate_content_params[:city_id])
+
+        unless property_type && listing_type
+          return render json: { error: 'property_type_id and listing_type_id are required' },
+                         status: :unprocessable_entity
+        end
+
+        categories = PropertyCategory.where(id: Array(generate_content_params[:property_category_ids]))
+
+        # Preserve the advisor's selection order — PropertyFeature.where(id:...)
+        # does not guarantee it, and the first feature is the mandatory
+        # "featured characteristic" the title generator relies on.
+        feature_ids = Array(generate_content_params[:property_feature_ids])
+        features = PropertyFeature.where(id: feature_ids).index_by(&:id).values_at(*feature_ids).compact
+
+        result = Ai::PropertyContentGenerator.call(
+          property_type: property_type,
+          listing_type: listing_type,
+          categories: categories,
+          features: features,
+          address: generate_content_params[:address],
+          neighborhood: generate_content_params[:neighborhood],
+          city: city&.es_name,
+          state: state&.es_name,
+          price: generate_content_params[:price],
+          land_area: generate_content_params[:land_area],
+          built_area: generate_content_params[:built_area],
+          rooms: generate_content_params[:rooms],
+          bathrooms: generate_content_params[:bathrooms],
+          half_bathrooms: generate_content_params[:half_bathrooms],
+          parking_spaces: generate_content_params[:parking_spaces]
+        )
+
+        render json: result, status: :ok
+      rescue Ai::PropertyContentGenerator::GenerationError => e
+        render json: { error: e.message }, status: :bad_gateway
+      end
+
       # DELETE /api/v1/properties/:id
       def destroy
         if @property.destroy
@@ -297,6 +344,12 @@ module Api
         permitted_columns = Property.column_names.map(&:to_sym) - %i[id created_at updated_at images image_order]
         params.require(:property).permit(*permitted_columns, images: [], videos: [], property_category_ids: [],
                                                              property_feature_ids: [], image_order: [])
+      end
+
+      def generate_content_params
+        params.permit(:property_type_id, :listing_type_id, :address, :neighborhood, :city_id, :state_id,
+                      :price, :land_area, :built_area, :rooms, :bathrooms, :half_bathrooms,
+                      :parking_spaces, property_category_ids: [], property_feature_ids: [])
       end
 
       # ---- intake-only helpers ----

@@ -28,6 +28,7 @@ Rails.application.routes.draw do
           # Machine-to-machine intake from the Google Apps Script pipeline.
           # Auth: Authorization: Bearer <PROPERTY_INTAKE_TOKEN>, not a user session.
           post 'intake', to: 'properties#intake'
+          post 'generate_content', to: 'properties#generate_content'
         end
 
         # PDF generation routes
