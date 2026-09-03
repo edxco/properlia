@@ -1,6 +1,8 @@
 import { apiClient } from '../../lib/api-client';
 import type {
   CreatePropertyDto,
+  GenerateContentParams,
+  GenerateContentResult,
   PaginatedResponse,
   Property,
   PropertyPayload,
@@ -163,6 +165,19 @@ export const propertyApi = {
   ): Promise<void> => {
     return apiClient.request<void>(`/properties/${propertyId}/attachments/${attachmentId}`, {
       method: 'DELETE',
+      headers: buildAuthHeaders(token),
+      requiresAuth: true,
+    });
+  },
+
+  // Generate a bilingual title/description draft from the form's current values
+  generateContent: async (
+    data: GenerateContentParams,
+    token?: string
+  ): Promise<GenerateContentResult> => {
+    return apiClient.request<GenerateContentResult>('/properties/generate_content', {
+      method: 'POST',
+      body: JSON.stringify(data),
       headers: buildAuthHeaders(token),
       requiresAuth: true,
     });

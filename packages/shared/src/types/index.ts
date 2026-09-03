@@ -127,6 +127,31 @@ export interface PropertyPayload {
 export type CreatePropertyDto = PropertyPayload;
 export type UpdatePropertyDto = Partial<PropertyPayload>;
 
+export interface GenerateContentParams {
+  property_type_id: string;
+  listing_type_id: string;
+  property_category_ids?: string[];
+  property_feature_ids?: string[];
+  address?: string;
+  neighborhood?: string;
+  city_id?: string;
+  state_id?: string;
+  price?: number;
+  land_area?: number;
+  built_area?: number;
+  rooms?: number;
+  bathrooms?: number;
+  half_bathrooms?: number;
+  parking_spaces?: number;
+}
+
+export interface GenerateContentResult {
+  title_es: string;
+  title_en: string;
+  description_es: string;
+  description_en: string;
+}
+
 export interface ApiResponse<T> {
   data: T;
   message?: string;
