@@ -38,10 +38,10 @@ module Api
         # Filter by listing_type_id (sale, rent, pre-sale)
         properties = properties.where(listing_type_id: params[:listing_type_id]) if params[:listing_type_id].present?
 
-        # Location filters (case-insensitive partial match)
-        properties = properties.where('LOWER(city) LIKE ?', "%#{params[:city].downcase}%") if params[:city].present?
+        # Location filters (exact match on the normalized state/city lookup tables)
+        properties = properties.where(state_id: params[:state_id]) if params[:state_id].present?
 
-        properties = properties.where('LOWER(state) LIKE ?', "%#{params[:state].downcase}%") if params[:state].present?
+        properties = properties.where(city_id: params[:city_id]) if params[:city_id].present?
 
         if params[:neighborhood].present?
           properties = properties.where('LOWER(neighborhood) LIKE ?', "%#{params[:neighborhood].downcase}%")
@@ -72,12 +72,15 @@ module Api
                                  .where('LOWER(property_types.name) = ?', params[:property_type_name].downcase)
         end
 
-        # Text search on title, description, address, city, state, and neighborhood
+        # Text search on title, description, address, state, city, and neighborhood
         if params[:search].present?
           search_term = "%#{params[:search].downcase}%"
-          properties = properties.where(
-            'LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(address) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(neighborhood) LIKE ?',
-            search_term, search_term, search_term, search_term, search_term, search_term
+          properties = properties.left_joins(:state, :city).where(
+            'LOWER(properties.title) LIKE :q OR LOWER(properties.description) LIKE :q OR ' \
+            'LOWER(properties.address) LIKE :q OR LOWER(properties.neighborhood) LIKE :q OR ' \
+            'LOWER(states.name) LIKE :q OR LOWER(states.es_name) LIKE :q OR ' \
+            'LOWER(cities.name) LIKE :q OR LOWER(cities.es_name) LIKE :q',
+            q: search_term
           )
         end
 
@@ -190,10 +193,16 @@ module Api
         status = Status.find_by(name: 'active')
         categories = PropertyCategory.where(slug: Array(intake_params[:property_categories]).map { |s| s.to_s.downcase })
 
+        state, city = LocationResolver.resolve(
+          state_name: intake_params[:state].presence || 'Puebla',
+          city_name: intake_params.dig(:location, :municipio)
+        )
+
         errors = []
         errors << "Unknown specific_property_type: #{intake_params[:specific_property_type]}" unless property_type
         errors << "Unknown transaction_type/presale combination: #{intake_params[:transaction_type]}" unless listing_type
         errors << 'No "active" status found — check Status seeds' unless status
+        errors << "Unknown state: #{intake_params[:state]} (not one of the 32 seeded Mexican states)" unless state
         return render json: { errors: errors }, status: :unprocessable_entity if errors.any?
 
         property = Property.new(
@@ -208,8 +217,8 @@ module Api
           half_bathrooms: intake_params.dig(:specs, :half_bathrooms) || 0,
           parking_spaces: intake_params.dig(:specs, :parking_spaces) || 0,
           price: intake_params[:price],
-          state: intake_params[:state].presence || 'Puebla',
-          city: intake_params.dig(:location, :municipio),
+          state: state,
+          city: city,
           neighborhood: intake_params.dig(:location, :colonia),
           property_type: property_type,
           listing_type: listing_type,
@@ -325,8 +334,8 @@ module Api
 
       def listing_url_for(property)
         base = ENV.fetch('FRONTEND_URL', 'https://properlia.com')
-        state = intake_slugify(property.state)
-        city = intake_slugify(property.city)
+        state = intake_slugify(property.state&.name)
+        city = intake_slugify(property.city&.name)
         slug = intake_slugify(property.title)
         "#{base}/es/properties/#{state}/#{city}/#{property.id}/#{slug}"
       end
@@ -369,6 +378,20 @@ module Api
                                 es_name: property.listing_type.es_name
                               }
                             end,
+          'state' => if property.state
+                       {
+                         id: property.state.id,
+                         name: property.state.name,
+                         es_name: property.state.es_name
+                       }
+                     end,
+          'city' => if property.city
+                      {
+                        id: property.city.id,
+                        name: property.city.name,
+                        es_name: property.city.es_name
+                      }
+                    end,
           'property_categories' => property.property_categories.map do |cat|
             { id: cat.id, name: cat.name, es_name: cat.es_name, slug: cat.slug }
           end,

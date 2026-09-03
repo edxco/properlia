@@ -9,8 +9,8 @@ module Pdf
       location_parts = []
       location_parts << sanitize_for_pdf(@property.address) if @property.address.present?
       location_parts << sanitize_for_pdf(@property.neighborhood) if @property.neighborhood.present?
-      location_parts << sanitize_for_pdf(@property.city) if @property.city.present?
-      location_parts << sanitize_for_pdf(@property.state) if @property.state.present?
+      location_parts << sanitize_for_pdf(@property.city.es_name) if @property.city.present?
+      location_parts << sanitize_for_pdf(@property.state.es_name) if @property.state.present?
       location_parts << sanitize_for_pdf(@property.zip_code) if @property.zip_code.present?
 
       pdf.text location_parts.join(', '), size: 10

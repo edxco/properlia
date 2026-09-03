@@ -126,7 +126,7 @@ class EmailService
       params = {
         from: ENV.fetch('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
         to: general_info.email_to,
-        subject: "Confirmación #{property.property_type.es_name} en #{property.listing_type.es_name}, #{property.address}, #{property.city}",
+        subject: "Confirmación #{property.property_type.es_name} en #{property.listing_type.es_name}, #{property.address}, #{property.city&.es_name}",
         html: property_confirmation_html(property: property)
       }
 
@@ -401,12 +401,12 @@ class EmailService
 
                 <div class="property-detail">
                   <div class="detail-label">Ciudad</div>
-                  <div class="detail-value">#{property.city || 'No especificado'}</div>
+                  <div class="detail-value">#{property.city&.es_name || 'No especificado'}</div>
                 </div>
 
                 <div class="property-detail">
                   <div class="detail-label">Estado</div>
-                  <div class="detail-value">#{property.state || 'No especificado'}</div>
+                  <div class="detail-value">#{property.state&.es_name || 'No especificado'}</div>
                 </div>
 
                 <div class="section-title">Información Adicional</div>
@@ -439,7 +439,7 @@ class EmailService
     # HTML template for buyer consultation admin email
     def buyer_consultation_admin_html(lead:)
       budget_display = lead.max_budget.present? ? "$#{number_with_delimiter(lead.max_budget)}" : 'No especificado'
-      location_parts = [lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?)
+      location_parts = [lead.neighborhood, lead.city&.es_name, lead.state&.es_name].compact.reject(&:blank?)
       location_display = location_parts.any? ? location_parts.join(', ') : 'No especificado'
       desired_date_display = lead.desired_date.present? ? lead.desired_date.strftime('%d/%m/%Y') : 'No especificado'
       source_detail = lead.source_detail || {}
@@ -526,7 +526,7 @@ class EmailService
     # HTML template for seller consultation admin email
     def seller_consultation_admin_html(lead:)
       budget_display = lead.max_budget.present? ? "$#{number_with_delimiter(lead.max_budget)}" : 'No especificado'
-      location_parts = [lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?)
+      location_parts = [lead.neighborhood, lead.city&.es_name, lead.state&.es_name].compact.reject(&:blank?)
       location_display = location_parts.any? ? location_parts.join(', ') : 'No especificado'
       desired_date_display = lead.desired_date.present? ? lead.desired_date.strftime('%d/%m/%Y') : 'No especificado'
 
@@ -651,7 +651,7 @@ class EmailService
                     <span class="summary-value">Compra</span>
                   </div>
                   #{lead.max_budget.present? ? "<div class=\"summary-item\"><span class=\"summary-label\">Presupuesto:</span> <span class=\"summary-value\">$#{number_with_delimiter(lead.max_budget)}</span></div>" : ''}
-                  #{[lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?).any? ? "<div class=\"summary-item\"><span class=\"summary-label\">Ubicación:</span> <span class=\"summary-value\">#{[lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?).join(', ')}</span></div>" : ''}
+                  #{[lead.neighborhood, lead.city&.es_name, lead.state&.es_name].compact.reject(&:blank?).any? ? "<div class=\"summary-item\"><span class=\"summary-label\">Ubicación:</span> <span class=\"summary-value\">#{[lead.neighborhood, lead.city&.es_name, lead.state&.es_name].compact.reject(&:blank?).join(', ')}</span></div>" : ''}
                 </div>
 
                 <div class="contact-section">
@@ -729,7 +729,7 @@ class EmailService
                     <span class="summary-value">Venta</span>
                   </div>
                   #{lead.max_budget.present? ? "<div class=\"summary-item\"><span class=\"summary-label\">Precio Esperado:</span> <span class=\"summary-value\">$#{number_with_delimiter(lead.max_budget)}</span></div>" : ''}
-                  #{[lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?).any? ? "<div class=\"summary-item\"><span class=\"summary-label\">Ubicación:</span> <span class=\"summary-value\">#{[lead.neighborhood, lead.city, lead.state].compact.reject(&:blank?).join(', ')}</span></div>" : ''}
+                  #{[lead.neighborhood, lead.city&.es_name, lead.state&.es_name].compact.reject(&:blank?).any? ? "<div class=\"summary-item\"><span class=\"summary-label\">Ubicación:</span> <span class=\"summary-value\">#{[lead.neighborhood, lead.city&.es_name, lead.state&.es_name].compact.reject(&:blank?).join(', ')}</span></div>" : ''}
                 </div>
 
                 <div class="contact-section">

@@ -271,7 +271,7 @@ module Pdf
       [
         sanitize_for_pdf(@property.address).presence,
         sanitize_for_pdf(@property.neighborhood).presence,
-        [sanitize_for_pdf(@property.city), sanitize_for_pdf(@property.state)].reject(&:blank?).join(', ').presence
+        [sanitize_for_pdf(@property.city&.es_name), sanitize_for_pdf(@property.state&.es_name)].reject(&:blank?).join(', ').presence
       ].compact.each_with_index do |line, i|
         pdf.text_box line,
                      at: [r_txt_x, ref_y.call(addr_y0 + i * addr_line_h)],

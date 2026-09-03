@@ -54,7 +54,7 @@ module Pdf
           # Row 2 left: location
           location_parts = []
           location_parts << sanitize_for_pdf(@property.address) if @property.exclusive_listing && @property.address.present?
-          location_parts += [@property.neighborhood, @property.city, @property.state].compact.reject(&:blank?).map { |s| sanitize_for_pdf(s) }
+          location_parts += [@property.neighborhood, @property.city&.es_name, @property.state&.es_name].compact.reject(&:blank?).map { |s| sanitize_for_pdf(s) }
           location_text = location_parts.join(', ')
 
           begin

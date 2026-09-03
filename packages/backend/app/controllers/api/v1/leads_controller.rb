@@ -143,7 +143,7 @@ module Api
           :referrer_url, :landing_url, :interest_operation, :interest_property_type,
           :min_budget, :max_budget, :score, :notes, :assigned_to_user_id,
           :next_follow_up_at, :consent_marketing,
-          :desired_date, :neighborhood, :city, :state,
+          :desired_date, :neighborhood, :city_id, :state_id,
           source_detail: {},
           images: []
         )
@@ -153,7 +153,7 @@ module Api
         params.require(:lead).permit(
           :full_name, :email, :phone, :source, :property_type_id,
           :interest_operation, :max_budget, :notes, :interest_property_type,
-          :desired_date, :neighborhood, :city, :state,
+          :desired_date, :neighborhood, :city_id, :state_id,
           :consent_marketing,
           source_detail: {},
           images: []
@@ -195,8 +195,8 @@ module Api
           max_budget: lead.max_budget,
           score: lead.score,
           notes: lead.notes,
-          city: lead.city,
-          state: lead.state,
+          city_id: lead.city_id,
+          state_id: lead.state_id,
           neighborhood: lead.neighborhood,
           desired_date: lead.desired_date,
           assigned_to_user_id: lead.assigned_to_user_id,
@@ -217,6 +217,14 @@ module Api
             id: lead.property.id,
             title: lead.property.title
           }
+        end
+
+        if lead.state
+          json[:state] = { id: lead.state.id, name: lead.state.name, es_name: lead.state.es_name }
+        end
+
+        if lead.city
+          json[:city] = { id: lead.city.id, name: lead.city.name, es_name: lead.city.es_name }
         end
 
         if include_events
