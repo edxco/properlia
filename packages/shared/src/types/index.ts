@@ -98,7 +98,9 @@ export interface PropertyPayload {
   featured?: boolean;
   exclusive_listing?: boolean;
   title: string;
+  title_en?: string;
   description?: string;
+  description_en?: string;
   land_area?: number;
   built_area?: number;
   rooms?: number;
