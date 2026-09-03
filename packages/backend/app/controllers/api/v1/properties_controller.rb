@@ -113,7 +113,7 @@ module Api
 
         property = Property.new(property_params)
         if property.save
-          ProcessPropertyImagesJob.perform_later(property.id) if params.dig(:property, :images).present?
+          ProcessPropertyImagesJob.perform_later(property.id, property.images.pluck(:id)) if params.dig(:property, :images).present?
 
           # Send confirmation email asynchronously
           begin
@@ -155,7 +155,7 @@ module Api
             existing_order = @property.image_order.map(&:to_s)
             new_ids = @property.images.pluck(:id).map(&:to_s) - existing_order
             @property.update_column(:image_order, existing_order + new_ids) if new_ids.any?
-            ProcessPropertyImagesJob.perform_later(@property.id)
+            ProcessPropertyImagesJob.perform_later(@property.id, new_ids) if new_ids.any?
           end
           @property.videos.attach(new_videos) if new_videos.present?
 

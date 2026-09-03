@@ -57,7 +57,7 @@ module Api
 
         if lead.save
           lead.record_event!('created', metadata: { source: lead.source })
-          ProcessLeadImagesJob.perform_later(lead.id) if params.dig(:lead, :images).present?
+          ProcessLeadImagesJob.perform_later(lead.id, lead.images.pluck(:id)) if params.dig(:lead, :images).present?
           render json: lead_json(lead), status: :created
         else
           render json: { errors: lead.errors.full_messages }, status: :unprocessable_entity
@@ -67,7 +67,7 @@ module Api
       # PUT/PATCH /api/v1/leads/:id
       def update
         if @lead.update(lead_params)
-          ProcessLeadImagesJob.perform_later(@lead.id) if params.dig(:lead, :images).present?
+          ProcessLeadImagesJob.perform_later(@lead.id, @lead.images.pluck(:id)) if params.dig(:lead, :images).present?
           render json: lead_json(@lead), status: :ok
         else
           render json: { errors: @lead.errors.full_messages }, status: :unprocessable_entity
@@ -117,7 +117,7 @@ module Api
 
         if lead.save
           lead.record_event!('created', metadata: { source: lead.source })
-          ProcessLeadImagesJob.perform_later(lead.id) if params.dig(:lead, :images).present?
+          ProcessLeadImagesJob.perform_later(lead.id, lead.images.pluck(:id)) if params.dig(:lead, :images).present?
 
           # Send consultation emails for buyer/seller forms
           send_consultation_emails(lead) if %w[buyer_form seller_form].include?(lead.source)

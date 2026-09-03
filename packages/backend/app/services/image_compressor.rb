@@ -12,6 +12,7 @@ class ImageCompressor
 
   def call
     return unless @attachment.content_type.start_with?("image/")
+    return if @attachment.blob.metadata["compressed"]
 
     @attachment.blob.open do |tmp|
       processed = ImageProcessing::Vips
@@ -24,7 +25,8 @@ class ImageCompressor
       new_blob = ActiveStorage::Blob.create_and_upload!(
         io: processed,
         filename: "#{@attachment.filename.base}.jpg",
-        content_type: "image/jpeg"
+        content_type: "image/jpeg",
+        metadata: { compressed: true }
       )
 
       old_blob = @attachment.blob
@@ -33,5 +35,6 @@ class ImageCompressor
     end
   rescue StandardError => e
     Rails.logger.error "ImageCompressor failed for attachment #{@attachment.id}: #{e.message}"
+    raise
   end
 end
