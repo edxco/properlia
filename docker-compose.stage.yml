@@ -62,6 +62,8 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
       FRONTEND_URL: ${FRONTEND_URL}
+      # Anthropic Claude — used to draft AI property descriptions
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:
       db:
         condition: service_healthy
