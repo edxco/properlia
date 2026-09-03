@@ -70,7 +70,7 @@ module Ai
 
       response = client.messages.create(
         model: MODEL,
-        max_tokens: 900,
+        max_tokens: 3000,
         system: system_prompt,
         messages: [{ role: 'user', content: user_prompt }]
       )
@@ -186,8 +186,15 @@ module Ai
     end
 
     def parse_response(response)
-      text = response.content.first.text
-      data = JSON.parse(text)
+      if response.stop_reason == :max_tokens
+        Rails.logger.error 'Anthropic response truncated: hit max_tokens before completing'
+        raise GenerationError, 'AI service returned an unexpected response.'
+      end
+
+      text_block = response.content.find { |block| block.type == :text }
+      raise GenerationError, 'AI service returned an unexpected response.' unless text_block
+
+      data = JSON.parse(text_block.text)
       {
         title_es: data.fetch('title_es'),
         title_en: data.fetch('title_en'),
