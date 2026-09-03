@@ -66,7 +66,7 @@ export function Footer() {
 
   return (
     <footer className="text-white flex flex-col">
-      <div className="bg-primary-70 m-0 p-0">
+      <div className="bg-navy m-0 p-0">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-12 m-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Logo and Company Info */}
@@ -132,7 +132,7 @@ export function Footer() {
 
             {/* Properties by Type */}
             <nav aria-label="Properties by type" className="hidden md:block text-right">
-              <h3 className="font-semibold text-lg mb-4">{t("properties")}</h3>
+              <h3 className="font-medium text-lg mb-4">{t("properties")}</h3>
               <ul className="space-y-2">
                 <li>
                   <Link
@@ -163,7 +163,7 @@ export function Footer() {
 
             {/* Services */}
             <nav aria-label="Services" className="hidden md:block text-right">
-              <h3 className="font-semibold text-lg mb-4">{t("services")}</h3>
+              <h3 className="font-medium text-lg mb-4">{t("services")}</h3>
               <ul className="space-y-2">
                 <li>
                   <Link
@@ -194,7 +194,7 @@ export function Footer() {
 
             {/* Contact */}
             <div className="text-center md:text-right">
-              <h3 className="font-semibold text-lg mb-4">{t("contact")}</h3>
+              <h3 className="font-medium text-lg mb-4">{t("contact")}</h3>
               <address className="not-italic space-y-2 text-sm text-white/80">
                 {generalInfo?.whatsapp && (
                   <p>
@@ -234,7 +234,7 @@ export function Footer() {
           </div>
         </div>
       </div>
-      <div className="bg-primary m-0 p-0">
+      <div className="bg-navy border-t border-white/10 m-0 p-0">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 justify-between items-end gap-4">
             <div>
@@ -245,7 +245,7 @@ export function Footer() {
                 href="https://thecodetaco.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/80 font-light hover:text-white transition-colors text-sm"
+                className="text-white/80 font-normal hover:text-white transition-colors text-sm"
               >
                 {t("builtWithLove")}
               </a>
