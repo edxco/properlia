@@ -44,8 +44,10 @@ export interface Lead {
   utm_campaign?: string | null;
   desired_date?: string | null;
   neighborhood?: string | null;
-  city?: string | null;
-  state?: string | null;
+  city_id?: string | null;
+  state_id?: string | null;
+  city?: CommonEntity | null;
+  state?: CommonEntity | null;
   created_at: string;
   updated_at: string;
 }
@@ -86,8 +88,8 @@ export interface CreatePublicLeadDto {
   notes?: string;
   desired_date?: string;
   neighborhood?: string;
-  city?: string;
-  state?: string;
+  city_id?: string;
+  state_id?: string;
   consent_marketing?: boolean;
   source_detail?: Record<string, unknown>;
   interest_property_type?: string;

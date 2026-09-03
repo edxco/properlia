@@ -2,16 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
-import { useT } from "@properlia/shared/components/TranslationProvider";
+import { useLocale, useT } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeFirstWord } from "@properlia/shared";
+import type { City, State } from "@properlia/shared/types";
 
 interface PropertyFilters {
   rooms?: number;
   bathrooms?: number;
   priceMin?: number;
   priceMax?: number;
-  city?: string;
-  state?: string;
+  city_id?: string;
+  state_id?: string;
   landAreaMin?: number;
   landAreaMax?: number;
 }
@@ -24,8 +25,8 @@ interface PropertyFiltersBarProps {
   advancedFilterCount: number;
   currentCount: number;
   totalCount: number;
-  cities: string[];
-  states: string[];
+  cities: City[];
+  states: State[];
 }
 
 export function PropertyFiltersBar({
@@ -40,6 +41,7 @@ export function PropertyFiltersBar({
   states,
 }: PropertyFiltersBarProps) {
   const t = useT();
+  const locale = useLocale();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [priceMinDisplay, setPriceMinDisplay] = useState(
     filters.priceMin ? filters.priceMin.toLocaleString() : ""
@@ -70,8 +72,10 @@ export function PropertyFiltersBar({
   // Build location text
   const locationText = () => {
     const parts: string[] = [];
-    if (filters.city) parts.push(filters.city);
-    if (filters.state) parts.push(filters.state);
+    const selectedCity = cities.find((c) => c.id === filters.city_id);
+    const selectedState = states.find((s) => s.id === filters.state_id);
+    if (selectedCity) parts.push(locale === "es" ? selectedCity.es_name : selectedCity.name);
+    if (selectedState) parts.push(locale === "es" ? selectedState.es_name : selectedState.name);
     return parts.length > 0 ? ` ${t("in") || "in"} ${parts.join(", ")}` : "";
   };
 
@@ -218,39 +222,40 @@ export function PropertyFiltersBar({
                   {t("location") || "Location"}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {/* City Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t("city") || "City"}
-                    </label>
-                    <select
-                      value={filters.city || ""}
-                      onChange={(e) => onFilterChange("city", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-900"
-                    >
-                      <option value="">{t("all") || "All"}</option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* State Filter */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t("state") || "State"}
                     </label>
                     <select
-                      value={filters.state || ""}
-                      onChange={(e) => onFilterChange("state", e.target.value)}
+                      value={filters.state_id || ""}
+                      onChange={(e) => onFilterChange("state_id", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-900"
                     >
                       <option value="">{t("all") || "All"}</option>
                       {states.map((state) => (
-                        <option key={state} value={state}>
-                          {state}
+                        <option key={state.id} value={state.id}>
+                          {locale === "es" ? state.es_name : state.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* City Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t("city") || "City"}
+                    </label>
+                    <select
+                      value={filters.city_id || ""}
+                      onChange={(e) => onFilterChange("city_id", e.target.value)}
+                      disabled={!filters.state_id}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">{t("all") || "All"}</option>
+                      {cities.map((city) => (
+                        <option key={city.id} value={city.id}>
+                          {locale === "es" ? city.es_name : city.name}
                         </option>
                       ))}
                     </select>
@@ -309,8 +314,8 @@ export function PropertyFiltersBar({
             <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
               <button
                 onClick={() => {
-                  onFilterChange("city", undefined);
-                  onFilterChange("state", undefined);
+                  onFilterChange("city_id", undefined);
+                  onFilterChange("state_id", undefined);
                   onFilterChange("landAreaMin", undefined);
                   onFilterChange("landAreaMax", undefined);
                 }}

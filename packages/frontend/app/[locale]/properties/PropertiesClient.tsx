@@ -6,7 +6,9 @@ import { PropertyFiltersBar } from "@/components/filters/PropertyFiltersBar";
 import { PropertyFiltersSidebar } from "@/components/filters/PropertyFiltersSidebar";
 import { NoResultsAlert } from "@/components/alerts/NoResultsAlert";
 import { useProperties } from "@/src/services/properties/queries";
-import { useT } from "@properlia/shared/components/TranslationProvider";
+import { useStates } from "@/src/services/states/queries";
+import { useCities } from "@/src/services/cities/queries";
+import { useLocale, useT } from "@properlia/shared/components/TranslationProvider";
 import { Property } from "@properlia/shared/types";
 import { getAbsoluteImageUrl } from "@properlia/shared";
 import { PropertyCard, BannerSlideshow } from "@/components/ui";
@@ -16,8 +18,8 @@ const ITEMS_PER_PAGE = 9;
 interface Filters {
   rooms?: number;
   bathrooms?: number;
-  city?: string;
-  state?: string;
+  city_id?: string;
+  state_id?: string;
   priceMin?: number;
   priceMax?: number;
   landAreaMin?: number;
@@ -29,6 +31,7 @@ interface Filters {
 
 export default function PropertiesClient() {
   const t = useT();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<Filters>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,8 +55,8 @@ export default function PropertiesClient() {
     const params: Record<string, any> = { items: 100 };
 
     if (filters.searchQuery) params.search = filters.searchQuery;
-    if (filters.city) params.city = filters.city;
-    if (filters.state) params.state = filters.state;
+    if (filters.city_id) params.city_id = filters.city_id;
+    if (filters.state_id) params.state_id = filters.state_id;
     if (filters.priceMin) params.price_min = filters.priceMin;
     if (filters.priceMax) params.price_max = filters.priceMax;
     if (filters.rooms) params.rooms_min = filters.rooms;
@@ -76,22 +79,13 @@ export default function PropertiesClient() {
     isError,
   } = useProperties(apiParams);
 
-  const { cities, states } = useMemo(() => {
-    if (!propertiesData?.data) return { cities: [], states: [] };
+  const { data: statesData } = useStates();
+  const states = statesData?.data ?? [];
+  const { data: citiesData } = useCities(filters.state_id);
+  const cities = citiesData?.data ?? [];
 
-    const citiesSet = new Set<string>();
-    const statesSet = new Set<string>();
-
-    propertiesData.data.forEach((prop: Property) => {
-      if (prop.city) citiesSet.add(prop.city);
-      if (prop.state) statesSet.add(prop.state);
-    });
-
-    return {
-      cities: Array.from(citiesSet).sort(),
-      states: Array.from(statesSet).sort(),
-    };
-  }, [propertiesData]);
+  const selectedState = states.find((s) => s.id === filters.state_id);
+  const selectedCity = cities.find((c) => c.id === filters.city_id);
 
   // Client-side filtering for fields not yet supported by backend
   const filteredProperties = useMemo(() => {
@@ -124,7 +118,12 @@ export default function PropertiesClient() {
   }, [propertiesData, filters]);
 
   const handleFilterChange = (key: keyof Filters, value: any) => {
-    setFilters((prev) => ({ ...prev, [key]: value || undefined }));
+    setFilters((prev) => {
+      const next = { ...prev, [key]: value || undefined };
+      // Selecting a new state invalidates any previously selected city.
+      if (key === "state_id") next.city_id = undefined;
+      return next;
+    });
     setCurrentPage(1);
   };
 
@@ -137,8 +136,8 @@ export default function PropertiesClient() {
     (v) => v !== undefined
   ).length;
   const advancedFilterCount = [
-    filters.city,
-    filters.state,
+    filters.city_id,
+    filters.state_id,
     filters.landAreaMin,
     filters.landAreaMax,
   ].filter((v) => v !== undefined).length;
@@ -213,6 +212,8 @@ export default function PropertiesClient() {
             {hasNoResults && (
               <NoResultsAlert
                 filters={filters}
+                cityName={selectedCity ? (locale === "es" ? selectedCity.es_name : selectedCity.name) : undefined}
+                stateName={selectedState ? (locale === "es" ? selectedState.es_name : selectedState.name) : undefined}
                 onClearFilters={clearFilters}
                 autoDismissSeconds={10}
               />

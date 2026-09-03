@@ -6,6 +6,8 @@ import { useT, useLocale } from "@properlia/shared/components/TranslationProvide
 import { PriceInput } from "@properlia/shared/components";
 import { parsePriceInput } from "@properlia/shared";
 import { usePropertyTypes } from "@/src/services/property-types/queries";
+import { useStates } from "@/src/services/states/queries";
+import { useCities } from "@/src/services/cities/queries";
 import { useCreatePublicLead } from "@/src/services/leads/mutations";
 import { CreatePublicLeadDto } from "@properlia/shared/services/leads/api";
 import { IconCheck } from "@tabler/icons-react";
@@ -45,8 +47,8 @@ interface FormData {
   desired_date: string;
   max_budget: string;
   neighborhood: string;
-  city: string;
-  state: string;
+  city_id: string;
+  state_id: string;
   notes: string;
   consent_marketing: boolean;
 }
@@ -59,8 +61,8 @@ const initialFormData: FormData = {
   desired_date: "",
   max_budget: "",
   neighborhood: "",
-  city: "",
-  state: "",
+  city_id: "",
+  state_id: "",
   notes: "",
   consent_marketing: false,
 };
@@ -76,6 +78,10 @@ export default function SellPropertyClient() {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const propertyTypes = propertyTypesData?.data || [];
+  const { data: statesData } = useStates();
+  const states = statesData?.data || [];
+  const { data: citiesData } = useCities(formData.state_id);
+  const cities = citiesData?.data || [];
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -92,6 +98,12 @@ export default function SellPropertyClient() {
     if (errors[name as keyof FormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+  };
+
+  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStateId = e.target.value;
+    // Reset city when state changes, since the city list is scoped to the state.
+    setFormData((prev) => ({ ...prev, state_id: newStateId, city_id: "" }));
   };
 
   const validate = (): boolean => {
@@ -131,8 +143,8 @@ export default function SellPropertyClient() {
       if (!isNaN(parsedBudget)) leadData.max_budget = parsedBudget;
     }
     if (formData.neighborhood.trim()) leadData.neighborhood = formData.neighborhood;
-    if (formData.city.trim()) leadData.city = formData.city;
-    if (formData.state.trim()) leadData.state = formData.state;
+    if (formData.city_id) leadData.city_id = formData.city_id;
+    if (formData.state_id) leadData.state_id = formData.state_id;
     if (formData.notes.trim()) leadData.notes = formData.notes;
 
     try {
@@ -370,32 +382,43 @@ export default function SellPropertyClient() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="city" className={labelClass}>
-                      {t("city")}
-                    </label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      placeholder={t("enterCity")}
-                      className={fieldClass()}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="state" className={labelClass}>
+                    <label htmlFor="state_id" className={labelClass}>
                       {t("state")}
                     </label>
-                    <input
-                      type="text"
-                      id="state"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleChange}
-                      placeholder={t("enterState")}
+                    <select
+                      id="state_id"
+                      name="state_id"
+                      value={formData.state_id}
+                      onChange={handleStateChange}
                       className={fieldClass()}
-                    />
+                    >
+                      <option value="">{t("select")}</option>
+                      {states.map((state) => (
+                        <option key={state.id} value={state.id}>
+                          {locale === "es" ? state.es_name : state.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="city_id" className={labelClass}>
+                      {t("city")}
+                    </label>
+                    <select
+                      id="city_id"
+                      name="city_id"
+                      value={formData.city_id}
+                      onChange={handleChange}
+                      disabled={!formData.state_id}
+                      className={fieldClass()}
+                    >
+                      <option value="">{t("select")}</option>
+                      {cities.map((city) => (
+                        <option key={city.id} value={city.id}>
+                          {locale === "es" ? city.es_name : city.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

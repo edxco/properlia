@@ -21,16 +21,18 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({
   const breadcrumbItems: BreadcrumbItem[] = [];
 
   if (property.state) {
+    const stateLabel = locale === "es" ? property.state.es_name : property.state.name;
     breadcrumbItems.push({
-      label: property.state,
-      href: `/properties?state=${encodeURIComponent(property.state)}`,
+      label: stateLabel,
+      href: `/properties?state_id=${encodeURIComponent(property.state.id)}`,
     });
   }
 
   if (property.city) {
+    const cityLabel = locale === "es" ? property.city.es_name : property.city.name;
     breadcrumbItems.push({
-      label: property.city,
-      href: `/properties?city=${encodeURIComponent(property.city)}`,
+      label: cityLabel,
+      href: `/properties?city_id=${encodeURIComponent(property.city.id)}`,
     });
   }
 

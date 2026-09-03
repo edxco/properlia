@@ -51,7 +51,9 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({
               <span className={styles.infoLabel}>
                 {locale === "es" ? "Ciudad" : "City"}:
               </span>
-              <span className={styles.infoValue}>{property.city}</span>
+              <span className={styles.infoValue}>
+                {locale === "es" ? property.city.es_name : property.city.name}
+              </span>
             </div>
           )}
           {property.state && (
@@ -59,7 +61,9 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({
               <span className={styles.infoLabel}>
                 {locale === "es" ? "Estado" : "State"}:
               </span>
-              <span className={styles.infoValue}>{property.state}</span>
+              <span className={styles.infoValue}>
+                {locale === "es" ? property.state.es_name : property.state.name}
+              </span>
             </div>
           )}
           {property.zip_code && (

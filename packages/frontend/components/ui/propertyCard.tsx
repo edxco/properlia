@@ -136,8 +136,8 @@ interface PropertyCardProps {
   property_features?: PropertyFeature[];
   property_categories?: PropertyCategory[];
   neighborhood?: string | null;
-  city?: string | null;
-  state?: string | null;
+  city?: { name: string; es_name: string } | null;
+  state?: { name: string; es_name: string } | null;
   autoplay?: boolean;
 }
 
@@ -411,7 +411,10 @@ export const PropertyCard = ({
               )}
               {(city || state) && (
                 <p className="font-normal" style={{ color: "#888780", fontSize: 13 }}>
-                  {[city, state].filter(Boolean).join(", ")}
+                  {[
+                    locale === "es" ? city?.es_name : city?.name,
+                    locale === "es" ? state?.es_name : state?.name,
+                  ].filter(Boolean).join(", ")}
                 </p>
               )}
             </div>

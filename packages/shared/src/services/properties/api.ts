@@ -15,8 +15,8 @@ type PropertyQueryParams = {
   page?: number;
   items?: number;
   // Location filters
-  city?: string;
-  state?: string;
+  city_id?: string;
+  state_id?: string;
   neighborhood?: string;
   // Price range filters
   price_min?: number;
@@ -87,8 +87,8 @@ export const propertyApi = {
     if (params?.property_type_id) query.set('property_type_id', params.property_type_id);
     if (params?.listing_type_id) query.set('listing_type_id', params.listing_type_id);
     // Location filters
-    if (params?.city) query.set('city', params.city);
-    if (params?.state) query.set('state', params.state);
+    if (params?.city_id) query.set('city_id', params.city_id);
+    if (params?.state_id) query.set('state_id', params.state_id);
     if (params?.neighborhood) query.set('neighborhood', params.neighborhood);
     // Price range filters
     if (params?.price_min !== undefined) query.set('price_min', String(params.price_min));

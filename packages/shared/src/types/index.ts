@@ -57,8 +57,8 @@ export interface Property {
   parking_spaces: number;
   price: number;
   address?: string;
-  city?: string | null;
-  state?: string | null;
+  city_id?: string | null;
+  state_id?: string | null;
   zip_code?: string | null;
   neighborhood?: string | null;
   coordinates?: string | null;
@@ -68,6 +68,8 @@ export interface Property {
   property_type?: CommonEntity | null;
   status?: CommonEntity | null;
   listing_type?: CommonEntity | null;
+  state?: CommonEntity | null;
+  city?: CommonEntity | null;
   property_categories?: PropertyCategory[];
   property_features?: PropertyFeature[];
   images: Attachment[];
@@ -84,6 +86,12 @@ export interface Status extends CommonEntity {}
 
 export interface ListingType extends CommonEntity {}
 
+export interface State extends CommonEntity {}
+
+export interface City extends CommonEntity {
+  state_id: string;
+}
+
 export interface PropertyPayload {
   featured?: boolean;
   exclusive_listing?: boolean;
@@ -97,8 +105,8 @@ export interface PropertyPayload {
   parking_spaces?: number;
   price: number;
   address: string;
-  city?: string;
-  state?: string;
+  city_id?: string;
+  state_id?: string;
   zip_code?: string;
   neighborhood?: string;
   coordinates?: string;

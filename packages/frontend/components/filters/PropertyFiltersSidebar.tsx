@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useT } from "@properlia/shared/components/TranslationProvider";
+import { useLocale, useT } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeFirstWord } from "@properlia/shared";
+import type { City, State } from "@properlia/shared/types";
 
 interface PropertyFilters {
   rooms?: number;
   bathrooms?: number;
   priceMin?: number;
   priceMax?: number;
-  city?: string;
-  state?: string;
+  city_id?: string;
+  state_id?: string;
   landAreaMin?: number;
   landAreaMax?: number;
 }
@@ -22,8 +23,8 @@ interface PropertyFiltersSidebarProps {
   activeFilterCount: number;
   currentCount: number;
   totalCount: number;
-  cities: string[];
-  states: string[];
+  cities: City[];
+  states: State[];
 }
 
 export function PropertyFiltersSidebar({
@@ -37,6 +38,7 @@ export function PropertyFiltersSidebar({
   states,
 }: PropertyFiltersSidebarProps) {
   const t = useT();
+  const locale = useLocale();
   const [priceMinDisplay, setPriceMinDisplay] = useState(
     filters.priceMin ? filters.priceMin.toLocaleString() : ""
   );
@@ -177,35 +179,36 @@ export function PropertyFiltersSidebar({
           </h3>
           <div className="space-y-2">
             <select
-              value={filters.city || ""}
-              onChange={(e) => onFilterChange("city", e.target.value || undefined)}
+              value={filters.state_id || ""}
+              onChange={(e) => onFilterChange("state_id", e.target.value || undefined)}
               className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900 ${
-                !filters.city ? "text-gray-500" : "text-gray-900"
-              }`}
-            >
-              <option value="" className="text-gray-500">
-                {t("city") || "City"}
-              </option>
-              {cities.map((city) => (
-                <option key={city} value={city} className="text-gray-900">
-                  {city}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={filters.state || ""}
-              onChange={(e) => onFilterChange("state", e.target.value || undefined)}
-              className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900 ${
-                !filters.state ? "text-gray-500" : "text-gray-900"
+                !filters.state_id ? "text-gray-500" : "text-gray-900"
               }`}
             >
               <option value="" className="text-gray-500">
                 {t("state") || "State"}
               </option>
               {states.map((state) => (
-                <option key={state} value={state} className="text-gray-900">
-                  {state}
+                <option key={state.id} value={state.id} className="text-gray-900">
+                  {locale === "es" ? state.es_name : state.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={filters.city_id || ""}
+              onChange={(e) => onFilterChange("city_id", e.target.value || undefined)}
+              disabled={!filters.state_id}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                !filters.city_id ? "text-gray-500" : "text-gray-900"
+              }`}
+            >
+              <option value="" className="text-gray-500">
+                {t("city") || "City"}
+              </option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id} className="text-gray-900">
+                  {locale === "es" ? city.es_name : city.name}
                 </option>
               ))}
             </select>

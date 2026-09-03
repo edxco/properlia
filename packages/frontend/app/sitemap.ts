@@ -8,8 +8,8 @@ const LOCALES = ["es", "en"] as const;
 interface Property {
   id: string;
   title: string;
-  state?: string | null;
-  city?: string | null;
+  state?: { name: string } | null;
+  city?: { name: string } | null;
   updated_at?: string;
 }
 
@@ -42,8 +42,8 @@ async function fetchAllProperties(): Promise<Property[]> {
 }
 
 function buildPropertyPath(property: Property): string {
-  const state = slugify(property.state) || "na";
-  const city = slugify(property.city) || "na";
+  const state = slugify(property.state?.name) || "na";
+  const city = slugify(property.city?.name) || "na";
   const slug = slugify(property.title);
   return `/properties/${state}/${city}/${property.id}/${slug}`;
 }

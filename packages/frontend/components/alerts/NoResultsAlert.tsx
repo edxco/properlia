@@ -6,8 +6,8 @@ import { useT } from "@properlia/shared/components/TranslationProvider";
 interface Filters {
   rooms?: number;
   bathrooms?: number;
-  city?: string;
-  state?: string;
+  city_id?: string;
+  state_id?: string;
   priceMin?: number;
   priceMax?: number;
   landAreaMin?: number;
@@ -18,12 +18,16 @@ interface Filters {
 
 interface NoResultsAlertProps {
   filters: Filters;
+  cityName?: string;
+  stateName?: string;
   onClearFilters: () => void;
   autoDismissSeconds?: number;
 }
 
 export function NoResultsAlert({
   filters,
+  cityName,
+  stateName,
   onClearFilters,
   autoDismissSeconds = 10,
 }: NoResultsAlertProps) {
@@ -60,8 +64,8 @@ export function NoResultsAlert({
               filters.bathrooms ||
               filters.priceMin ||
               filters.priceMax ||
-              filters.city ||
-              filters.state ||
+              cityName ||
+              stateName ||
               filters.landAreaMin ||
               filters.landAreaMax) && (
               <p className="font-medium">
@@ -78,14 +82,14 @@ export function NoResultsAlert({
                 • {t("bathrooms") || "Bathrooms"}: {filters.bathrooms}+
               </p>
             )}
-            {filters.city && (
+            {cityName && (
               <p className="ml-4">
-                • {t("city") || "City"}: {filters.city}
+                • {t("city") || "City"}: {cityName}
               </p>
             )}
-            {filters.state && (
+            {stateName && (
               <p className="ml-4">
-                • {t("state") || "State"}: {filters.state}
+                • {t("state") || "State"}: {stateName}
               </p>
             )}
             {(filters.priceMin || filters.priceMax) && (
