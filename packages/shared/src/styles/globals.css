@@ -22,6 +22,13 @@
   --color-primary: var(--primary);
   --color-primary-70: var(--primary-70);
   --color-properlia-gray: var(--properlia-gray);
+  --color-navy: var(--navy);
+  --color-blue: var(--blue);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
+  --color-blue-light: var(--blue-light);
+  --color-carbon: var(--carbon);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -68,6 +75,15 @@
   --primary: oklch(0.4332 0.1378 261.28);
   --properlia-gray: oklab(32.847% 0.00454 -0.00044);
   --primary-70: oklch(20.798% 0.05125 261.594);
+
+  /* Properlia brand tokens — see docs/brand/properlia-brand-guidelines.md */
+  --navy: #1A3A5C;
+  --blue: #214C9B;
+  --gold: #C4A44A;
+  --gold-light: #F0E4B8;
+  --gold-dark: #7A6228;
+  --blue-light: #E8F0F8;
+  --carbon: #2C2C2A;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
