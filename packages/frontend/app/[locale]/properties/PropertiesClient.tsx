@@ -11,7 +11,7 @@ import { useCities } from "@/src/services/cities/queries";
 import { useLocale, useT } from "@properlia/shared/components/TranslationProvider";
 import { Property } from "@properlia/shared/types";
 import { getAbsoluteImageUrl } from "@properlia/shared";
-import { PropertyCard, BannerSlideshow } from "@/components/ui";
+import { PropertyCard, PropertyCardSkeleton, BannerSlideshow } from "@/components/ui";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -209,21 +209,11 @@ export default function PropertiesClient() {
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            {hasNoResults && (
-              <NoResultsAlert
-                filters={filters}
-                cityName={selectedCity ? (locale === "es" ? selectedCity.es_name : selectedCity.name) : undefined}
-                stateName={selectedState ? (locale === "es" ? selectedState.es_name : selectedState.name) : undefined}
-                onClearFilters={clearFilters}
-                autoDismissSeconds={10}
-              />
-            )}
-
             {isLoading ? (
-              <div className="text-center py-12">
-                <div className="text-stone-600">
-                  {t("loading") || "Loading properties"}...
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {Array.from({ length: ITEMS_PER_PAGE }, (_, i) => (
+                  <PropertyCardSkeleton key={i} />
+                ))}
               </div>
             ) : isError ? (
               <div className="text-center py-12">
@@ -231,6 +221,14 @@ export default function PropertiesClient() {
                   {t("errorLoading") || "Error loading properties"}
                 </div>
               </div>
+            ) : hasNoResults ? (
+              <NoResultsAlert
+                filters={filters}
+                cityName={selectedCity ? (locale === "es" ? selectedCity.es_name : selectedCity.name) : undefined}
+                stateName={selectedState ? (locale === "es" ? selectedState.es_name : selectedState.name) : undefined}
+                onClearFilters={clearFilters}
+                autoDismissSeconds={10}
+              />
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
