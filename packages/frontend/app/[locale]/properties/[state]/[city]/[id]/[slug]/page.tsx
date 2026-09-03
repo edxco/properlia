@@ -1,5 +1,5 @@
 import { propertyApi } from "@properlia/shared/services/properties/api";
-import { PropertyDetail } from "@properlia/shared";
+import { PropertyDetailView } from "@/components/property/PropertyDetailView";
 import { notFound } from "next/navigation";
 
 export default async function Page({
@@ -16,5 +16,5 @@ export default async function Page({
     notFound();
   }
 
-  return <PropertyDetail property={property} locale={locale} />;
+  return <PropertyDetailView property={property} locale={locale} />;
 }
