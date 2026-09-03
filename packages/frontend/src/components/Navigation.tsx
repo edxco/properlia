@@ -34,15 +34,15 @@ export function Navigation() {
   const linkClass = (path: string) =>
     `transition-colors text-sm tracking-wide font-medium ${
       isActive(path)
-        ? "text-primary font-semibold border-b-2 border-stone-900 pb-0.5"
-        : "text-stone-600 hover:text-stone-900"
+        ? "text-primary border-b-2 border-primary pb-0.5"
+        : "text-carbon hover:text-primary"
     }`;
 
   const mobileLinkClass = (path: string) =>
     `block text-sm tracking-wide font-medium ${
       isActive(path)
-        ? "text-stone-900"
-        : "text-stone-700 hover:text-stone-900"
+        ? "text-primary"
+        : "text-carbon hover:text-primary"
     }`;
 
   const handleMouseEnter = () => {
@@ -55,7 +55,7 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-stone-100">
+    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-border">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link href={`/${locale}`} className="flex items-center space-x-2">
@@ -69,10 +69,10 @@ export function Navigation() {
               onMouseLeave={handleMouseLeave}
             >
               <button
-                className={`flex items-center gap-1 transition-colors text-sm tracking-wide font-medium ${
+                className={`flex items-center gap-1 transition-colors text-sm tracking-wide font-medium focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-primary focus-visible:rounded-sm ${
                   isActive("/properties")
-                    ? "text-primary font-semibold border-b-2 border-stone-900 pb-0.5"
-                    : "text-stone-600 hover:text-stone-900"
+                    ? "text-primary border-b-2 border-primary pb-0.5"
+                    : "text-carbon hover:text-primary"
                 }`}
               >
                 {t("properties")}
@@ -83,12 +83,12 @@ export function Navigation() {
 
               {isPropertiesOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3">
-                  <div className="bg-white border border-stone-100 rounded-lg shadow-lg py-1.5 min-w-[160px]">
+                  <div className="bg-white border border-border rounded-lg py-1.5 min-w-[160px]">
                     {PROPERTY_CATEGORIES.map(({ key, param }) => (
                       <Link
                         key={key}
                         href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
-                        className="block px-4 py-2 text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-colors"
+                        className="block px-4 py-2 text-sm text-carbon hover:text-primary hover:bg-blue-light transition-colors"
                         onClick={() => setIsPropertiesOpen(false)}
                       >
                         {capitalizeEachWord(t(key))}
@@ -112,7 +112,7 @@ export function Navigation() {
           </div>
 
           <button
-            className="md:hidden text-stone-900"
+            className="md:hidden text-carbon hover:text-primary transition-colors p-2 -mr-2 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-primary focus-visible:rounded-sm"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
@@ -125,12 +125,12 @@ export function Navigation() {
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-stone-100">
+        <div className="md:hidden bg-white border-t border-border">
           <div className="px-6 py-6 space-y-4">
             <div>
               <button
                 className={`flex items-center gap-1 w-full text-left text-sm tracking-wide font-medium ${
-                  isActive("/properties") ? "text-stone-900" : "text-stone-700 hover:text-stone-900"
+                  isActive("/properties") ? "text-primary" : "text-carbon hover:text-primary"
                 }`}
                 onClick={() => setIsMobilePropertiesOpen(!isMobilePropertiesOpen)}
               >
@@ -140,12 +140,12 @@ export function Navigation() {
                 />
               </button>
               {isMobilePropertiesOpen && (
-                <div className="mt-2 ml-3 space-y-2 border-l border-stone-200 pl-3">
+                <div className="mt-2 ml-3 space-y-2 border-l border-border pl-3">
                   {PROPERTY_CATEGORIES.map(({ key, param }) => (
                     <Link
                       key={key}
                       href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
-                      className="block text-sm text-stone-600 hover:text-stone-900"
+                      className="block text-sm text-carbon hover:text-primary"
                       onClick={() => { setIsMenuOpen(false); setIsMobilePropertiesOpen(false); }}
                     >
                       {capitalizeEachWord(t(key))}
