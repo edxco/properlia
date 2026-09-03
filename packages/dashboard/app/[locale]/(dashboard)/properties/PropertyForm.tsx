@@ -328,7 +328,6 @@ export default function PropertyForm({
   const [generateContentError, setGenerateContentError] = useState<
     string | null
   >(null);
-  const [contentGenerated, setContentGenerated] = useState(false);
 
   const { data: cities } = useCities(form.state_id);
 
@@ -338,7 +337,6 @@ export default function PropertyForm({
   useEffect(() => {
     setDeletedAttachmentIds(new Set());
     setExistingImageOrder(editingProperty?.images.map((img) => img.id) ?? []);
-    setContentGenerated(Boolean(editingProperty?.title));
 
     if (editingProperty) {
       const categoryIds =
@@ -472,7 +470,6 @@ export default function PropertyForm({
         description: result.description_es,
         description_en: result.description_en,
       }));
-      setContentGenerated(true);
     } catch (error: any) {
       setGenerateContentError(
         error?.message || "Failed to generate title and description"
@@ -1656,7 +1653,6 @@ export default function PropertyForm({
             onChange={(event) => handleChange("title", event.target.value)}
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
             placeholder={t("modernApartmentInLomas")}
-            disabled={!contentGenerated}
             required
           />
 
@@ -1669,7 +1665,6 @@ export default function PropertyForm({
             onChange={(event) => handleChange("title_en", event.target.value)}
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
             placeholder="Title for this listing, in English"
-            disabled={!contentGenerated}
           />
 
           <label className="mt-3 block text-sm font-medium text-gray-700">
@@ -1683,7 +1678,6 @@ export default function PropertyForm({
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
             rows={3}
             placeholder={t("keyHighlightsForThisListing")}
-            disabled={!contentGenerated}
             required
           />
 
@@ -1698,7 +1692,6 @@ export default function PropertyForm({
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
             rows={3}
             placeholder="Key highlights for this listing, in English"
-            disabled={!contentGenerated}
           />
         </div>
 
