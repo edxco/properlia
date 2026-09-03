@@ -29,6 +29,7 @@ RSpec.describe 'POST /api/v1/properties/generate_content', type: :request do
 
   it 'returns AI-drafted titles and descriptions in both languages' do
     fake_content = double(
+      type: :text,
       text: {
         title_es: 'Casa con alberca en Lomas de Angelópolis',
         title_en: 'House with pool in Lomas de Angelópolis',
@@ -36,7 +37,7 @@ RSpec.describe 'POST /api/v1/properties/generate_content', type: :request do
         description_en: 'Beautiful house...'
       }.to_json
     )
-    fake_response = double(content: [fake_content])
+    fake_response = double(content: [fake_content], stop_reason: :end_turn)
     fake_client = double(messages: double(create: fake_response))
     allow(Anthropic::Client).to receive(:new).and_return(fake_client)
     allow(ENV).to receive(:[]).and_call_original
@@ -57,6 +58,7 @@ RSpec.describe 'POST /api/v1/properties/generate_content', type: :request do
     garden = PropertyFeature.create!(name: 'garden', es_name: 'jardín', slug: 'garden')
 
     fake_content = double(
+      type: :text,
       text: {
         title_es: 'Casa con alberca en Lomas de Angelópolis',
         title_en: 'House with pool in Lomas de Angelópolis',
@@ -64,7 +66,7 @@ RSpec.describe 'POST /api/v1/properties/generate_content', type: :request do
         description_en: 'Beautiful house...'
       }.to_json
     )
-    fake_response = double(content: [fake_content])
+    fake_response = double(content: [fake_content], stop_reason: :end_turn)
     fake_client = double(messages: double(create: fake_response))
     allow(Anthropic::Client).to receive(:new).and_return(fake_client)
     allow(ENV).to receive(:[]).and_call_original
