@@ -3,6 +3,8 @@ class Property < ApplicationRecord
   belongs_to :property_type
   belongs_to :status
   belongs_to :listing_type
+  belongs_to :state, optional: true
+  belongs_to :city, optional: true
   has_many_attached :images
   has_many_attached :videos
   has_many :leads, dependent: :nullify

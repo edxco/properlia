@@ -39,6 +39,8 @@ Rails.application.routes.draw do
       resources :property_features, only: %i[index create destroy]
       resources :statuses
       resources :listing_types
+      resources :states
+      resources :cities
 
       resources :leads, only: %i[index show create update] do
         collection do

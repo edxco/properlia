@@ -2,6 +2,8 @@ class Lead < ApplicationRecord
   # Associations
   belongs_to :property, optional: true
   belongs_to :property_type, optional: true
+  belongs_to :state, optional: true
+  belongs_to :city, optional: true
   belongs_to :assigned_to, class_name: 'User', foreign_key: 'assigned_to_user_id', optional: true
   belongs_to :created_by, class_name: 'User', foreign_key: 'created_by_user_id', optional: true
 

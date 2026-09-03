@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_07_30_120000) do
+ActiveRecord::Schema[7.0].define(version: 2026_09_02_130500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -41,6 +41,17 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_30_120000) do
     t.uuid "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "cities", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "state_id", null: false
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["state_id", "es_name"], name: "index_cities_on_state_id_and_es_name", unique: true
+    t.index ["state_id", "name"], name: "index_cities_on_state_id_and_name", unique: true
+    t.index ["state_id"], name: "index_cities_on_state_id"
   end
 
   create_table "general_infos", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -103,18 +114,18 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_30_120000) do
     t.datetime "updated_at", null: false
     t.date "desired_date"
     t.string "neighborhood"
-    t.string "city"
-    t.string "state"
     t.uuid "property_type_id"
+    t.uuid "state_id"
+    t.uuid "city_id"
     t.index ["assigned_to_user_id", "status"], name: "index_leads_on_assigned_status"
-    t.index ["city"], name: "index_leads_on_city"
+    t.index ["city_id"], name: "index_leads_on_city_id"
     t.index ["email_normalized"], name: "index_leads_unique_email_normalized", unique: true, where: "(email_normalized IS NOT NULL)"
     t.index ["interest_operation"], name: "index_leads_on_interest_operation"
     t.index ["next_follow_up_at"], name: "index_leads_on_next_follow_up_at"
     t.index ["phone_e164"], name: "index_leads_unique_phone_e164", unique: true, where: "(phone_e164 IS NOT NULL)"
     t.index ["property_id"], name: "index_leads_on_property_id"
     t.index ["property_type_id"], name: "index_leads_on_property_type_id"
-    t.index ["state"], name: "index_leads_on_state"
+    t.index ["state_id"], name: "index_leads_on_state_id"
     t.index ["status", "created_at"], name: "index_leads_on_status_created_at"
     t.index ["utm_campaign"], name: "index_leads_on_utm_campaign"
     t.check_constraint "(min_budget IS NULL OR min_budget >= 0::numeric) AND (max_budget IS NULL OR max_budget >= 0::numeric)", name: "leads_budget_non_negative"
@@ -143,8 +154,6 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_30_120000) do
     t.integer "parking_spaces", default: 0, null: false
     t.decimal "price", precision: 12, scale: 2, null: false
     t.string "address"
-    t.string "city"
-    t.string "state"
     t.string "coordinates"
     t.jsonb "images", default: [], null: false
     t.datetime "created_at", null: false
@@ -157,14 +166,17 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_30_120000) do
     t.boolean "exclusive_listing", default: true, null: false
     t.jsonb "image_order", default: [], null: false
     t.text "description_en"
-    t.index ["city"], name: "index_properties_on_city"
+    t.string "title_en"
+    t.uuid "state_id"
+    t.uuid "city_id"
+    t.index ["city_id"], name: "index_properties_on_city_id"
     t.index ["featured"], name: "index_properties_on_featured"
     t.index ["images"], name: "index_properties_on_images", using: :gin
     t.index ["listing_type_id"], name: "index_properties_on_listing_type_id"
     t.index ["neighborhood"], name: "index_properties_on_neighborhood"
     t.index ["price"], name: "index_properties_on_price"
     t.index ["property_type_id"], name: "index_properties_on_property_type_id"
-    t.index ["state"], name: "index_properties_on_state"
+    t.index ["state_id"], name: "index_properties_on_state_id"
     t.index ["status_id"], name: "index_properties_on_status_id"
     t.index ["zip_code"], name: "index_properties_on_zip_code"
     t.check_constraint "bathrooms >= 0", name: "properties_bathrooms_non_negative"
@@ -227,6 +239,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_30_120000) do
     t.index ["name"], name: "index_property_types_on_name", unique: true
   end
 
+  create_table "states", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "es_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["es_name"], name: "index_states_on_es_name", unique: true
+    t.index ["name"], name: "index_states_on_name", unique: true
+  end
+
   create_table "statuses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "es_name", null: false
@@ -234,6 +255,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_30_120000) do
     t.datetime "updated_at", null: false
     t.index ["es_name"], name: "index_statuses_on_es_name", unique: true
     t.index ["name"], name: "index_statuses_on_name", unique: true
+  end
+
+  create_table "unmatched_state_city_backfill", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "source_table", null: false
+    t.uuid "source_id", null: false
+    t.string "original_state"
+    t.string "original_city"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -256,14 +286,19 @@ ActiveRecord::Schema[7.0].define(version: 2026_07_30_120000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "cities", "states"
   add_foreign_key "lead_events", "leads"
   add_foreign_key "lead_events", "users", column: "created_by_user_id"
+  add_foreign_key "leads", "cities"
   add_foreign_key "leads", "properties"
   add_foreign_key "leads", "property_types"
+  add_foreign_key "leads", "states"
   add_foreign_key "leads", "users", column: "assigned_to_user_id"
   add_foreign_key "leads", "users", column: "created_by_user_id"
+  add_foreign_key "properties", "cities"
   add_foreign_key "properties", "listing_types"
   add_foreign_key "properties", "property_types"
+  add_foreign_key "properties", "states"
   add_foreign_key "properties", "statuses"
   add_foreign_key "properties_property_categories", "properties"
   add_foreign_key "properties_property_categories", "property_categories"
