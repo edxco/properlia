@@ -31,6 +31,10 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
+  # Allow SSR requests from the frontend/dashboard containers, whose Host
+  # header is the Docker service name rather than an IP or *.localhost.
+  config.hosts << "backend"
+
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
   routes.default_url_options[:host] = "localhost:3000"
