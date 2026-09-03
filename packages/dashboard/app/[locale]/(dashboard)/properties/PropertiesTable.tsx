@@ -215,9 +215,13 @@ export default function PropertiesTable({
                             </span>
                           )}
                           <span>•</span>
-                          <span>{property.city || "—"}</span>
+                          <span>
+                            {(locale === "es" ? property.city?.es_name : property.city?.name) || "—"}
+                          </span>
                           <span>•</span>
-                          <span>{property.state || "—"}</span>
+                          <span>
+                            {(locale === "es" ? property.state?.es_name : property.state?.name) || "—"}
+                          </span>
                           {property.zip_code && (
                             <>
                               <span>•</span>

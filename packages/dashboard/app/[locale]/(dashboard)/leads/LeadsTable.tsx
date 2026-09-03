@@ -393,7 +393,11 @@ export default function LeadsTable({
                             {t("desiredLocation")}:
                           </span>
                           <span>
-                            {[lead.neighborhood, lead.city, lead.state]
+                            {[
+                              lead.neighborhood,
+                              locale === "es" ? lead.city?.es_name : lead.city?.name,
+                              locale === "es" ? lead.state?.es_name : lead.state?.name,
+                            ]
                               .filter(Boolean)
                               .join(", ")}
                           </span>

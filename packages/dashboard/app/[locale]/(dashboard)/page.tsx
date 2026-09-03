@@ -87,7 +87,7 @@ export default function DashboardPage() {
                 <li key={property.id} className="py-2">
                   <p className="text-sm font-semibold text-gray-900">{property.title}</p>
                   <p className="text-xs text-gray-500">
-                    {property.city || '—'}, {property.state || '—'} ·{' '}
+                    {property.city?.name || '—'}, {property.state?.name || '—'} ·{' '}
                     {property.property_type?.name || 'No type'}
                   </p>
                 </li>
