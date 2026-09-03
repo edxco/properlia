@@ -490,5 +490,6 @@
   "galleryPrevious": "Previous photo",
   "galleryNext": "Next photo",
   "galleryAriaLabel": "photo gallery",
-  "galleryFooter": "Press {esc} to close • {left} {right} to navigate"
+  "galleryFooter": "Press {esc} to close • {left} {right} to navigate",
+  "generateWithAI": "Generate with AI"
 }

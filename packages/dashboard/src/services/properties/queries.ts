@@ -8,6 +8,7 @@ import {
 import { propertyApi } from '@properlia/shared/services/properties/api';
 import type {
   CreatePropertyDto,
+  GenerateContentParams,
   UpdatePropertyDto,
 } from '@properlia/shared/types';
 
@@ -65,6 +66,13 @@ export const useUpdateProperty = () => {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['properties', variables.id] });
     },
+  });
+};
+
+export const useGenerateContent = () => {
+  return useMutation({
+    mutationFn: (data: GenerateContentParams) =>
+      propertyApi.generateContent(data),
   });
 };
 

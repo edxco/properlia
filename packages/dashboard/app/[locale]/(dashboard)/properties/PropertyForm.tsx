@@ -8,19 +8,28 @@ import {
   Image as ImageIcon,
   Video as VideoIcon,
   Check,
+  Sparkles,
+  Star,
 } from "lucide-react";
-import type { Attachment, Property, PropertyPayload } from "@properlia/shared/types";
+import type {
+  Attachment,
+  Property,
+  PropertyPayload,
+} from "@properlia/shared/types";
 
 import {
   useCreateProperty,
   useUpdateProperty,
   useDeleteAttachment,
   useReorderImages,
+  useGenerateContent,
 } from "@/src/services/properties/queries";
 import { usePropertyTypes } from "@/src/services/property-types/queries";
 import { useStatuses } from "@/src/services/statuses/queries";
 import { useListingTypes } from "@/src/services/listing-types/queries";
 import { usePropertyFeatures } from "@/src/services/property-features/queries";
+import { useStates } from "@/src/services/states/queries";
+import { useCities } from "@/src/services/cities/queries";
 import {
   useLocale,
   useT,
@@ -35,13 +44,14 @@ import PreviewPDF from "./[id]/previewPDF";
 
 type FormState = {
   title: string;
+  title_en: string;
   address: string;
   price: string;
   property_type_id: string;
   status_id: string;
   listing_type_id: string;
-  city: string;
-  state: string;
+  city_id: string;
+  state_id: string;
   zip_code: string;
   neighborhood: string;
   rooms: string;
@@ -51,6 +61,7 @@ type FormState = {
   land_area: string;
   built_area: string;
   description: string;
+  description_en: string;
   featured: boolean;
   exclusive_listing: boolean;
   property_category_ids: string[];
@@ -61,13 +72,14 @@ type FormState = {
 
 const emptyForm: FormState = {
   title: "",
+  title_en: "",
   address: "",
   price: "",
   property_type_id: "",
   status_id: "",
   listing_type_id: "",
-  city: "",
-  state: "",
+  city_id: "",
+  state_id: "",
   zip_code: "",
   neighborhood: "",
   rooms: "",
@@ -77,6 +89,7 @@ const emptyForm: FormState = {
   land_area: "",
   built_area: "",
   description: "",
+  description_en: "",
   featured: false,
   exclusive_listing: true,
   property_category_ids: [],
@@ -299,6 +312,7 @@ export default function PropertyForm({
   const { data: statuses } = useStatuses();
   const { data: listingTypes } = useListingTypes();
   const { data: propertyFeatures } = usePropertyFeatures();
+  const { data: states } = useStates();
   const { mutateAsync: createProperty, isPending: creating } =
     useCreateProperty();
   const { mutateAsync: updateProperty, isPending: updating } =
@@ -307,6 +321,16 @@ export default function PropertyForm({
     useDeleteAttachment();
   const { mutateAsync: reorderImages, isPending: reorderingImages } =
     useReorderImages();
+  const {
+    mutateAsync: generateContent,
+    isPending: generatingContent,
+  } = useGenerateContent();
+  const [generateContentError, setGenerateContentError] = useState<
+    string | null
+  >(null);
+  const [contentGenerated, setContentGenerated] = useState(false);
+
+  const { data: cities } = useCities(form.state_id);
 
   // Initialize form state and image order when the editing property changes.
   // Intentionally excludes propertyTypes/statuses to avoid resetting image order
@@ -314,12 +338,14 @@ export default function PropertyForm({
   useEffect(() => {
     setDeletedAttachmentIds(new Set());
     setExistingImageOrder(editingProperty?.images.map((img) => img.id) ?? []);
+    setContentGenerated(Boolean(editingProperty?.title));
 
     if (editingProperty) {
       const categoryIds =
         editingProperty.property_categories?.map((c) => c.id) ?? [];
       setForm({
         title: editingProperty.title ?? "",
+        title_en: editingProperty.title_en ?? "",
         address: editingProperty.address ?? "",
         price: editingProperty.price
           ? formatPriceInput(editingProperty.price.toString())
@@ -327,8 +353,8 @@ export default function PropertyForm({
         property_type_id: editingProperty.property_type_id ?? "",
         status_id: editingProperty.status_id ?? "",
         listing_type_id: editingProperty.listing_type_id ?? "",
-        city: editingProperty.city ?? "",
-        state: editingProperty.state ?? "",
+        city_id: editingProperty.city_id ?? "",
+        state_id: editingProperty.state_id ?? "",
         zip_code: editingProperty.zip_code ?? "",
         neighborhood: editingProperty.neighborhood ?? "",
         rooms: editingProperty.rooms?.toString() ?? "",
@@ -338,6 +364,7 @@ export default function PropertyForm({
         land_area: editingProperty.land_area?.toString() ?? "",
         built_area: editingProperty.built_area?.toString() ?? "",
         description: editingProperty.description ?? "",
+        description_en: editingProperty.description_en ?? "",
         featured: editingProperty.featured ?? false,
         exclusive_listing: editingProperty.exclusive_listing ?? true,
         property_category_ids: categoryIds,
@@ -386,6 +413,71 @@ export default function PropertyForm({
     value: string | boolean | File[] | string[]
   ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Lightweight gate for the combined title+description generator: just enough
+  // context for a grounded title (type, operation, location) plus at least one
+  // selected feature, since the first one becomes the title's featured
+  // characteristic.
+  const canGenerateContent = useMemo(() => {
+    return (
+      Boolean(form.property_type_id) &&
+      Boolean(form.listing_type_id) &&
+      Boolean(form.city_id) &&
+      Boolean(form.state_id) &&
+      form.property_feature_ids.length > 0
+    );
+  }, [
+    form.property_type_id,
+    form.listing_type_id,
+    form.city_id,
+    form.state_id,
+    form.property_feature_ids,
+  ]);
+
+  const handleGenerateContent = async () => {
+    setGenerateContentError(null);
+    try {
+      const result = await generateContent({
+        property_type_id: form.property_type_id,
+        listing_type_id: form.listing_type_id,
+        property_category_ids:
+          form.property_category_ids.length > 0
+            ? form.property_category_ids
+            : undefined,
+        property_feature_ids:
+          form.property_feature_ids.length > 0
+            ? form.property_feature_ids
+            : undefined,
+        address: form.address || undefined,
+        neighborhood: form.neighborhood || undefined,
+        city_id: form.city_id || undefined,
+        state_id: form.state_id || undefined,
+        price: form.price ? parseInt(form.price.replace(/,/g, ""), 10) : undefined,
+        land_area: form.land_area ? Number(form.land_area) : undefined,
+        built_area: form.built_area ? Number(form.built_area) : undefined,
+        rooms: form.rooms ? Number(form.rooms) : undefined,
+        bathrooms: form.bathrooms ? Number(form.bathrooms) : undefined,
+        half_bathrooms: form.half_bathrooms
+          ? Number(form.half_bathrooms)
+          : undefined,
+        parking_spaces: form.parking_spaces
+          ? Number(form.parking_spaces)
+          : undefined,
+      });
+      setForm((prev) => ({
+        ...prev,
+        title: result.title_es,
+        title_en: result.title_en,
+        description: result.description_es,
+        description_en: result.description_en,
+      }));
+      setContentGenerated(true);
+    } catch (error: any) {
+      setGenerateContentError(
+        error?.message || "Failed to generate title and description"
+      );
+    }
   };
 
   // Convert WebP image to PNG
@@ -684,13 +776,14 @@ export default function PropertyForm({
 
     const payload: PropertyPayload = {
       title: form.title.trim(),
+      title_en: form.title_en.trim() || undefined,
       address: form.address.trim(),
       price: parseInt(form.price.replace(/,/g, ""), 10) || 0,
       property_type_id: form.property_type_id,
       status_id: form.status_id || undefined,
       listing_type_id: form.listing_type_id,
-      city: form.city || undefined,
-      state: form.state || undefined,
+      city_id: form.city_id || undefined,
+      state_id: form.state_id || undefined,
       zip_code: form.zip_code || undefined,
       neighborhood: form.neighborhood || undefined,
       rooms: form.rooms ? Number(form.rooms) : undefined,
@@ -704,6 +797,7 @@ export default function PropertyForm({
       land_area: form.land_area ? Number(form.land_area) : undefined,
       built_area: form.built_area ? Number(form.built_area) : undefined,
       description: form.description || undefined,
+      description_en: form.description_en || undefined,
       featured: form.featured,
       exclusive_listing: form.exclusive_listing,
       property_category_ids:
@@ -729,8 +823,8 @@ export default function PropertyForm({
       !payload.neighborhood ||
       !payload.property_type_id ||
       !payload.listing_type_id ||
-      !form.city ||
-      !form.state ||
+      !form.city_id ||
+      !form.state_id ||
       !form.zip_code ||
       !form.status_id ||
       !form.land_area ||
@@ -973,20 +1067,6 @@ export default function PropertyForm({
 
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            {t("title")} <span className="text-red-600">*</span>
-          </label>
-          <input
-            type="text"
-            value={form.title}
-            onChange={(event) => handleChange("title", event.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            placeholder={t("modernApartmentInLomas")}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
             {t("address")}
           </label>
           <input
@@ -1017,29 +1097,49 @@ export default function PropertyForm({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              {t("city")} <span className="text-red-600">*</span>
+              {t("state")} <span className="text-red-600">*</span>
             </label>
-            <input
-              type="text"
-              value={form.city}
-              onChange={(event) => handleChange("city", event.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder="City"
+            <select
+              value={form.state_id}
+              onChange={(event) => {
+                handleChange("state_id", event.target.value);
+                // Reset city when state changes, same as the property_type_id
+                // -> property_category_ids reset above.
+                handleChange("city_id", "");
+              }}
+              className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               required
-            />
+            >
+              <option value="">{t("select")}</option>
+              {states?.map((state) => (
+                <option key={state.id} value={state.id}>
+                  {capitalizeFirstWord(
+                    locale === "es" ? state.es_name : state.name
+                  )}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              {t("state")} <span className="text-red-600">*</span>
+              {t("city")} <span className="text-red-600">*</span>
             </label>
-            <input
-              type="text"
-              value={form.state}
-              onChange={(event) => handleChange("state", event.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              placeholder="State"
+            <select
+              value={form.city_id}
+              onChange={(event) => handleChange("city_id", event.target.value)}
+              className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               required
-            />
+              disabled={!form.state_id}
+            >
+              <option value="">{t("select")}</option>
+              {cities?.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {capitalizeFirstWord(
+                    locale === "es" ? city.es_name : city.name
+                  )}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -1188,22 +1288,6 @@ export default function PropertyForm({
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("description")} <span className="text-red-600">*</span>
-          </label>
-          <textarea
-            value={form.description}
-            onChange={(event) =>
-              handleChange("description", event.target.value)
-            }
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            rows={3}
-            placeholder={t("keyHighlightsForThisListing")}
-            required
-          />
-        </div>
-
         {/* Property Features */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1260,31 +1344,30 @@ export default function PropertyForm({
             )}
           </div>
 
-          {/* Selected Features Pills */}
+          {/* Selected Features Pills — kept in actual selection order (not
+              alphabetical) since the first one is the AI title generator's
+              mandatory "featured characteristic". */}
           {form.property_feature_ids.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
-              {[...form.property_feature_ids]
-                .sort((a, b) => {
-                  const featureA = propertyFeatures?.find((f) => f.id === a);
-                  const featureB = propertyFeatures?.find((f) => f.id === b);
-                  const nameA =
-                    (locale === "es" ? featureA?.es_name : featureA?.name) ??
-                    "";
-                  const nameB =
-                    (locale === "es" ? featureB?.es_name : featureB?.name) ??
-                    "";
-                  return nameA.localeCompare(nameB);
-                })
-                .map((featureId) => {
+              {form.property_feature_ids.map((featureId, index) => {
                   const feature = propertyFeatures?.find(
                     (f) => f.id === featureId
                   );
                   if (!feature) return null;
+                  const isFeatured = index === 0;
                   return (
                     <span
                       key={featureId}
-                      className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
+                      title={isFeatured ? "Destacada — used in the AI title" : undefined}
+                      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm ${
+                        isFeatured
+                          ? "bg-amber-100 text-amber-800 border border-amber-300"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
                     >
+                      {isFeatured && (
+                        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                      )}
                       {capitalizeFirstWord(
                         locale === "es" ? feature.es_name : feature.name
                       )}
@@ -1542,6 +1625,81 @@ export default function PropertyForm({
               ))}
             </div>
           )}
+        </div>
+
+        {/* AI Generated Content */}
+        <div>
+          <button
+            type="button"
+            onClick={handleGenerateContent}
+            disabled={!canGenerateContent || generatingContent}
+            title={
+              canGenerateContent
+                ? undefined
+                : "Fill in property type, listing type, city, state, and select at least one feature first"
+            }
+            className="cursor-pointer inline-flex items-center gap-1 rounded-md border border-blue-300 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Sparkles className="h-3 w-3" />
+            {generatingContent ? "Generating..." : t("generateWithAI")}
+          </button>
+          {generateContentError && (
+            <p className="mt-1 text-xs text-red-600">{generateContentError}</p>
+          )}
+
+          <label className="mt-3 block text-sm font-medium text-gray-700">
+            {t("title")} <span className="text-red-600">*</span>
+          </label>
+          <input
+            type="text"
+            value={form.title}
+            onChange={(event) => handleChange("title", event.target.value)}
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+            placeholder={t("modernApartmentInLomas")}
+            disabled={!contentGenerated}
+            required
+          />
+
+          <label className="mt-3 block text-sm font-medium text-gray-700">
+            English title
+          </label>
+          <input
+            type="text"
+            value={form.title_en}
+            onChange={(event) => handleChange("title_en", event.target.value)}
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+            placeholder="Title for this listing, in English"
+            disabled={!contentGenerated}
+          />
+
+          <label className="mt-3 block text-sm font-medium text-gray-700">
+            {t("description")} <span className="text-red-600">*</span>
+          </label>
+          <textarea
+            value={form.description}
+            onChange={(event) =>
+              handleChange("description", event.target.value)
+            }
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+            rows={3}
+            placeholder={t("keyHighlightsForThisListing")}
+            disabled={!contentGenerated}
+            required
+          />
+
+          <label className="mt-3 block text-sm font-medium text-gray-700">
+            English description
+          </label>
+          <textarea
+            value={form.description_en}
+            onChange={(event) =>
+              handleChange("description_en", event.target.value)
+            }
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+            rows={3}
+            placeholder="Key highlights for this listing, in English"
+            disabled={!contentGenerated}
+          />
         </div>
 
         <button
