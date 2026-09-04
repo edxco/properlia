@@ -132,7 +132,7 @@ export function Footer() {
 
             {/* Properties by Type */}
             <nav aria-label="Properties by type" className="hidden md:block text-right">
-              <h3 className="font-medium text-lg mb-4">{t("properties")}</h3>
+              <h3 className="font-display font-medium text-lg mb-4">{t("properties")}</h3>
               <ul className="space-y-2">
                 <li>
                   <Link
@@ -163,7 +163,7 @@ export function Footer() {
 
             {/* Services */}
             <nav aria-label="Services" className="hidden md:block text-right">
-              <h3 className="font-medium text-lg mb-4">{t("services")}</h3>
+              <h3 className="font-display font-medium text-lg mb-4">{t("services")}</h3>
               <ul className="space-y-2">
                 <li>
                   <Link
@@ -194,7 +194,7 @@ export function Footer() {
 
             {/* Contact */}
             <div className="text-center md:text-right">
-              <h3 className="font-medium text-lg mb-4">{t("contact")}</h3>
+              <h3 className="font-display font-medium text-lg mb-4">{t("contact")}</h3>
               <address className="not-italic space-y-2 text-sm text-white/80">
                 {generalInfo?.whatsapp && (
                   <p>
@@ -258,19 +258,19 @@ export function Footer() {
               <div className="flex justify-end gap-4 text-right text-xs">
                 <Link
                   href={`/${locale}/terms`}
-                  className="text-white/50 hover:text-white transition-colors"
+                  className="text-white/70 hover:text-white transition-colors"
                 >
                   {t("termsAndConditions")}
                 </Link>
                 <Link
                   href={`/${locale}/privacy`}
-                  className="text-white/50 hover:text-white transition-colors"
+                  className="text-white/70 hover:text-white transition-colors"
                 >
                   {t("privacyNotice")}
                 </Link>
                 <Link
                   href={`/${locale}/sitemap`}
-                  className="text-white/50 hover:text-white transition-colors"
+                  className="text-white/70 hover:text-white transition-colors"
                 >
                   {t("sitemap")}
                 </Link>
