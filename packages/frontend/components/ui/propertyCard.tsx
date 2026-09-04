@@ -106,9 +106,16 @@ const CATEGORY_CONFIG: Record<
   string,
   { color: string; Icon: React.FC<{ size?: number }> }
 > = {
-  "6ba7b810-9dad-11d1-80b4-00c04fd430c8": { color: "#214C9B", Icon: IcoHouse },
-  "70928012-73a7-4790-9556-9a25b29b6e82": { color: "#1A3A5C", Icon: IcoOffice },
-  "e49a8880-60b6-4550-9831-2746498c09d5": { color: "#2C2C2A", Icon: IcoWarehouse },
+  "6ba7b810-9dad-11d1-80b4-00c04fd430c8": { color: "var(--blue)", Icon: IcoHouse },
+  "70928012-73a7-4790-9556-9a25b29b6e82": { color: "var(--navy)", Icon: IcoOffice },
+  "e49a8880-60b6-4550-9831-2746498c09d5": { color: "var(--carbon)", Icon: IcoWarehouse },
+};
+
+// listing-type ID → operation pill colors (per brand guidelines)
+const OPERATION_CONFIG: Record<string, { background: string; color: string }> = {
+  "b8e9f3d2-4c5a-6b7e-0f9e-8d2c3b4e5f6a": { background: "var(--blue)", color: "#fff" }, // venta
+  "c9f0e4d3-5c6b-7a8e-1f0e-9d3c4b5e6f7b": { background: "var(--blue)", color: "#fff" }, // renta
+  "a7f8e2d1-3c4b-5a6e-9f8d-7c1b2a3e4f5d": { background: "var(--navy)", color: "var(--gold)" }, // preventa
 };
 
 const formatPrice = (value: number) =>
@@ -188,6 +195,8 @@ export const PropertyCard = ({
   // --- Pills ---
   const operationLabel =
     locale === "es" ? listing_types.es_name : listing_types.name;
+  const operationColors =
+    OPERATION_CONFIG[listing_types.id] ?? { background: "var(--blue-light)", color: "var(--blue)" };
 
   const typeLabel =
     locale === "es" ? property_type.es_name : property_type.name;
@@ -199,11 +208,7 @@ export const PropertyCard = ({
       .map((cat) => CATEGORY_CONFIG[cat.id]?.color)
       .filter(Boolean) as string[];
 
-    if (colors.length === 0) return { background: "#214C9B" };
-    if (colors.length === 1) return { background: colors[0] };
-    return {
-      background: `linear-gradient(90deg, ${colors.join(", ")})`,
-    };
+    return { background: colors[0] ?? "var(--blue)" };
   };
 
   const firstCategoryConfig =
@@ -221,7 +226,7 @@ export const PropertyCard = ({
       href={propertyPath}
       className="flex flex-col bg-white rounded-2xl overflow-hidden h-full"
       style={{
-        border: "1px solid #EAEAE3",
+        border: "1px solid var(--border)",
         boxShadow:
           "0 1px 2px rgba(20,30,50,.06), 0 14px 30px -22px rgba(20,30,50,.38)",
       }}
@@ -229,7 +234,7 @@ export const PropertyCard = ({
       {/* Photo region */}
       <div
         className="relative shrink-0 group"
-        style={{ height: 200, background: "#E8F0F8" }}
+        style={{ height: 200, background: "var(--blue-light)" }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -269,10 +274,10 @@ export const PropertyCard = ({
         {/* Top-left: operation + type pills */}
         <div className="absolute top-[14px] left-[14px] flex gap-2 z-10">
           <span
-            className="inline-flex items-center font-medium rounded-full"
+            className="inline-flex items-center font-medium rounded-full uppercase"
             style={{
-              background: "#E8F0F8",
-              color: "#214C9B",
+              background: operationColors.background,
+              color: operationColors.color,
               fontSize: 11,
               padding: "5px 11px",
               boxShadow: "0 1px 2px rgba(20,30,50,.14)",
@@ -281,9 +286,9 @@ export const PropertyCard = ({
             {operationLabel}
           </span>
           <span
-            className="inline-flex items-center gap-[5px] font-medium rounded-full"
+            className="inline-flex items-center gap-[5px] font-medium rounded-full uppercase"
             style={{
-              background: "#1A3A5C",
+              background: "var(--navy)",
               color: "#fff",
               fontSize: 11,
               padding: "5px 11px",
@@ -324,7 +329,7 @@ export const PropertyCard = ({
               className="inline-flex items-center gap-[5px] font-medium rounded-full tabular-nums"
               style={{
                 background: "rgba(255,255,255,.95)",
-                color: "#2C2C2A",
+                color: "var(--carbon)",
                 fontSize: 12,
                 padding: "6px 10px",
                 boxShadow: "0 1px 3px rgba(20,30,50,.18)",
@@ -339,7 +344,7 @@ export const PropertyCard = ({
               className="inline-flex items-center gap-[5px] font-medium rounded-full tabular-nums"
               style={{
                 background: "rgba(255,255,255,.95)",
-                color: "#2C2C2A",
+                color: "var(--carbon)",
                 fontSize: 12,
                 padding: "6px 10px",
                 boxShadow: "0 1px 3px rgba(20,30,50,.18)",
@@ -381,7 +386,7 @@ export const PropertyCard = ({
           <span
             className="font-medium tabular-nums"
             style={{
-              color: "#C4A44A",
+              color: "var(--gold)",
               fontSize: 23,
               letterSpacing: "-0.2px",
             }}
@@ -390,7 +395,7 @@ export const PropertyCard = ({
           </span>
           <span
             className="font-normal ml-[6px]"
-            style={{ color: "#888780", fontSize: 13 }}
+            style={{ color: "var(--text-secondary)", fontSize: 13 }}
           >
             MXN
           </span>
@@ -400,17 +405,17 @@ export const PropertyCard = ({
         {(neighborhood || city || state) && (
           <div
             className="flex items-start gap-2 mt-3"
-            style={{ color: "#888780" }}
+            style={{ color: "var(--text-secondary)" }}
           >
             <IcoMapPin size={17} />
             <div>
               {neighborhood && (
-                <p className="font-normal" style={{ color: "#2C2C2A", fontSize: 14 }}>
+                <p className="font-normal" style={{ color: "var(--carbon)", fontSize: 14 }}>
                   {neighborhood}
                 </p>
               )}
               {(city || state) && (
-                <p className="font-normal" style={{ color: "#888780", fontSize: 13 }}>
+                <p className="font-normal" style={{ color: "var(--text-secondary)", fontSize: 13 }}>
                   {[
                     locale === "es" ? city?.es_name : city?.name,
                     locale === "es" ? state?.es_name : state?.name,
@@ -425,11 +430,11 @@ export const PropertyCard = ({
       {/* Category banner */}
       {property_categories.length > 0 && (
         <div
-          className="flex items-center justify-center gap-[7px] font-medium shrink-0"
+          className="flex items-center justify-center gap-[7px] shrink-0 py-1.5"
           style={{
-            height: 42,
+            height: 'auto',
             color: "#fff",
-            fontSize: 13,
+            fontSize: 12,
             letterSpacing: "0.3px",
             ...getCategoryBg(),
           }}
