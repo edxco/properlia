@@ -70,7 +70,7 @@ export function PropertyFiltersSidebar({
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">
+          <h2 className="font-display text-base font-medium text-gray-900">
             {t("filters") || "Filters"}
           </h2>
           {activeFilterCount > 0 && (

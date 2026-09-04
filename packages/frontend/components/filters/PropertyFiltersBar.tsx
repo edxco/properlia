@@ -204,7 +204,7 @@ export function PropertyFiltersBar({
           {/* Modal */}
           <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl border border-gray-200 p-6 z-50 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="font-display text-xl font-medium text-gray-900">
                 {t("moreFilters") || "More Filters"}
               </h2>
               <button
