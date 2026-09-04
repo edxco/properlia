@@ -43,10 +43,10 @@ export function Hero() {
       <div className="relative z-20 h-full flex items-center">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-2xl text-white font-semibold tracking-wider bg-primary inline-block px-3 py-1">
+            <h1 className="text-2xl text-white font-medium tracking-wider bg-primary inline-block px-3 py-1">
               {t("heroBadge")}
             </h1>
-            <p aria-hidden="true" className="font-bold text-2xl md:text-5xl lg:text-6xl font-lexend text-white leading-tight tracking-wide">
+            <p aria-hidden="true" className="text-2xl md:text-5xl lg:text-6xl font-display text-white leading-tight tracking-wide">
               <TypingAnimation
                 words={[
                   t("heroLine1"),
