@@ -8,7 +8,7 @@ export function ProofStrip() {
   const t = useT();
 
   return (
-    <section className="border-y border-[#C4A44A]/30 bg-[#1A3A5C]">
+    <section className="border-y border-gold/30 bg-navy">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -27,7 +27,7 @@ export function ProofStrip() {
 
         <span
           aria-hidden="true"
-          className="h-px w-24 bg-[#C4A44A]/40 md:mx-16 md:h-16 md:w-px lg:mx-24"
+          className="h-px w-24 bg-gold/40 md:mx-16 md:h-16 md:w-px lg:mx-24"
         />
 
         <div className="flex items-baseline gap-5">
