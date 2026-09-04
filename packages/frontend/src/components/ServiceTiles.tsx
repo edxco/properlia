@@ -11,7 +11,6 @@ interface ServiceTile {
   subtitleKey: string;
   buttonKey: string;
   href: string;
-  gradient: string;
 }
 
 const tiles: ServiceTile[] = [
@@ -20,21 +19,18 @@ const tiles: ServiceTile[] = [
     subtitleKey: "serviceTileBuySubtitle",
     buttonKey: "serviceTileBuyButton",
     href: "/buyer-consultation",
-    gradient: "bg-gradient-to-br from-blue-700 via-blue-800 to-primary",
   },
   {
     titleKey: "serviceTileSellTitle",
     subtitleKey: "serviceTileSellSubtitle",
     buttonKey: "serviceTileSellButton",
     href: "/seller-consultation",
-    gradient: "bg-gradient-to-br from-blue-700 via-blue-700 to-primary",
   },
   {
     titleKey: "serviceTileInvestTitle",
     subtitleKey: "serviceTileInvestSubtitle",
     buttonKey: "serviceTileInvestButton",
     href: "/properties?category=investment",
-    gradient: "bg-gradient-to-br from-blue-700 via-indigo-800 to-primary",
   },
 ];
 
@@ -43,15 +39,15 @@ export function ServiceTiles() {
   const locale = useLocale();
 
   return (
-    <section className="py-16 md:py-24 bg-stone-50 px-4">
+    <section className="py-16 md:py-24 bg-bg px-4">
       <div className="max-w-7xl mx-auto px-0">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {tiles.map((tile, index) => (
             <Link
               key={index}
               href={`/${locale}${tile.href}`}
-              className={`
-                ${tile.gradient}
+              className="
+                bg-navy
                 relative overflow-hidden
                 rounded-2xl
                 p-6 md:p-8 lg:p-10
@@ -62,17 +58,17 @@ export function ServiceTiles() {
                 transition-all duration-300 ease-out
                 group
                 cursor-pointer
-              `}
+              "
             >
               {/* Subtle overlay for depth */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Content */}
               <div className="relative z-10">
-                <h3 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white uppercase tracking-wider leading-tight">
+                <h3 className="font-display text-l md:text-3xl lg:text-4xl font-medium text-white uppercase tracking-wider leading-tight">
                   {t(tile.titleKey)}
                 </h3>
-                <p className="mt-4 text-white/80 text-base md:text-lg font-light leading-relaxed">
+                <p className="mt-4 text-white/80 text-base md:text-lg font-normal leading-relaxed">
                   {t(tile.subtitleKey)}
                 </p>
               </div>
@@ -86,7 +82,7 @@ export function ServiceTiles() {
                     border-2 border-white/90
                     text-white font-medium text-sm md:text-base
                     rounded-lg
-                    group-hover:bg-white group-hover:text-slate-800
+                    group-hover:bg-white group-hover:text-navy
                     transition-all duration-300 ease-out
                     group-hover:border-white
                   "
