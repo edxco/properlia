@@ -33,7 +33,7 @@ export function BuyerHero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#1A3A5C]">
+    <section className="relative overflow-hidden bg-navy">
       {/* Depth vignette, stays inside the navy family */}
       <div
         aria-hidden="true"
@@ -60,7 +60,7 @@ export function BuyerHero() {
               initial="hidden"
               animate="visible"
               variants={fadeUp}
-              className="mt-8 font-[family-name:var(--font-editorial-display)] text-[2.6rem] font-semibold leading-[1.06] tracking-[-0.015em] text-white md:text-6xl lg:text-[4.3rem]"
+              className="mt-8 font-[family-name:var(--font-editorial-display)] text-[2.6rem] font-medium leading-[1.06] tracking-[-0.015em] text-white md:text-6xl lg:text-[4.3rem]"
             >
               {titleLead}
               {titleTurn && <span className="block italic">{titleTurn}</span>}
@@ -86,7 +86,7 @@ export function BuyerHero() {
               <a
                 href={`#${FORM_SECTION_ID}`}
                 onClick={scrollToForm}
-                className="inline-flex h-14 items-center gap-3 bg-[#C4A44A] px-9 font-[family-name:var(--font-editorial-body)] text-sm font-semibold tracking-wide text-[#1A3A5C] transition-colors duration-200 hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A3A5C]"
+                className="inline-flex h-14 items-center gap-3 bg-gold px-9 font-[family-name:var(--font-editorial-body)] text-sm font-medium tracking-wide text-navy transition-colors duration-200 hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
                 {t("buyerHeroCta")}
                 <IconArrowDown size={18} stroke={2} aria-hidden="true" />
@@ -102,7 +102,7 @@ export function BuyerHero() {
             variants={fadeUp}
             className="lg:col-span-4 lg:col-start-9"
           >
-            <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-[#C4A44A]/40 pt-8 lg:grid-cols-1 lg:gap-y-0 lg:divide-y lg:divide-white/10 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
+            <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-gold/40 pt-8 lg:grid-cols-1 lg:gap-y-0 lg:divide-y lg:divide-white/10 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
               <div className="col-span-2 flex flex-col lg:col-span-1 lg:pb-10">
                 <dt className="order-2 mt-4 font-[family-name:var(--font-editorial-body)] text-xs font-medium uppercase tracking-[0.18em] text-white/60">
                   {t("proofStat1Label")}

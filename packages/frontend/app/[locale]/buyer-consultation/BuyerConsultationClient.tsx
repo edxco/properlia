@@ -30,25 +30,25 @@ declare global {
 const TOTAL_STEPS = 4;
 
 const labelClass =
-  "block font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] mb-1.5";
+  "block font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy mb-1.5";
 const helperTextClass =
   "font-[family-name:var(--font-editorial-body)] text-xs text-slate-400 mb-2";
 const errorTextClass =
   "mt-1.5 font-[family-name:var(--font-editorial-body)] text-sm text-red-600";
 const requiredMarkClass = "text-red-500";
 const radioOptionClass = "flex items-center gap-3 cursor-pointer";
-const radioInputClass = "h-4 w-4 accent-[#214C9B] border-slate-300";
+const radioInputClass = "h-4 w-4 accent-blue border-slate-300";
 const radioLabelClass = "font-[family-name:var(--font-editorial-body)] text-sm text-slate-700";
-const checkboxInputClass = "h-4 w-4 accent-[#214C9B] border-slate-300 rounded";
+const checkboxInputClass = "h-4 w-4 accent-blue border-slate-300 rounded";
 
 function fieldClass(hasError?: boolean) {
-  return `w-full h-12 px-4 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-[#1A3A5C] placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:border-[#214C9B] ${
+  return `w-full h-12 px-4 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-navy placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue focus:border-blue ${
     hasError ? "border-red-400" : "border-slate-300"
   }`;
 }
 
 function textareaClass(hasError?: boolean) {
-  return `w-full px-4 py-3 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-[#1A3A5C] placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:border-[#214C9B] resize-none ${
+  return `w-full px-4 py-3 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-navy placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue focus:border-blue resize-none ${
     hasError ? "border-red-400" : "border-slate-300"
   }`;
 }
@@ -415,13 +415,13 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
   if (isSuccess) {
     return (
-      <section className="flex min-h-[60vh] items-center bg-[#EEF1F5] py-24 font-[family-name:var(--font-editorial-body)]">
+      <section className="flex min-h-[60vh] items-center bg-blue-light py-24 font-[family-name:var(--font-editorial-body)]">
         <div className="mx-auto w-full max-w-xl px-6 lg:px-8">
-          <div className="border-t-2 border-[#C4A44A] bg-white px-8 py-12 text-center shadow-[0_24px_64px_-32px_rgba(26,58,92,0.35)] md:px-12 md:py-14">
-            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#1A3A5C]">
-              <IconCheck size={30} stroke={2} className="text-[#C4A44A]" />
+          <div className="border-t-2 border-gold bg-white px-8 py-12 text-center shadow-[0_24px_64px_-32px_rgba(26,58,92,0.35)] md:px-12 md:py-14">
+            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-navy">
+              <IconCheck size={30} stroke={2} className="text-gold" />
             </div>
-            <h2 className="font-[family-name:var(--font-editorial-display)] text-2xl font-semibold leading-snug text-[#1A3A5C] md:text-3xl">
+            <h2 className="font-[family-name:var(--font-editorial-display)] text-2xl font-medium leading-snug text-navy md:text-3xl">
               {t("buyerFormSuccess")
                 .replace("{{buyer_name}}", submittedName)
                 .split("\n")
@@ -434,7 +434,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             </h2>
             <button
               onClick={() => setIsSuccess(false)}
-              className="mt-10 inline-flex h-12 items-center bg-[#1A3A5C] px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-[#214C9B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+              className="mt-10 inline-flex h-12 items-center bg-navy px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
             >
               {t("buyerSubmitButton")}
             </button>
@@ -442,7 +442,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href={`/${locale}/properties`}
-                className="inline-flex h-12 items-center border border-[#1A3A5C]/25 px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] transition-colors hover:border-[#1A3A5C] hover:bg-[#1A3A5C]/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+                className="inline-flex h-12 items-center border border-navy/25 px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:border-navy hover:bg-navy/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
               >
                 {t("buyerSuccessBrowseCta")}
               </Link>
@@ -453,7 +453,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-12 items-center gap-2 bg-[#C4A44A] px-8 font-[family-name:var(--font-editorial-body)] text-sm font-semibold text-[#1A3A5C] transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+                  className="inline-flex h-12 items-center gap-2 bg-gold px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
                 >
                   <IconBrandWhatsapp size={18} stroke={1.75} aria-hidden="true" />
                   {t("buyerSuccessWhatsAppCta")}
@@ -535,8 +535,8 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                     phone_has_whatsapp: !prev.phone_has_whatsapp,
                   }))
                 }
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:ring-offset-2 ${
-                  formData.phone_has_whatsapp ? "bg-[#1A3A5C]" : "bg-slate-200"
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue focus:ring-offset-2 ${
+                  formData.phone_has_whatsapp ? "bg-navy" : "bg-slate-200"
                 }`}
               >
                 <span
@@ -546,7 +546,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 />
               </button>
               <label className="flex items-center gap-1.5 font-[family-name:var(--font-editorial-body)] text-sm text-slate-700">
-                <IconBrandWhatsapp size={18} stroke={1.75} className="text-[#1A3A5C]" />
+                <IconBrandWhatsapp size={18} stroke={1.75} className="text-navy" />
                 {t("buyerWhatsAppSwitch")}
               </label>
             </div>
@@ -1094,11 +1094,11 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
       <BuyerAdvantages />
       <ProofStrip />
 
-      <section id="buyer-consultation-form" className="bg-[#EEF1F5] py-20 md:py-28">
+      <section id="buyer-consultation-form" className="bg-blue-light py-20 md:py-28">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           {/* Editorial section header, aligned with the card */}
           <div className="max-w-2xl">
-            <h2 className="font-[family-name:var(--font-editorial-display)] text-4xl font-semibold tracking-[-0.01em] text-[#1A3A5C] md:text-5xl">
+            <h2 className="font-[family-name:var(--font-editorial-display)] text-4xl font-medium tracking-[-0.01em] text-navy md:text-5xl">
               {t("buyerFormSectionTitle")}
             </h2>
             <p className="mt-5 font-[family-name:var(--font-editorial-body)] text-lg leading-relaxed text-slate-600">
@@ -1107,7 +1107,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           </div>
 
           {/* The consultation card: advisor rail + client side */}
-          <div className="mt-12 grid overflow-hidden border-t-2 border-[#C4A44A] shadow-[0_32px_80px_-40px_rgba(26,58,92,0.4)] lg:grid-cols-[320px_1fr]">
+          <div className="mt-12 grid overflow-hidden border-t-2 border-gold shadow-[0_32px_80px_-40px_rgba(26,58,92,0.4)] lg:grid-cols-[320px_1fr]">
             <BuyerStepper
               currentStep={currentStep}
               totalSteps={TOTAL_STEPS}
@@ -1117,13 +1117,13 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             <div className="bg-white px-6 py-10 md:px-10 lg:px-14 lg:py-12">
               {/* Step Title & Description */}
               <div className="border-b border-slate-200 pb-6">
-                <p className="font-[family-name:var(--font-editorial-body)] text-xs font-medium uppercase tracking-[0.2em] text-[#214C9B]">
+                <p className="font-[family-name:var(--font-editorial-body)] text-xs font-medium uppercase tracking-[0.2em] text-blue">
                   {t("buyerStepPrefix")} {currentStep} {t("buyerStepConnector")} {TOTAL_STEPS}
                 </p>
                 <h3
                   ref={stepHeadingRef}
                   tabIndex={-1}
-                  className="mt-3 font-[family-name:var(--font-editorial-display)] text-2xl font-semibold text-[#1A3A5C] focus:outline-none md:text-[1.7rem]"
+                  className="mt-3 font-[family-name:var(--font-editorial-display)] text-2xl font-medium text-navy focus:outline-none md:text-[1.7rem]"
                 >
                   {stepTitles[currentStep - 1].title}
                 </h3>
@@ -1162,7 +1162,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                     <button
                       type="button"
                       onClick={handleBack}
-                      className="flex h-12 items-center gap-2 border border-[#1A3A5C]/25 px-6 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] transition-colors hover:border-[#1A3A5C] hover:bg-[#1A3A5C]/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+                      className="flex h-12 items-center gap-2 border border-navy/25 px-6 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:border-navy hover:bg-navy/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
                     >
                       <IconChevronLeft size={16} stroke={2} aria-hidden="true" />
                       {t("buyerBack")}
@@ -1175,7 +1175,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                     <button
                       type="button"
                       onClick={handleNext}
-                      className="flex h-12 items-center gap-2 bg-[#1A3A5C] px-7 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-[#214C9B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+                      className="flex h-12 items-center gap-2 bg-navy px-7 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
                     >
                       {t("buyerNext")}
                       <IconChevronRight size={16} stroke={2} aria-hidden="true" />
@@ -1184,7 +1184,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                     <button
                       type="submit"
                       disabled={createLead.isPending}
-                      className="flex h-12 items-center gap-2 bg-[#C4A44A] px-7 font-[family-name:var(--font-editorial-body)] text-sm font-semibold text-[#1A3A5C] transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                      className="flex h-12 items-center gap-2 bg-gold px-7 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
                     >
                       {createLead.isPending ? t("submitting") : t("buyerSubmitButton")}
                     </button>

@@ -14,7 +14,7 @@ export function BuyerStepper({ currentStep, totalSteps, labels }: BuyerStepperPr
   const stepOfLabel = `${t("buyerStepPrefix")} ${currentStep} ${t("buyerStepConnector")} ${totalSteps}`;
 
   return (
-    <div className="flex h-full flex-col bg-[#1A3A5C] px-6 py-6 lg:px-10 lg:py-12">
+    <div className="flex h-full flex-col bg-navy px-6 py-6 lg:px-10 lg:py-12">
       {/* Desktop: vertical agenda */}
       <div className="hidden flex-1 flex-col lg:flex">
         <p className="font-[family-name:var(--font-editorial-body)] text-xs font-medium uppercase tracking-[0.22em] text-white/50">
@@ -33,7 +33,7 @@ export function BuyerStepper({ currentStep, totalSteps, labels }: BuyerStepperPr
                   aria-current={isActive ? "step" : undefined}
                   className={`flex items-center gap-5 border-l-2 py-4 pl-6 transition-colors duration-200 ${
                     isActive
-                      ? "border-[#C4A44A]"
+                      ? "border-gold"
                       : isCompleted
                       ? "border-white/40"
                       : "border-white/10"
@@ -42,7 +42,7 @@ export function BuyerStepper({ currentStep, totalSteps, labels }: BuyerStepperPr
                   <span
                     aria-hidden="true"
                     className={`w-9 font-[family-name:var(--font-editorial-display)] text-2xl font-medium italic leading-none transition-colors duration-200 ${
-                      isActive ? "text-[#C4A44A]" : isCompleted ? "text-white/70" : "text-white/30"
+                      isActive ? "text-gold" : isCompleted ? "text-white/70" : "text-white/30"
                     }`}
                   >
                     {isCompleted ? (
@@ -71,11 +71,11 @@ export function BuyerStepper({ currentStep, totalSteps, labels }: BuyerStepperPr
         {/* Trust microcopy anchored to the rail's foot */}
         <div className="mt-auto space-y-3 border-t border-white/10 pt-8">
           <p className="flex items-start gap-3 font-[family-name:var(--font-editorial-body)] text-sm leading-relaxed text-white/70">
-            <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#C4A44A]" />
+            <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" />
             {t("buyerTrustStripPart2")}
           </p>
           <p className="flex items-start gap-3 font-[family-name:var(--font-editorial-body)] text-sm leading-relaxed text-white/70">
-            <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#C4A44A]" />
+            <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" />
             {t("buyerTrustStripPart1")}
           </p>
         </div>
@@ -102,7 +102,7 @@ export function BuyerStepper({ currentStep, totalSteps, labels }: BuyerStepperPr
                 key={stepNumber}
                 aria-current={isActive ? "step" : undefined}
                 className={`h-1 flex-1 rounded-full transition-colors duration-200 ${
-                  isActive ? "bg-[#C4A44A]" : isCompleted ? "bg-white/60" : "bg-white/15"
+                  isActive ? "bg-gold" : isCompleted ? "bg-white/60" : "bg-white/15"
                 }`}
               >
                 <span className="sr-only">{label}</span>
