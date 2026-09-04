@@ -25,7 +25,7 @@ export function SellerMethod() {
           variants={reveal}
           className="flex items-end justify-between gap-8 border-b border-slate-200 pb-8"
         >
-          <h2 className="max-w-2xl font-[family-name:var(--font-editorial-display)] text-4xl font-semibold tracking-[-0.01em] text-[#1A3A5C] md:text-5xl">
+          <h2 className="max-w-2xl font-[family-name:var(--font-editorial-display)] text-4xl font-medium tracking-[-0.01em] text-navy md:text-5xl">
             {t("sellerMethodTitle")}
           </h2>
           <span

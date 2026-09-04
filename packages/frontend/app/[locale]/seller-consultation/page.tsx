@@ -6,14 +6,14 @@ import { buildMetadata } from "@/src/lib/metadata";
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500"],
   style: ["normal", "italic"],
   variable: "--font-editorial-display",
 });
 
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
   variable: "--font-editorial-body",
 });
 

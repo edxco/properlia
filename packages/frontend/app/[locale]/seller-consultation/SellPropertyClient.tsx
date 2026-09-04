@@ -22,19 +22,19 @@ declare global {
 }
 
 const labelClass =
-  "block font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] mb-1.5";
+  "block font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy mb-1.5";
 const errorTextClass =
   "mt-1.5 font-[family-name:var(--font-editorial-body)] text-sm text-red-600";
 const requiredMarkClass = "text-red-500";
 
 function fieldClass(hasError?: boolean) {
-  return `w-full h-12 px-4 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-[#1A3A5C] placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:border-[#214C9B] ${
+  return `w-full h-12 px-4 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-navy placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue focus:border-blue ${
     hasError ? "border-red-400" : "border-slate-300"
   }`;
 }
 
 function textareaClass(hasError?: boolean) {
-  return `w-full px-4 py-3 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-[#1A3A5C] placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:border-[#214C9B] resize-none ${
+  return `w-full px-4 py-3 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-navy placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue focus:border-blue resize-none ${
     hasError ? "border-red-400" : "border-slate-300"
   }`;
 }
@@ -168,18 +168,18 @@ export default function SellPropertyClient() {
 
   if (isSuccess) {
     return (
-      <section className="flex min-h-[60vh] items-center bg-[#EEF1F5] py-24 font-[family-name:var(--font-editorial-body)]">
+      <section className="flex min-h-[60vh] items-center bg-blue-light py-24 font-[family-name:var(--font-editorial-body)]">
         <div className="mx-auto w-full max-w-xl px-6 lg:px-8">
-          <div className="border-t-2 border-[#C4A44A] bg-white px-8 py-12 text-center shadow-[0_24px_64px_-32px_rgba(26,58,92,0.35)] md:px-12 md:py-14">
-            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#1A3A5C]">
-              <IconCheck size={30} stroke={2} className="text-[#C4A44A]" />
+          <div className="border-t-2 border-gold bg-white px-8 py-12 text-center shadow-[0_24px_64px_-32px_rgba(26,58,92,0.35)] md:px-12 md:py-14">
+            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-navy">
+              <IconCheck size={30} stroke={2} className="text-gold" />
             </div>
-            <h2 className="font-[family-name:var(--font-editorial-display)] text-2xl font-semibold leading-snug text-[#1A3A5C] md:text-3xl">
+            <h2 className="font-[family-name:var(--font-editorial-display)] text-2xl font-medium leading-snug text-navy md:text-3xl">
               {t("formSuccess")}
             </h2>
             <button
               onClick={() => setIsSuccess(false)}
-              className="mt-10 inline-flex h-12 items-center bg-[#1A3A5C] px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-[#214C9B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
+              className="mt-10 inline-flex h-12 items-center bg-navy px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
             >
               {t("submitForm")}
             </button>
@@ -195,19 +195,19 @@ export default function SellPropertyClient() {
       <SellerMethod />
       <ProofStrip />
 
-      <section id="seller-consultation-form" className="bg-[#EEF1F5] py-20 md:py-28">
+      <section id="seller-consultation-form" className="bg-blue-light py-20 md:py-28">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           {/* Editorial section header, aligned with the card */}
           <div className="max-w-2xl">
-            <h2 className="font-[family-name:var(--font-editorial-display)] text-4xl font-semibold tracking-[-0.01em] text-[#1A3A5C] md:text-5xl">
+            <h2 className="font-[family-name:var(--font-editorial-display)] text-4xl font-medium tracking-[-0.01em] text-navy md:text-5xl">
               {t("sellFormTitle")}
             </h2>
           </div>
 
           {/* The consultation card: advisor rail + client side */}
-          <div className="mt-12 grid overflow-hidden border-t-2 border-[#C4A44A] shadow-[0_32px_80px_-40px_rgba(26,58,92,0.4)] lg:grid-cols-[320px_1fr]">
+          <div className="mt-12 grid overflow-hidden border-t-2 border-gold shadow-[0_32px_80px_-40px_rgba(26,58,92,0.4)] lg:grid-cols-[320px_1fr]">
             {/* Advisor rail: method recap + trust microcopy (desktop only) */}
-            <aside className="hidden flex-col bg-[#1A3A5C] px-10 py-12 lg:flex">
+            <aside className="hidden flex-col bg-navy px-10 py-12 lg:flex">
               <p className="font-[family-name:var(--font-editorial-body)] text-xs font-medium uppercase tracking-[0.22em] text-white/50">
                 {t("sellerRailTitle")}
               </p>
@@ -233,11 +233,11 @@ export default function SellPropertyClient() {
 
               <div className="mt-auto space-y-3 border-t border-white/10 pt-8">
                 <p className="flex items-start gap-3 font-[family-name:var(--font-editorial-body)] text-sm leading-relaxed text-white/70">
-                  <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#C4A44A]" />
+                  <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" />
                   {t("buyerTrustStripPart2")}
                 </p>
                 <p className="flex items-start gap-3 font-[family-name:var(--font-editorial-body)] text-sm leading-relaxed text-white/70">
-                  <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#C4A44A]" />
+                  <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" />
                   {t("buyerTrustStripPart1")}
                 </p>
               </div>
@@ -446,7 +446,7 @@ export default function SellPropertyClient() {
                     name="consent_marketing"
                     checked={formData.consent_marketing}
                     onChange={handleChange}
-                    className="mt-1 h-4 w-4 rounded border-slate-300 accent-[#214C9B]"
+                    className="mt-1 h-4 w-4 rounded border-slate-300 accent-blue"
                   />
                   <label
                     htmlFor="consent_marketing"
@@ -461,7 +461,7 @@ export default function SellPropertyClient() {
                   <button
                     type="submit"
                     disabled={createLead.isPending}
-                    className="flex h-12 w-full items-center justify-center gap-2 bg-[#C4A44A] px-7 font-[family-name:var(--font-editorial-body)] text-sm font-semibold text-[#1A3A5C] transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 md:ml-auto md:w-auto"
+                    className="flex h-12 w-full items-center justify-center gap-2 bg-gold px-7 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 md:ml-auto md:w-auto"
                   >
                     {createLead.isPending ? t("submitting") : t("submitForm")}
                   </button>
