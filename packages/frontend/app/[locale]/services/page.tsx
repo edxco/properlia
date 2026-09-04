@@ -88,7 +88,7 @@ export default async function ServicesPage({
       {/* Hero */}
       <section className="border-b border-stone-100 px-6 py-12 md:py-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="font-lexend text-3xl md:text-4xl font-bold text-stone-900 mb-2">
+          <h1 className="font-display text-3xl md:text-4xl font-medium text-stone-900 mb-2">
             {dict["servicesPageTitle"]}
           </h1>
           <p className="text-stone-500 text-lg">
@@ -115,7 +115,7 @@ export default async function ServicesPage({
                   {service.number}
                 </span>
 
-                <h2 className="font-lexend mt-3 text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 leading-tight max-w-2xl">
+                <h2 className="font-display mt-3 text-2xl md:text-3xl lg:text-4xl font-medium text-stone-900 leading-tight max-w-2xl">
                   {dict[service.titleKey]}
                 </h2>
 
@@ -165,7 +165,7 @@ export default async function ServicesPage({
 
       {/* CTA */}
       <section className="bg-stone-900 px-6 py-20 md:py-24 text-center">
-        <h2 className="font-lexend text-3xl md:text-4xl font-bold text-white">
+        <h2 className="font-display text-3xl md:text-4xl font-medium text-white">
           {dict["servicesCta"]}
         </h2>
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
