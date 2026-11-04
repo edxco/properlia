@@ -38,6 +38,7 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+      DASHBOARD_URL: ${DASHBOARD_URL:-http://localhost:3002}
     depends_on:
       db:
         condition: service_healthy
