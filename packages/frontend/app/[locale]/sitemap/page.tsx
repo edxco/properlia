@@ -42,6 +42,10 @@ export default async function SitemapPage({
       ],
     },
     {
+      title: dict["sitemapSectionContact"],
+      links: [{ label: dict["contact"], href: `/${locale}/contact` }],
+    },
+    {
       title: dict["sitemapSectionLegal"],
       links: [
         { label: dict["termsAndConditions"], href: `/${locale}/terms` },

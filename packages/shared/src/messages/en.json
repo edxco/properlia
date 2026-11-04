@@ -490,5 +490,9 @@
   "galleryPrevious": "Previous photo",
   "galleryNext": "Next photo",
   "galleryAriaLabel": "photo gallery",
-  "galleryFooter": "Press {esc} to close • {left} {right} to navigate"
+  "galleryFooter": "Press {esc} to close • {left} {right} to navigate",
+  "contactMetaTitle": "Contact | Properlia",
+  "contactMetaDescription": "Get in touch with Properlia via WhatsApp, phone, email or social media. Real estate advisory in Puebla.",
+  "contactTitle": "Contact us",
+  "sitemapSectionContact": "Contact"
 }

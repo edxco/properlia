@@ -490,5 +490,9 @@
   "galleryPrevious": "Foto anterior",
   "galleryNext": "Foto siguiente",
   "galleryAriaLabel": "galería de fotos",
-  "galleryFooter": "Presiona {esc} para cerrar • {left} {right} para navegar"
+  "galleryFooter": "Presiona {esc} para cerrar • {left} {right} para navegar",
+  "contactMetaTitle": "Contacto | Properlia",
+  "contactMetaDescription": "Contáctanos por WhatsApp, teléfono, correo o redes sociales. Asesoría inmobiliaria en Puebla.",
+  "contactTitle": "Contáctanos",
+  "sitemapSectionContact": "Contacto"
 }

@@ -108,6 +108,9 @@ export function Navigation() {
             <Link href={`/${locale}/services`} className={linkClass("/services")}>
               {t("services")}
             </Link>
+            <Link href={`/${locale}/contact`} className={linkClass("/contact")}>
+              {t("contact")}
+            </Link>
             <LanguageSwitcher />
           </div>
 
@@ -174,6 +177,13 @@ export function Navigation() {
               onClick={() => setIsMenuOpen(false)}
             >
               {t("services")}
+            </Link>
+            <Link
+              href={`/${locale}/contact`}
+              className={mobileLinkClass("/contact")}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {t("contact")}
             </Link>
             <div className="pt-2">
               <LanguageSwitcher />
