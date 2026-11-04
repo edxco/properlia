@@ -3,6 +3,7 @@ import { propertyApi } from "@properlia/shared/services/properties/api";
 import { getAbsoluteImageUrl } from "@properlia/shared/lib/api-client";
 import { buildMetadata } from "@/src/lib/metadata";
 import { buildPropertyUrl } from "@properlia/shared/lib/slugify";
+import { isPubliclyVisible } from "@properlia/shared/lib/propertyVisibility";
 import type { Property } from "@properlia/shared/types";
 
 const BASE_URL = "https://properlia.com";
@@ -83,7 +84,7 @@ export default async function PropertyLayout({
   let jsonLd = null;
   try {
     const property = await propertyApi.getById(id);
-    jsonLd = buildPropertyJsonLd(property, locale);
+    if (isPubliclyVisible(property)) jsonLd = buildPropertyJsonLd(property, locale);
   } catch {
     // Property not found — skip JSON-LD
   }

@@ -8,6 +8,7 @@ import type {
 } from '../../types';
 
 type PropertyQueryParams = {
+  public?: boolean;
   featured?: boolean;
   status_id?: string;
   property_type_id?: string;
@@ -82,6 +83,7 @@ export const propertyApi = {
 
     if (params?.page) query.set('page', String(params.page));
     if (params?.items) query.set('items', String(params.items));
+    if (params?.public) query.set('public', 'true');
     if (params?.featured !== undefined) query.set('featured', String(params.featured));
     if (params?.status_id) query.set('status_id', params.status_id);
     if (params?.property_type_id) query.set('property_type_id', params.property_type_id);

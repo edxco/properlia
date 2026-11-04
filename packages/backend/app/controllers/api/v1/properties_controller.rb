@@ -2,6 +2,8 @@
 module Api
   module V1
     class PropertiesController < ApplicationController
+      HIDDEN_PUBLIC_STATUSES = %w[sold leased suspended expired].freeze
+
       skip_before_action :authenticate_user!, only: %i[index show intake]
       skip_before_action :reject_disabled_user!, only: %i[index show intake]
       before_action :authenticate_intake_token!, only: %i[intake]
@@ -13,12 +15,10 @@ module Api
       def index
         properties = Property.all
 
-        # Exclude suspended properties by default (unless include_suspended=true)
-        # Suspended status ID: 7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64
-        # unless ActiveModel::Type::Boolean.new.cast(params[:include_suspended])
-        #   suspended_status_id = '7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64'
-        #   properties = properties.where.not(status_id: suspended_status_id)
-        # end
+        # Public listings hide sold, leased, suspended and expired properties
+        if ActiveModel::Type::Boolean.new.cast(params[:public])
+          properties = properties.where.not(status_id: Status.where(name: HIDDEN_PUBLIC_STATUSES).select(:id))
+        end
 
         # Filter by featured
         if params[:featured].present?

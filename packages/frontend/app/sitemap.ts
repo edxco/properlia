@@ -25,7 +25,7 @@ async function fetchAllProperties(): Promise<Property[]> {
 
   while (page <= totalPages) {
     try {
-      const res = await fetch(`${API_URL}/properties?page=${page}&items=100`, {
+      const res = await fetch(`${API_URL}/properties?page=${page}&items=100&public=true`, {
         next: { revalidate: 3600 },
       });
       if (!res.ok) break;
