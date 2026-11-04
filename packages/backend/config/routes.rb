@@ -62,6 +62,10 @@ Rails.application.routes.draw do
       post 'emails/welcome', to: 'emails#send_welcome'
 
       # Admin endpoints
+      # Signed links from the on-hold (apartada) reminder email
+      get 'on_hold_reminders', to: 'on_hold_reminders#show'
+      post 'on_hold_reminders', to: 'on_hold_reminders#create'
+
       namespace :admin do
         resources :users, only: %i[index show create update] do
           member do
