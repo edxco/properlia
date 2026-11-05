@@ -6,6 +6,7 @@ import Link from "next/link";
 import { propertyApi } from "@properlia/shared/services/properties/api";
 import type { Property } from "@properlia/shared/types";
 import { useT } from "@properlia/shared/components/TranslationProvider";
+import { Alert } from "@properlia/shared/components/ui";
 import PropertyForm from "../../PropertyForm";
 
 export default function EditPropertyPage() {
@@ -49,13 +50,11 @@ export default function EditPropertyPage() {
       <div className="space-y-6">
         <Link
           href="/properties"
-          className="text-gray-500 hover:text-gray-700"
+          className="text-brand-gray hover:text-brand-carbon"
         >
           ← {t("properties")}
         </Link>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error || "Property not found"}</p>
-        </div>
+        <Alert tone="danger">{error || "Property not found"}</Alert>
       </div>
     );
   }
@@ -65,7 +64,7 @@ export default function EditPropertyPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/properties"
-          className="text-gray-500 hover:text-gray-700"
+          className="text-brand-gray hover:text-brand-carbon"
         >
           ← {t("properties")}
         </Link>

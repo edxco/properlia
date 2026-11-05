@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_09_02_130500) do
+ActiveRecord::Schema[7.0].define(version: 2026_11_04_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -169,6 +169,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_09_02_130500) do
     t.string "title_en"
     t.uuid "state_id"
     t.uuid "city_id"
+    t.datetime "on_hold_since"
+    t.datetime "on_hold_reminded_at"
     t.index ["city_id"], name: "index_properties_on_city_id"
     t.index ["featured"], name: "index_properties_on_featured"
     t.index ["images"], name: "index_properties_on_images", using: :gin

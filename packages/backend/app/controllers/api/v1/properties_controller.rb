@@ -2,6 +2,8 @@
 module Api
   module V1
     class PropertiesController < ApplicationController
+      HIDDEN_PUBLIC_STATUSES = %w[sold leased suspended expired].freeze
+
       skip_before_action :authenticate_user!, only: %i[index show intake]
       skip_before_action :reject_disabled_user!, only: %i[index show intake]
       before_action :authenticate_intake_token!, only: %i[intake]
@@ -13,12 +15,10 @@ module Api
       def index
         properties = Property.all
 
-        # Exclude suspended properties by default (unless include_suspended=true)
-        # Suspended status ID: 7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64
-        # unless ActiveModel::Type::Boolean.new.cast(params[:include_suspended])
-        #   suspended_status_id = '7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64'
-        #   properties = properties.where.not(status_id: suspended_status_id)
-        # end
+        # Public listings hide sold, leased, suspended and expired properties
+        if ActiveModel::Type::Boolean.new.cast(params[:public])
+          properties = properties.where.not(status_id: Status.where(name: HIDDEN_PUBLIC_STATUSES).select(:id))
+        end
 
         # Filter by featured
         if params[:featured].present?
@@ -38,6 +38,12 @@ module Api
         # Filter by listing_type_id (sale, rent, pre-sale)
         properties = properties.where(listing_type_id: params[:listing_type_id]) if params[:listing_type_id].present?
 
+        # Filter by listing type name (sale, rent)
+        if params[:listing_type].present?
+          properties = properties.joins(:listing_type)
+                                 .where('LOWER(listing_types.name) = ?', params[:listing_type].downcase)
+        end
+
         # Location filters (exact match on the normalized state/city lookup tables)
         properties = properties.where(state_id: params[:state_id]) if params[:state_id].present?
 
@@ -51,6 +57,10 @@ module Api
         properties = properties.where('price >= ?', params[:price_min].to_f) if params[:price_min].present?
 
         properties = properties.where('price <= ?', params[:price_max].to_f) if params[:price_max].present?
+
+        properties = properties.where('land_area >= ?', params[:land_area_min].to_f) if params[:land_area_min].present?
+
+        properties = properties.where('land_area <= ?', params[:land_area_max].to_f) if params[:land_area_max].present?
 
         # Room and bathroom filters (minimum values)
         properties = properties.where('rooms >= ?', params[:rooms_min].to_i) if params[:rooms_min].present?
@@ -404,7 +414,7 @@ module Api
 
       def property_json(property)
         # include signed URLs for immediate consumption by your frontend
-        base_attributes = property.attributes.except('created_at', 'updated_at')
+        base_attributes = property.attributes.except('created_at')
 
         # Hide address if exclusive_listing is false
         base_attributes = base_attributes.except('address') unless property.exclusive_listing

@@ -6,6 +6,7 @@ import type { LeadStatus, InterestOperation } from "@properlia/shared/types";
 import { useLeads } from "@/src/services/leads/queries";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import LeadsTable from "./LeadsTable";
+import { Alert, DashboardTitle } from "@properlia/shared/components/ui";
 
 export default function LeadsPage() {
   const t = useT();
@@ -24,11 +25,9 @@ export default function LeadsPage() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">
-          {t('errorLoadingLeads')}: {error.message}
-        </p>
-      </div>
+      <Alert tone="danger">
+        {t('errorLoadingLeads')}: {error.message}
+      </Alert>
     );
   }
 
@@ -36,10 +35,10 @@ export default function LeadsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-primary uppercase">
+          <DashboardTitle>
             {t('leadsControlPanel')}
-          </h2>
-          <p className="text-sm text-gray-500">
+          </DashboardTitle>
+          <p className="text-sm text-brand-gray">
             {t('leadsDescription')}
           </p>
         </div>

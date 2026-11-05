@@ -9,6 +9,8 @@ class Property < ApplicationRecord
   has_many_attached :videos
   has_many :leads, dependent: :nullify
 
+  after_commit :revalidate_frontend_cache
+
   # Direct many-to-many relationship with categories
   # Users select which categories apply when creating a listing
   # (e.g., Land can be residential, commercial, industrial, or any combination)
@@ -31,6 +33,21 @@ class Property < ApplicationRecord
       .distinct
   }
 
+  ON_HOLD_REMINDER_INTERVAL = 3.days
+
+  scope :on_hold, -> { joins(:status).where(statuses: { name: Status::ON_HOLD }) }
+
+  scope :on_hold_due_for_reminder, ->(now = Time.current) {
+    on_hold.where('COALESCE(properties.on_hold_reminded_at, properties.on_hold_since) <= ?',
+                  now - ON_HOLD_REMINDER_INTERVAL)
+  }
+
+  before_save :track_on_hold_status, if: :will_save_change_to_status_id?
+
+  def on_hold?
+    status&.name == Status::ON_HOLD
+  end
+
   # Get available categories for this property's type
   # Useful for forms to show which categories the user can select
   def available_categories
@@ -43,6 +60,13 @@ class Property < ApplicationRecord
 
   validate :acceptable_attachments
 
+  private
+
+  def track_on_hold_status
+    self.on_hold_since = on_hold? ? Time.current : nil
+    self.on_hold_reminded_at = nil
+  end
+
   def acceptable_attachments
     images.each do |img|
       errors.add(:images, "must be an image") unless img.content_type.start_with?("image/")
@@ -50,5 +74,9 @@ class Property < ApplicationRecord
     videos.each do |vid|
       errors.add(:videos, "must be a video") unless vid.content_type.start_with?("video/")
     end
+  end
+
+  def revalidate_frontend_cache
+    RevalidateFrontendCacheJob.perform_later
   end
 end

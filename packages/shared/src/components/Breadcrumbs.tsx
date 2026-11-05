@@ -41,13 +41,13 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' 
                 </svg>
               )}
               {isLast || !item.href ? (
-                <span className="text-xs md:text-sm font-medium text-gray-500">
+                <span className="text-xs md:text-sm font-medium text-brand-gray">
                   {item.label}
                 </span>
               ) : (
                 <Link
                   href={item.href}
-                  className="inline-flex items-center text-xs md:text-sm font-medium text-gray-700 hover:text-blue-600"
+                  className="inline-flex items-center text-xs md:text-sm font-medium text-brand-carbon hover:text-brand-blue"
                 >
                   {item.label}
                 </Link>

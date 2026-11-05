@@ -106,16 +106,16 @@ const CATEGORY_CONFIG: Record<
   string,
   { color: string; Icon: React.FC<{ size?: number }> }
 > = {
-  "6ba7b810-9dad-11d1-80b4-00c04fd430c8": { color: "var(--blue)", Icon: IcoHouse },
-  "70928012-73a7-4790-9556-9a25b29b6e82": { color: "var(--navy)", Icon: IcoOffice },
-  "e49a8880-60b6-4550-9831-2746498c09d5": { color: "var(--carbon)", Icon: IcoWarehouse },
+  "6ba7b810-9dad-11d1-80b4-00c04fd430c8": { color: "var(--brand-blue)", Icon: IcoHouse },
+  "70928012-73a7-4790-9556-9a25b29b6e82": { color: "var(--brand-navy)", Icon: IcoOffice },
+  "e49a8880-60b6-4550-9831-2746498c09d5": { color: "var(--brand-carbon)", Icon: IcoWarehouse },
 };
 
 // listing-type ID → operation pill colors (per brand guidelines)
 const OPERATION_CONFIG: Record<string, { background: string; color: string }> = {
-  "b8e9f3d2-4c5a-6b7e-0f9e-8d2c3b4e5f6a": { background: "var(--blue)", color: "#fff" }, // venta
-  "c9f0e4d3-5c6b-7a8e-1f0e-9d3c4b5e6f7b": { background: "var(--blue)", color: "#fff" }, // renta
-  "a7f8e2d1-3c4b-5a6e-9f8d-7c1b2a3e4f5d": { background: "var(--navy)", color: "var(--gold)" }, // preventa
+  "b8e9f3d2-4c5a-6b7e-0f9e-8d2c3b4e5f6a": { background: "var(--brand-blue)", color: "#fff" }, // venta
+  "c9f0e4d3-5c6b-7a8e-1f0e-9d3c4b5e6f7b": { background: "var(--brand-blue)", color: "#fff" }, // renta
+  "a7f8e2d1-3c4b-5a6e-9f8d-7c1b2a3e4f5d": { background: "var(--brand-navy)", color: "var(--brand-gold)" }, // preventa
 };
 
 const formatPrice = (value: number) =>
@@ -146,6 +146,8 @@ interface PropertyCardProps {
   city?: { name: string; es_name: string } | null;
   state?: { name: string; es_name: string } | null;
   autoplay?: boolean;
+  displayTitle?: string;
+  priority?: boolean;
 }
 
 export const PropertyCard = ({
@@ -164,13 +166,18 @@ export const PropertyCard = ({
   city,
   state,
   autoplay = false,
+  displayTitle,
+  priority = false,
 }: PropertyCardProps) => {
   const locale = useLocale();
+  const locationLabel = (entity: { name: string; es_name: string }) =>
+    (locale === "es" && entity.es_name) || entity.name;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
   const propertyPath = `/${locale}${buildPropertyUrl({ id, title, state, city })}`;
+  const imageAlt = displayTitle ?? title;
 
   useEffect(() => {
     if (!autoplay || images.length <= 1 || isHovered) return;
@@ -196,7 +203,7 @@ export const PropertyCard = ({
   const operationLabel =
     locale === "es" ? listing_types.es_name : listing_types.name;
   const operationColors =
-    OPERATION_CONFIG[listing_types.id] ?? { background: "var(--blue-light)", color: "var(--blue)" };
+    OPERATION_CONFIG[listing_types.id] ?? { background: "var(--brand-pale)", color: "var(--brand-blue)" };
 
   const typeLabel =
     locale === "es" ? property_type.es_name : property_type.name;
@@ -208,7 +215,7 @@ export const PropertyCard = ({
       .map((cat) => CATEGORY_CONFIG[cat.id]?.color)
       .filter(Boolean) as string[];
 
-    return { background: colors[0] ?? "var(--blue)" };
+    return { background: colors[0] ?? "var(--brand-blue)" };
   };
 
   const firstCategoryConfig =
@@ -224,9 +231,9 @@ export const PropertyCard = ({
   return (
     <Link
       href={propertyPath}
-      className="flex flex-col bg-white rounded-2xl overflow-hidden h-full"
+      className="flex flex-col bg-white rounded-card overflow-hidden h-full"
       style={{
-        border: "1px solid var(--border)",
+        border: "1px solid var(--brand-border)",
         boxShadow:
           "0 1px 2px rgba(20,30,50,.06), 0 14px 30px -22px rgba(20,30,50,.38)",
       }}
@@ -234,7 +241,7 @@ export const PropertyCard = ({
       {/* Photo region */}
       <div
         className="relative shrink-0 group"
-        style={{ height: 200, background: "var(--blue-light)" }}
+        style={{ height: 200, background: "var(--brand-pale)" }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -243,13 +250,13 @@ export const PropertyCard = ({
               <Image
                 key={index}
                 src={image}
-                alt={`${title} - Image ${index + 1}`}
+                alt={`${imageAlt} - ${index + 1}`}
                 fill
                 className={`object-cover transition-opacity duration-700 ease-in-out ${
                   index === currentImageIndex ? "opacity-100" : "opacity-0"
                 }`}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={index === 0}
+                priority={priority && index === 0}
                 unoptimized={
                   image.includes("localhost") ||
                   image.includes("rails/active_storage")
@@ -259,11 +266,11 @@ export const PropertyCard = ({
           : images[0] && (
               <Image
                 src={images[0]}
-                alt={title}
+                alt={imageAlt}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority
+                priority={priority}
                 unoptimized={
                   images[0].includes("localhost") ||
                   images[0].includes("rails/active_storage")
@@ -288,7 +295,7 @@ export const PropertyCard = ({
           <span
             className="inline-flex items-center gap-[5px] font-medium rounded-full uppercase"
             style={{
-              background: "var(--navy)",
+              background: "var(--brand-navy)",
               color: "#fff",
               fontSize: 11,
               padding: "5px 11px",
@@ -308,14 +315,14 @@ export const PropertyCard = ({
               className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               aria-label="Previous image"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-800" />
+              <ChevronLeft className="w-5 h-5 text-brand-carbon" />
             </button>
             <button
               onClick={goToNext}
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               aria-label="Next image"
             >
-              <ChevronRight className="w-5 h-5 text-gray-800" />
+              <ChevronRight className="w-5 h-5 text-brand-carbon" />
             </button>
           </>
         )}
@@ -329,7 +336,7 @@ export const PropertyCard = ({
               className="inline-flex items-center gap-[5px] font-medium rounded-full tabular-nums"
               style={{
                 background: "rgba(255,255,255,.95)",
-                color: "var(--carbon)",
+                color: "var(--brand-carbon)",
                 fontSize: 12,
                 padding: "6px 10px",
                 boxShadow: "0 1px 3px rgba(20,30,50,.18)",
@@ -344,7 +351,7 @@ export const PropertyCard = ({
               className="inline-flex items-center gap-[5px] font-medium rounded-full tabular-nums"
               style={{
                 background: "rgba(255,255,255,.95)",
-                color: "var(--carbon)",
+                color: "var(--brand-carbon)",
                 fontSize: 12,
                 padding: "6px 10px",
                 boxShadow: "0 1px 3px rgba(20,30,50,.18)",
@@ -386,7 +393,7 @@ export const PropertyCard = ({
           <span
             className="font-medium tabular-nums"
             style={{
-              color: "var(--gold)",
+              color: "var(--brand-gold)",
               fontSize: 23,
               letterSpacing: "-0.2px",
             }}
@@ -395,7 +402,7 @@ export const PropertyCard = ({
           </span>
           <span
             className="font-normal ml-[6px]"
-            style={{ color: "var(--text-secondary)", fontSize: 13 }}
+            style={{ color: "var(--brand-gray)", fontSize: 13 }}
           >
             MXN
           </span>
@@ -405,20 +412,20 @@ export const PropertyCard = ({
         {(neighborhood || city || state) && (
           <div
             className="flex items-start gap-2 mt-3"
-            style={{ color: "var(--text-secondary)" }}
+            style={{ color: "var(--brand-gray)" }}
           >
             <IcoMapPin size={17} />
             <div>
               {neighborhood && (
-                <p className="font-normal" style={{ color: "var(--carbon)", fontSize: 14 }}>
+                <p className="font-normal" style={{ color: "var(--brand-carbon)", fontSize: 14 }}>
                   {neighborhood}
                 </p>
               )}
               {(city || state) && (
-                <p className="font-normal" style={{ color: "var(--text-secondary)", fontSize: 13 }}>
+                <p className="font-normal" style={{ color: "var(--brand-gray)", fontSize: 13 }}>
                   {[
-                    locale === "es" ? city?.es_name : city?.name,
-                    locale === "es" ? state?.es_name : state?.name,
+                    city && locationLabel(city),
+                    state && locationLabel(state),
                   ].filter(Boolean).join(", ")}
                 </p>
               )}

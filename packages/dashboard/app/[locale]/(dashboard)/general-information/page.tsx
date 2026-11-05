@@ -8,6 +8,14 @@ import {
   useUpdateGeneralInfo,
 } from "@/src/services/general-info/queries";
 import { useAuth } from "@/src/contexts/AuthContext";
+import {
+  Alert,
+  Button,
+  Card,
+  DashboardTitle,
+  Field,
+  Input,
+} from "@properlia/shared/components/ui";
 
 type FormState = {
   phone: string;
@@ -110,227 +118,187 @@ export default function GeneralInformationPage() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">
-          Error loading general information: {error.message}
-        </p>
-      </div>
+      <Alert tone="danger">
+        Error loading general information: {error.message}
+      </Alert>
     );
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-primary uppercase">
-          {t("generalInformation")}
-        </h2>
-        <p className="text-sm text-gray-500">
+        <DashboardTitle>{t("generalInformation")}</DashboardTitle>
+        <p className="text-sm text-brand-gray">
           Manage contact information that will be used across the platform.
         </p>
       </div>
 
       <div className="max-w-2xl">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <Card>
           {isLoading ? (
-            <div className="flex justify-center py-12 text-gray-500">
+            <div className="flex justify-center py-12 text-brand-gray">
               Loading general information...
             </div>
           ) : (
             <>
               {formError && (
-                <div className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                <Alert tone="danger" className="mb-4 p-3">
                   {formError}
-                </div>
+                </Alert>
               )}
 
               {successMessage && (
-                <div className="mb-4 rounded border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                <Alert tone="success" className="mb-4 p-3">
                   {successMessage}
-                </div>
+                </Alert>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("phone")}
-                  </label>
-                  <input
+                <Field
+                  label={t("phone")}
+                  hint="Main contact phone number for your business"
+                >
+                  <Input
                     type="tel"
                     value={form.phone}
                     onChange={(event) =>
                       handleChange("phone", event.target.value)
                     }
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="+52 555 123 4567"
                     required
                     disabled={!isAdmin}
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Main contact phone number for your business
-                  </p>
-                </div>
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    WhatsApp
-                  </label>
-                  <input
+                <Field
+                  label="WhatsApp"
+                  hint="WhatsApp number for quick customer communication"
+                >
+                  <Input
                     type="tel"
                     value={form.whatsapp}
                     onChange={(event) =>
                       handleChange("whatsapp", event.target.value)
                     }
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="+52 555 123 4567"
                     required
                     disabled={!isAdmin}
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    WhatsApp number for quick customer communication
-                  </p>
-                </div>
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("email")}
-                  </label>
-                  <input
+                <Field
+                  label={t("email")}
+                  hint="Email address where inquiries will be sent"
+                >
+                  <Input
                     type="email"
                     value={form.email_to}
                     onChange={(event) =>
                       handleChange("email_to", event.target.value)
                     }
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="contact@example.com"
                     required
                     disabled={!isAdmin}
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Email address where inquiries will be sent
-                  </p>
-                </div>
+                </Field>
 
-                <div className="pt-6 border-t border-gray-200">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                <div className="pt-6 border-t border-brand-border">
+                  <h3 className="text-sm font-medium text-brand-carbon mb-4">
                     Social Media & Contact (Optional)
                   </h3>
                   <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Contact Email (Footer)
-                      </label>
-                      <input
+                    <Field
+                      label="Contact Email (Footer)"
+                      hint="Email displayed in the website footer"
+                    >
+                      <Input
                         type="email"
                         value={form.email_contact}
                         onChange={(event) =>
                           handleChange("email_contact", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="info@example.com"
                         disabled={!isAdmin}
                       />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Email displayed in the website footer
-                      </p>
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Instagram
-                      </label>
-                      <input
+                    <Field
+                      label="Instagram"
+                      hint="Instagram displayed in the website footer"
+                    >
+                      <Input
                         type="url"
                         value={form.instagram}
                         onChange={(event) =>
                           handleChange("instagram", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="https://instagram.com/yourprofile"
                         disabled={!isAdmin}
                       />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Instagram displayed in the website footer
-                      </p>
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Facebook
-                      </label>
-                      <input
+                    <Field
+                      label="Facebook"
+                      hint="Facebook displayed in the website footer"
+                    >
+                      <Input
                         type="url"
                         value={form.facebook}
                         onChange={(event) =>
                           handleChange("facebook", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="https://facebook.com/yourpage"
                         disabled={!isAdmin}
                       />
-                       <p className="mt-1 text-xs text-gray-500">
-                        Facebook displayed in the website footer
-                      </p>
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        LinkedIn
-                      </label>
-                      <input
+                    <Field
+                      label="LinkedIn"
+                      hint="LinkedIn displayed in the website footer"
+                    >
+                      <Input
                         type="url"
                         value={form.linkedin}
                         onChange={(event) =>
                           handleChange("linkedin", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="https://linkedin.com/company/yourcompany"
                         disabled={!isAdmin}
                       />
-                       <p className="mt-1 text-xs text-gray-500">
-                        LinkedIn displayed in the website footer
-                      </p>
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        TikTok
-                      </label>
-                      <input
+                    <Field
+                      label="TikTok"
+                      hint="TikTok displayed in the website footer"
+                    >
+                      <Input
                         type="url"
                         value={form.tiktok}
                         onChange={(event) =>
                           handleChange("tiktok", event.target.value)
                         }
-                        className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="https://tiktok.com/@yourprofile"
                         disabled={!isAdmin}
                       />
-                      <p className="mt-1 text-xs text-gray-500">
-                        TikTok displayed in the website footer
-                      </p>
-                    </div>
+                    </Field>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500">
+                <div className="flex items-center justify-between pt-4 border-t border-brand-border">
+                  <p className="text-sm text-brand-gray">
                     {!isAdmin
                       ? "Only admins can edit this information"
                       : "Phone, WhatsApp, and Email are required"}
                   </p>
-                  <button
-                    type="submit"
-                    className="flex items-center gap-2 rounded-md bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    disabled={updating || !isAdmin}
-                  >
+                  <Button type="submit" disabled={updating || !isAdmin}>
                     <Save className="h-4 w-4" />
                     {updating ? "Saving..." : "Save Changes"}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

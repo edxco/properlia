@@ -7,6 +7,7 @@ import { useProperties } from "@/src/services/properties/queries";
 import { useStatuses } from "@/src/services/statuses/queries";
 import { usePropertyTypes } from "@/src/services/property-types/queries";
 import { useT } from "@properlia/shared/components/TranslationProvider";
+import { Alert, DashboardTitle, buttonClasses } from "@properlia/shared/components/ui";
 import PropertiesTable from "./PropertiesTable";
 
 type Filters = { status_id?: string; property_type_id?: string };
@@ -42,11 +43,9 @@ export default function PropertiesPage() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">
-          Error loading properties: {error.message}
-        </p>
-      </div>
+      <Alert tone="danger">
+        Error loading properties: {error.message}
+      </Alert>
     );
   }
 
@@ -54,15 +53,13 @@ export default function PropertiesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-primary uppercase">
-            {t("propertiesControlPanel")}
-          </h2>
+          <DashboardTitle>{t("propertiesControlPanel")}</DashboardTitle>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
             href="/properties/new"
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+            className={buttonClasses({ size: "sm" })}
           >
             {t("addNewProperty")}
           </Link>

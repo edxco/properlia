@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
 import { PriceInput } from "@properlia/shared/components";
+import { Alert, Button, buttonClasses, controlClasses, Label, Switch } from "@properlia/shared/components/ui";
 import { parsePriceInput } from "@properlia/shared";
 import { useCreatePublicLead } from "@/src/services/leads/mutations";
 import { useGeneralInfo } from "@/src/services/general-info/queries";
@@ -29,29 +30,17 @@ declare global {
 // Step configuration
 const TOTAL_STEPS = 4;
 
-const labelClass =
-  "block font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy mb-1.5";
 const helperTextClass =
-  "font-[family-name:var(--font-editorial-body)] text-xs text-slate-400 mb-2";
+  " text-xs text-brand-gray mb-2";
 const errorTextClass =
-  "mt-1.5 font-[family-name:var(--font-editorial-body)] text-sm text-red-600";
-const requiredMarkClass = "text-red-500";
+  "mt-1.5 text-sm text-danger";
+const requiredMarkClass = "text-danger";
 const radioOptionClass = "flex items-center gap-3 cursor-pointer";
-const radioInputClass = "h-4 w-4 accent-blue border-slate-300";
-const radioLabelClass = "font-[family-name:var(--font-editorial-body)] text-sm text-slate-700";
-const checkboxInputClass = "h-4 w-4 accent-blue border-slate-300 rounded";
+const radioInputClass = "h-4 w-4 accent-brand-blue border-input";
+const radioLabelClass = " text-sm text-brand-carbon";
+const checkboxInputClass = "h-4 w-4 accent-brand-blue border-input rounded";
 
-function fieldClass(hasError?: boolean) {
-  return `w-full h-12 px-4 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-navy placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue focus:border-blue ${
-    hasError ? "border-red-400" : "border-slate-300"
-  }`;
-}
 
-function textareaClass(hasError?: boolean) {
-  return `w-full px-4 py-3 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-navy placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue focus:border-blue resize-none ${
-    hasError ? "border-red-400" : "border-slate-300"
-  }`;
-}
 
 interface FormData {
   // Step 1: Contact & starting point
@@ -415,13 +404,13 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
   if (isSuccess) {
     return (
-      <section className="flex min-h-[60vh] items-center bg-blue-light py-24 font-[family-name:var(--font-editorial-body)]">
+      <section className="flex min-h-[60vh] items-center bg-brand-pale py-24">
         <div className="mx-auto w-full max-w-xl px-6 lg:px-8">
-          <div className="border-t-2 border-gold bg-white px-8 py-12 text-center shadow-[0_24px_64px_-32px_rgba(26,58,92,0.35)] md:px-12 md:py-14">
-            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-navy">
-              <IconCheck size={30} stroke={2} className="text-gold" />
+          <div className="border-t-2 border-brand-gold bg-white px-8 py-12 text-center shadow-overlay md:px-12 md:py-14">
+            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-brand-navy">
+              <IconCheck size={30} stroke={2} className="text-brand-gold" />
             </div>
-            <h2 className="font-[family-name:var(--font-editorial-display)] text-2xl font-medium leading-snug text-navy md:text-3xl">
+            <h2 className="font-display text-2xl font-medium leading-snug text-brand-navy md:text-3xl">
               {t("buyerFormSuccess")
                 .replace("{{buyer_name}}", submittedName)
                 .split("\n")
@@ -432,17 +421,14 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   </Fragment>
                 ))}
             </h2>
-            <button
-              onClick={() => setIsSuccess(false)}
-              className="mt-10 inline-flex h-12 items-center bg-navy px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
-            >
+            <Button size="lg" onClick={() => setIsSuccess(false)} className="mt-10 text-sm">
               {t("buyerSubmitButton")}
-            </button>
+            </Button>
 
             <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href={`/${locale}/properties`}
-                className="inline-flex h-12 items-center border border-navy/25 px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:border-navy hover:bg-navy/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
+                className={buttonClasses({ variant: "secondary", size: "lg", className: "text-sm" })}
               >
                 {t("buyerSuccessBrowseCta")}
               </Link>
@@ -453,7 +439,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-12 items-center gap-2 bg-gold px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
+                  className={buttonClasses({ size: "lg", className: "text-sm" })}
                 >
                   <IconBrandWhatsapp size={18} stroke={1.75} aria-hidden="true" />
                   {t("buyerSuccessWhatsAppCta")}
@@ -474,9 +460,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           <div className="space-y-6">
             {/* Full Name */}
             <div>
-              <label htmlFor="full_name" className={labelClass}>
+              <Label htmlFor="full_name">
                 {t("buyerFullName")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <input
                 type="text"
                 id="full_name"
@@ -484,7 +470,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.full_name}
                 onChange={handleChange}
                 placeholder={t("enterFullName")}
-                className={fieldClass(!!errors.full_name)}
+                className={controlClasses({ invalid: !!errors.full_name })}
               />
               {errors.full_name && <p className={errorTextClass}>{errors.full_name}</p>}
             </div>
@@ -492,9 +478,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {/* Email & Phone */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label htmlFor="email" className={labelClass}>
+                <Label htmlFor="email">
                   {t("buyerEmail")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <input
                   type="email"
                   id="email"
@@ -502,14 +488,14 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.email}
                   onChange={handleChange}
                   placeholder={t("enterEmail")}
-                  className={fieldClass(!!errors.email)}
+                  className={controlClasses({ invalid: !!errors.email })}
                 />
                 {errors.email && <p className={errorTextClass}>{errors.email}</p>}
               </div>
               <div>
-                <label htmlFor="phone" className={labelClass}>
+                <Label htmlFor="phone">
                   {t("phone")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <input
                   type="tel"
                   id="phone"
@@ -517,7 +503,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder={t("enterPhone")}
-                  className={fieldClass(!!errors.phone)}
+                  className={controlClasses({ invalid: !!errors.phone })}
                 />
                 {errors.phone && <p className={errorTextClass}>{errors.phone}</p>}
               </div>
@@ -525,43 +511,33 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             {/* WhatsApp Switch */}
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={formData.phone_has_whatsapp}
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    phone_has_whatsapp: !prev.phone_has_whatsapp,
-                  }))
+              <Switch
+                id="phone_has_whatsapp"
+                checked={formData.phone_has_whatsapp}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, phone_has_whatsapp: checked }))
                 }
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue focus:ring-offset-2 ${
-                  formData.phone_has_whatsapp ? "bg-navy" : "bg-slate-200"
-                }`}
+              />
+              <label
+                htmlFor="phone_has_whatsapp"
+                className="flex cursor-pointer items-center gap-1.5 text-sm text-brand-carbon"
               >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    formData.phone_has_whatsapp ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </button>
-              <label className="flex items-center gap-1.5 font-[family-name:var(--font-editorial-body)] text-sm text-slate-700">
-                <IconBrandWhatsapp size={18} stroke={1.75} className="text-navy" />
+                <IconBrandWhatsapp size={18} stroke={1.75} className="text-brand-navy" />
                 {t("buyerWhatsAppSwitch")}
               </label>
             </div>
 
             {/* How did you hear about us */}
             <div>
-              <label htmlFor="how_did_you_hear" className={labelClass}>
+              <Label htmlFor="how_did_you_hear">
                 {t("buyerHowDidYouHear")}
-              </label>
+              </Label>
               <select
                 id="how_did_you_hear"
                 name="how_did_you_hear"
                 value={formData.how_did_you_hear}
                 onChange={handleChange}
-                className={fieldClass()}
+                className={controlClasses()}
               >
                 <option value="">{t("select")}</option>
                 <option value="referral">{t("buyerHearReferral")}</option>
@@ -575,9 +551,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {/* Conditional Other input */}
             {formData.how_did_you_hear === "other" && (
               <div>
-                <label htmlFor="how_did_you_hear_other" className={labelClass}>
+                <Label htmlFor="how_did_you_hear_other">
                   {t("buyerSpecifyOther")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <input
                   type="text"
                   id="how_did_you_hear_other"
@@ -585,7 +561,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.how_did_you_hear_other}
                   onChange={handleChange}
                   placeholder={t("buyerSpecifyOtherPlaceholder")}
-                  className={fieldClass(!!errors.how_did_you_hear_other)}
+                  className={controlClasses({ invalid: !!errors.how_did_you_hear_other })}
                 />
                 {errors.how_did_you_hear_other && (
                   <p className={errorTextClass}>{errors.how_did_you_hear_other}</p>
@@ -600,9 +576,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           <div className="space-y-6">
             {/* Buyer Profile */}
             <div>
-              <label className={`${labelClass} mb-3`}>
+              <Label className="mb-3">
                 {t("buyerProfileQuestion")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <div className="space-y-2">
                 {[
                   { value: "single", label: t("buyerProfileSingle") },
@@ -630,9 +606,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {/* Conditional Other input */}
             {formData.buyer_profile === "other" && (
               <div>
-                <label htmlFor="buyer_profile_other" className={labelClass}>
+                <Label htmlFor="buyer_profile_other">
                   {t("buyerSpecifyOther")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <input
                   type="text"
                   id="buyer_profile_other"
@@ -640,7 +616,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.buyer_profile_other}
                   onChange={handleChange}
                   placeholder={t("buyerSpecifyOtherPlaceholder")}
-                  className={fieldClass(!!errors.buyer_profile_other)}
+                  className={controlClasses({ invalid: !!errors.buyer_profile_other })}
                 />
                 {errors.buyer_profile_other && (
                   <p className={errorTextClass}>{errors.buyer_profile_other}</p>
@@ -650,9 +626,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             {/* Buying As */}
             <div>
-              <label className={`${labelClass} mb-3`}>
+              <Label className="mb-3">
                 {t("buyerBuyingAsQuestion")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <div className="space-y-2">
                 {[
                   { value: "individual", label: t("buyerBuyingAsIndividual") },
@@ -681,9 +657,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           <div className="space-y-6">
             {/* Property Types (Checkbox Group) */}
             <div>
-              <label className={`${labelClass} mb-3`}>
+              <Label className="mb-3">
                 {t("buyerPropertyType")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <div className="space-y-2">
                 {[
                   { value: "residential", label: t("buyerPropertyTypeResidential") },
@@ -711,9 +687,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             {/* Process Stage */}
             <div>
-              <label className={`${labelClass} mb-3`}>
+              <Label className="mb-3">
                 {t("buyerProcessStage")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <div className="space-y-2">
                 {[
                   { value: "exploring", label: t("buyerStageExploring") },
@@ -739,9 +715,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             {/* Priority Zones */}
             <div>
-              <label htmlFor="priority_zones" className={labelClass}>
+              <Label htmlFor="priority_zones">
                 {t("buyerPriorityZones")}
-              </label>
+              </Label>
               <p className={helperTextClass}>{t("buyerPriorityZonesHelper")}</p>
               <textarea
                 id="priority_zones"
@@ -750,13 +726,13 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.priority_zones}
                 onChange={handleChange}
                 placeholder={t("buyerPriorityZonesPlaceholder")}
-                className={textareaClass()}
+                className={controlClasses({ multiline: true, className: "resize-none" })}
               />
             </div>
 
             {/* Open to Other Zones */}
             <div>
-              <label className={`${labelClass} mb-3`}>{t("buyerOpenToOtherZones")}</label>
+              <Label className="mb-3">{t("buyerOpenToOtherZones")}</Label>
               <div className="flex gap-6">
                 {[
                   { value: "yes", label: t("yes") },
@@ -780,9 +756,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {/* Budget & Payment Method */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label htmlFor="max_budget" className={labelClass}>
+                <Label htmlFor="max_budget">
                   {t("buyerMaxBudget")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <PriceInput
                   id="max_budget"
                   name="max_budget"
@@ -794,21 +770,21 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                     }
                   }}
                   placeholder={t("buyerMaxBudgetPlaceholder")}
-                  className={`${fieldClass(!!errors.max_budget)} pl-8 pr-4`}
-                  symbolClassName="text-slate-500"
+                  className="pl-8 pr-4"
+                  symbolClassName="text-brand-gray"
                   hasError={!!errors.max_budget}
                 />
                 {errors.max_budget && <p className={errorTextClass}>{errors.max_budget}</p>}
               </div>
               <div>
-                <label className={labelClass}>
+                <Label>
                   {t("buyerPaymentMethod")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <select
                   name="payment_method"
                   value={formData.payment_method}
                   onChange={handleChange}
-                  className={fieldClass(!!errors.payment_method)}
+                  className={controlClasses({ invalid: !!errors.payment_method })}
                 >
                   <option value="">{t("select")}</option>
                   <option value="cash">{t("buyerPaymentCash")}</option>
@@ -826,9 +802,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {(formData.payment_method === "mortgage" ||
               formData.payment_method === "mixed") && (
               <div>
-                <label className={`${labelClass} mb-3`}>
+                <Label className="mb-3">
                   {t("buyerCreditPreApproval")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <div className="flex gap-6">
                   {[
                     { value: "yes", label: t("yes") },
@@ -860,9 +836,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
           <div className="space-y-6">
             {/* Essential Criteria */}
             <div>
-              <label htmlFor="essential_criteria" className={labelClass}>
+              <Label htmlFor="essential_criteria">
                 {t("buyerEssentialCriteria")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <p className={helperTextClass}>{t("buyerEssentialCriteriaHelper")}</p>
               <textarea
                 id="essential_criteria"
@@ -871,7 +847,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.essential_criteria}
                 onChange={handleChange}
                 placeholder={t("buyerEssentialCriteriaPlaceholder")}
-                className={textareaClass(!!errors.essential_criteria)}
+                className={controlClasses({ invalid: !!errors.essential_criteria, multiline: true, className: "resize-none" })}
               />
               {errors.essential_criteria && (
                 <p className={errorTextClass}>{errors.essential_criteria}</p>
@@ -880,9 +856,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             {/* Deal Breakers */}
             <div>
-              <label htmlFor="deal_breakers" className={labelClass}>
+              <Label htmlFor="deal_breakers">
                 {t("buyerDealBreakers")}
-              </label>
+              </Label>
               <textarea
                 id="deal_breakers"
                 name="deal_breakers"
@@ -890,15 +866,15 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.deal_breakers}
                 onChange={handleChange}
                 placeholder={t("buyerDealBreakersPlaceholder")}
-                className={textareaClass()}
+                className={controlClasses({ multiline: true, className: "resize-none" })}
               />
             </div>
 
             {/* Primary Goal */}
             <div>
-              <label className={`${labelClass} mb-3`}>
+              <Label className="mb-3">
                 {t("buyerPrimaryGoal")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <div className="space-y-2">
                 {[
                   { value: "home", label: t("buyerGoalHome") },
@@ -926,9 +902,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {/* Conditional Other input */}
             {formData.primary_goal === "other" && (
               <div>
-                <label htmlFor="primary_goal_other" className={labelClass}>
+                <Label htmlFor="primary_goal_other">
                   {t("buyerSpecifyOther")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <input
                   type="text"
                   id="primary_goal_other"
@@ -936,7 +912,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.primary_goal_other}
                   onChange={handleChange}
                   placeholder={t("buyerSpecifyOtherPlaceholder")}
-                  className={fieldClass(!!errors.primary_goal_other)}
+                  className={controlClasses({ invalid: !!errors.primary_goal_other })}
                 />
                 {errors.primary_goal_other && (
                   <p className={errorTextClass}>{errors.primary_goal_other}</p>
@@ -946,9 +922,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             {/* Timeframe */}
             <div>
-              <label className={`${labelClass} mb-3`}>
+              <Label className="mb-3">
                 {t("buyerDecisionTimeframe")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <div className="space-y-2">
                 {[
                   { value: "0-3", label: t("buyerTimeframe0to3") },
@@ -975,7 +951,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             {/* Prior Experience */}
             <div>
-              <label className={`${labelClass} mb-3`}>{t("buyerPriorExperience")}</label>
+              <Label className="mb-3">{t("buyerPriorExperience")}</Label>
               <div className="flex gap-6">
                 {[
                   { value: "yes", label: t("yes") },
@@ -999,9 +975,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
             {/* Prior Experience Frustration (conditional) */}
             {formData.prior_experience === "yes" && (
               <div>
-                <label htmlFor="prior_experience_frustration" className={labelClass}>
+                <Label htmlFor="prior_experience_frustration">
                   {t("buyerFrustration")} <span className={requiredMarkClass}>*</span>
-                </label>
+                </Label>
                 <textarea
                   id="prior_experience_frustration"
                   name="prior_experience_frustration"
@@ -1009,7 +985,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                   value={formData.prior_experience_frustration}
                   onChange={handleChange}
                   placeholder={t("buyerFrustrationPlaceholder")}
-                  className={textareaClass(!!errors.prior_experience_frustration)}
+                  className={controlClasses({ invalid: !!errors.prior_experience_frustration, multiline: true, className: "resize-none" })}
                 />
                 {errors.prior_experience_frustration && (
                   <p className={errorTextClass}>{errors.prior_experience_frustration}</p>
@@ -1019,9 +995,9 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             {/* Consultation Expectations */}
             <div>
-              <label htmlFor="consultation_expectations" className={labelClass}>
+              <Label htmlFor="consultation_expectations">
                 {t("buyerConsultationExpectations")}
-              </label>
+              </Label>
               <p className={helperTextClass}>{t("buyerConsultationExpectationsHelper")}</p>
               <textarea
                 id="consultation_expectations"
@@ -1030,15 +1006,15 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 value={formData.consultation_expectations}
                 onChange={handleChange}
                 placeholder={t("buyerConsultationExpectationsPlaceholder")}
-                className={textareaClass()}
+                className={controlClasses({ multiline: true, className: "resize-none" })}
               />
             </div>
 
             {/* Commitment Level */}
             <div>
-              <label className={`${labelClass} mb-3`}>
+              <Label className="mb-3">
                 {t("buyerCommitmentQuestion")} <span className={requiredMarkClass}>*</span>
-              </label>
+              </Label>
               <div className="space-y-2">
                 {[
                   { value: "yes", label: t("buyerCommitmentYes") },
@@ -1075,7 +1051,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
               />
               <label
                 htmlFor="consent_marketing"
-                className="ml-3 font-[family-name:var(--font-editorial-body)] text-sm text-slate-600"
+                className="ml-3 text-sm text-brand-carbon/70"
               >
                 {t("consentMarketing")}
               </label>
@@ -1094,20 +1070,20 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
       <BuyerAdvantages />
       <ProofStrip />
 
-      <section id="buyer-consultation-form" className="bg-blue-light py-20 md:py-28">
+      <section id="buyer-consultation-form" className="bg-brand-pale py-20 md:py-28">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           {/* Editorial section header, aligned with the card */}
           <div className="max-w-2xl">
-            <h2 className="font-[family-name:var(--font-editorial-display)] text-4xl font-medium tracking-[-0.01em] text-navy md:text-5xl">
+            <h2 className="font-display text-4xl font-medium tracking-[-0.01em] text-brand-navy md:text-5xl">
               {t("buyerFormSectionTitle")}
             </h2>
-            <p className="mt-5 font-[family-name:var(--font-editorial-body)] text-lg leading-relaxed text-slate-600">
+            <p className="mt-5 text-lg leading-relaxed text-brand-carbon/70">
               {t("buyerFormSectionText")}
             </p>
           </div>
 
           {/* The consultation card: advisor rail + client side */}
-          <div className="mt-12 grid overflow-hidden border-t-2 border-gold shadow-[0_32px_80px_-40px_rgba(26,58,92,0.4)] lg:grid-cols-[320px_1fr]">
+          <div className="mt-12 grid overflow-hidden border-t-2 border-brand-gold shadow-overlay lg:grid-cols-[320px_1fr]">
             <BuyerStepper
               currentStep={currentStep}
               totalSteps={TOTAL_STEPS}
@@ -1116,29 +1092,26 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             <div className="bg-white px-6 py-10 md:px-10 lg:px-14 lg:py-12">
               {/* Step Title & Description */}
-              <div className="border-b border-slate-200 pb-6">
-                <p className="font-[family-name:var(--font-editorial-body)] text-xs font-medium uppercase tracking-[0.2em] text-blue">
+              <div className="border-b border-brand-border pb-6">
+                <p className=" text-xs font-medium uppercase tracking-[0.2em] text-brand-blue">
                   {t("buyerStepPrefix")} {currentStep} {t("buyerStepConnector")} {TOTAL_STEPS}
                 </p>
                 <h3
                   ref={stepHeadingRef}
                   tabIndex={-1}
-                  className="mt-3 font-[family-name:var(--font-editorial-display)] text-2xl font-medium text-navy focus:outline-none md:text-[1.7rem]"
+                  className="mt-3 font-display text-2xl font-medium text-brand-navy focus:outline-none md:text-[1.7rem]"
                 >
                   {stepTitles[currentStep - 1].title}
                 </h3>
-                <p className="mt-2 font-[family-name:var(--font-editorial-body)] text-sm leading-relaxed text-slate-500">
+                <p className="mt-2 text-sm leading-relaxed text-brand-gray">
                   {stepTitles[currentStep - 1].description}
                 </p>
               </div>
 
               {errors.general && (
-                <div
-                  role="alert"
-                  className="mt-6 border-l-2 border-red-500 bg-red-50 p-4 font-[family-name:var(--font-editorial-body)] text-sm text-red-700"
-                >
+                <Alert tone="danger" className="mt-6">
                   {errors.general}
-                </div>
+                </Alert>
               )}
 
               <form onSubmit={handleSubmit}>
@@ -1157,37 +1130,35 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="mt-10 flex justify-between gap-4 border-t border-slate-200 pt-6">
+                <div className="mt-10 flex justify-between gap-4 border-t border-brand-border pt-6">
                   {currentStep > 1 ? (
-                    <button
-                      type="button"
+                    <Button
+                      variant="secondary"
+                      size="lg"
                       onClick={handleBack}
-                      className="flex h-12 items-center gap-2 border border-navy/25 px-6 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:border-navy hover:bg-navy/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
+                      className="px-6 text-sm"
                     >
                       <IconChevronLeft size={16} stroke={2} aria-hidden="true" />
                       {t("buyerBack")}
-                    </button>
+                    </Button>
                   ) : (
                     <div />
                   )}
 
                   {currentStep < TOTAL_STEPS ? (
-                    <button
-                      type="button"
-                      onClick={handleNext}
-                      className="flex h-12 items-center gap-2 bg-navy px-7 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2"
-                    >
+                    <Button size="lg" onClick={handleNext} className="px-7 text-sm">
                       {t("buyerNext")}
                       <IconChevronRight size={16} stroke={2} aria-hidden="true" />
-                    </button>
+                    </Button>
                   ) : (
-                    <button
+                    <Button
                       type="submit"
+                      size="lg"
                       disabled={createLead.isPending}
-                      className="flex h-12 items-center gap-2 bg-gold px-7 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-navy transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                      className="px-7 text-sm"
                     >
                       {createLead.isPending ? t("submitting") : t("buyerSubmitButton")}
-                    </button>
+                    </Button>
                   )}
                 </div>
               </form>

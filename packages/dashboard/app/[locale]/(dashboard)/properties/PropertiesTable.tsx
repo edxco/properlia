@@ -11,6 +11,7 @@ import {
   formatLargeNumber,
   getBadge,
 } from "@properlia/shared";
+import { Button, Card, Chip, Select } from "@properlia/shared/components/ui";
 import PropertyActionsDropdown from "./PropertyActionsDropdown";
 import FactSheetModal from "./FactSheetModal";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
@@ -59,103 +60,88 @@ export default function PropertiesTable({
   return (
     <div className="space-y-4">
       {/* Filter Bar */}
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm px-5 py-4 space-y-3">
+      <Card padding="none" className="px-5 py-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+          <span className="text-xs font-medium uppercase tracking-wide text-brand-gray">
             Filters
           </span>
           {(filters.status_id || filters.property_type_id) && (
-            <button
+            <Button
+              variant="link"
               onClick={() => onFilterChange({})}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              className="h-auto text-xs text-brand-gray hover:text-brand-carbon hover:no-underline"
             >
               Clear all
-            </button>
+            </Button>
           )}
         </div>
 
         <div className="flex flex-wrap gap-y-3 gap-x-6">
           {/* Status group */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-gray-500 whitespace-nowrap">
+            <span className="text-xs font-medium text-brand-gray whitespace-nowrap">
               Status
             </span>
             <div className="flex items-center gap-1 flex-wrap">
-              <button
+              <Chip
+                selected={!filters.status_id}
                 onClick={() => onFilterChange({ ...filters, status_id: undefined })}
-                className={`px-3 py-1 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
-                  !filters.status_id
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
               >
                 {capitalizeFirstWord(t("all"))}
-              </button>
+              </Chip>
               {statuses?.map((status) => (
-                <button
+                <Chip
                   key={status.id}
+                  selected={filters.status_id === status.id}
                   onClick={() => onFilterChange({ ...filters, status_id: status.id })}
-                  className={`px-3 py-1 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
-                    filters.status_id === status.id
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
                 >
                   {capitalizeFirstWord(locale === "es" ? status.es_name : status.name)}
-                </button>
+                </Chip>
               ))}
             </div>
           </div>
 
-          <div className="w-px bg-gray-200 self-stretch hidden sm:block" />
+          <div className="w-px bg-brand-border self-stretch hidden sm:block" />
 
           {/* Property type group */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-gray-500 whitespace-nowrap">
+            <span className="text-xs font-medium text-brand-gray whitespace-nowrap">
               Type
             </span>
             <div className="flex items-center gap-1 flex-wrap">
-              <button
+              <Chip
+                selected={!filters.property_type_id}
                 onClick={() => onFilterChange({ ...filters, property_type_id: undefined })}
-                className={`px-3 py-1 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
-                  !filters.property_type_id
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
               >
                 {capitalizeFirstWord(t("all"))}
-              </button>
+              </Chip>
               {propertyTypes?.map((type) => (
-                <button
+                <Chip
                   key={type.id}
+                  selected={filters.property_type_id === type.id}
                   onClick={() => onFilterChange({ ...filters, property_type_id: type.id })}
-                  className={`px-3 py-1 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
-                    filters.property_type_id === type.id
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
                 >
                   {capitalizeFirstWord(locale === "es" ? type.es_name : type.name)}
-                </button>
+                </Chip>
               ))}
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="overflow-visible rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+      <Card padding="none" className="overflow-visible">
+        <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
           <div>
-            <p className="text-sm font-semibold text-gray-800">
+            <p className="text-sm font-medium text-brand-carbon">
               {metadata?.count ?? 0} {t("properties")}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-brand-gray">
               Total: ${formatLargeNumber(totalPrice)} ($
               {totalPrice.toLocaleString()})
             </p>
           </div>
           {metadata && (
-            <div className="text-right text-xs text-gray-500">
+            <div className="text-right text-xs text-brand-gray">
               Page {metadata.page} of {metadata.pages}
             </div>
           )}
@@ -163,28 +149,28 @@ export default function PropertiesTable({
 
         <div>
           {isLoading ? (
-            <div className="flex justify-center px-6 py-12 text-gray-500">
+            <div className="flex justify-center px-6 py-12 text-brand-gray">
               Loading properties...
             </div>
           ) : properties.length ? (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-brand-border">
               {properties.map((property) => (
                 <div key={property.id} className="relative group pb-2">
                   <a
                     href={`/properties/${property.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-3 py-3 pr-14 sm:pl-6 sm:py-4 sm:pr-16 hover:bg-gray-100 transition-colors"
+                    className="block px-3 py-3 pr-14 sm:pl-6 sm:py-4 sm:pr-16 hover:bg-brand-bg transition-colors"
                   >
                     <div className="space-y-2">
                       {/* Row 1: Title and Price */}
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                         <div className="flex-1 flex gap-1 items-center">
                           <h3
-                            className={`font-semibold text-base line-clamp-2 sm:line-clamp-none ${
+                            className={`font-medium text-base line-clamp-2 sm:line-clamp-none ${
                               property.status_id ===
                               "7d4a2f8e-6c91-4b5d-a3f2-9e0c1b8a7d64"
-                                ? "text-gray-500"
+                                ? "text-brand-gray"
                                 : "text-primary"
                             }`}
                           >
@@ -196,11 +182,11 @@ export default function PropertiesTable({
                               getBadge(property.status, locale)}
                           </span>
                           {property.featured && (
-                            <Star className="ml-2 w-5 h-5 fill-amber-400 text-amber-400" />
+                            <Star className="ml-2 w-5 h-5 fill-brand-blue text-brand-blue" />
                           )}
                         </div>
                         <div className="sm:text-right">
-                          <div className="text-lg font-bold text-gray-900">
+                          <div className="text-lg font-medium text-brand-carbon">
                             ${Number(property.price || 0).toLocaleString()}
                           </div>
                         </div>
@@ -208,7 +194,7 @@ export default function PropertiesTable({
 
                       {/* Row 2: Location Details and Type Badges */}
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 text-sm">
-                        <div className="flex items-center gap-3 text-gray-600 flex-wrap">
+                        <div className="flex items-center gap-3 text-brand-carbon/70 flex-wrap">
                           {property.neighborhood && (
                             <span className="font-medium">
                               {property.neighborhood}
@@ -259,39 +245,42 @@ export default function PropertiesTable({
               ))}
             </div>
           ) : (
-            <div className="px-6 py-12 text-center text-gray-500">
-              <p className="font-medium text-gray-700">
+            <div className="px-6 py-12 text-center text-brand-gray">
+              <p className="font-medium text-brand-carbon">
                 No properties found
               </p>
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Pagination */}
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-brand-carbon/70">
           <span>{t("propertiesPerPage")}:</span>
-          <select
+          <Select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="rounded-md border border-gray-200 bg-white px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            controlSize="sm"
+            className="w-auto tabular-nums"
           >
             {[5, 10, 25, 50, 100].map((size) => (
               <option key={size} value={size}>{size}</option>
             ))}
-          </select>
+          </Select>
         </div>
 
         {metadata && metadata.pages > 1 && (
           <div className="flex items-center gap-1">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => onPageChange(metadata.page - 1)}
               disabled={metadata.page <= 1}
-              className="p-2 rounded-md text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="size-8"
             >
               <ChevronLeft className="w-4 h-4" />
-            </button>
+            </Button>
 
             {Array.from({ length: metadata.pages }, (_, i) => i + 1)
               .filter(
@@ -307,31 +296,31 @@ export default function PropertiesTable({
               }, [])
               .map((item, i) =>
                 item === "..." ? (
-                  <span key={`ellipsis-${i}`} className="px-2 text-gray-400">
+                  <span key={`ellipsis-${i}`} className="px-2 text-brand-gray">
                     …
                   </span>
                 ) : (
-                  <button
+                  <Button
                     key={item}
+                    variant={metadata.page === item ? "primary" : "ghost"}
+                    size="sm"
                     onClick={() => onPageChange(item as number)}
-                    className={`min-w-[2rem] h-8 px-2 rounded-md text-sm font-medium transition-colors ${
-                      metadata.page === item
-                        ? "bg-primary text-white"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                    className="h-8 min-w-8 px-2 tabular-nums"
                   >
                     {item}
-                  </button>
+                  </Button>
                 )
               )}
 
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => onPageChange(metadata.page + 1)}
               disabled={metadata.page >= metadata.pages}
-              className="p-2 rounded-md text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="size-8"
             >
               <ChevronRight className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useT } from "@properlia/shared/components/TranslationProvider";
+import { Alert, Button } from "@properlia/shared/components/ui";
 
 interface Filters {
   rooms?: number;
@@ -39,7 +40,7 @@ export function NoResultsAlert({
     if (autoDismissSeconds > 0) {
       const timer = setTimeout(() => {
         setShowAlert(false);
-      }, autoDismissSeconds * 10000);
+      }, autoDismissSeconds * 1000);
 
       return () => clearTimeout(timer);
     }
@@ -48,7 +49,7 @@ export function NoResultsAlert({
   if (!showAlert) return null;
 
   return (
-    <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+    <Alert tone="danger" role="status" className="mb-6">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <span className="mb-2">
@@ -56,10 +57,10 @@ export function NoResultsAlert({
           </span>
 
           {filters.listingType && (
-            <span className="font-semibold">{" "}{filters.listingType === "rent" ? t("rent") : t("buy")}</span>
+            <span className="font-medium">{" "}{filters.listingType === "rent" ? t("rent") : t("buy")}</span>
           )}
-          {filters.searchQuery && <>{" "}{t('in')}{" "}<span className="font-semibold">{filters.searchQuery}</span></>}
-          <div className="text-red-700 text-sm space-y-1">
+          {filters.searchQuery && <>{" "}{t('in')}{" "}<span className="font-medium">{filters.searchQuery}</span></>}
+          <div className="text-danger text-sm space-y-1">
             {(filters.rooms ||
               filters.bathrooms ||
               filters.priceMin ||
@@ -110,26 +111,25 @@ export function NoResultsAlert({
               </p>
             )}
           </div>
-          <p className="text-red-700 text-sm mt-3">
+          <p className="text-danger text-sm mt-3">
             {t("showingAllProperties") ||
               "Showing all available properties below"}
           </p>
         </div>
         <div className="flex gap-2 ml-4">
-          <button
-            onClick={onClearFilters}
-            className="px-3 py-1.5 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
-          >
+          <Button variant="destructive" size="sm" onClick={onClearFilters} className="px-3">
             {t("clearFilters") || "Clear filters"}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setShowAlert(false)}
-            className="px-3 py-1.5 bg-red-100 text-red-700 text-sm rounded hover:bg-red-200 transition-colors"
+            className="px-3 text-danger hover:bg-danger/10"
           >
             {t("dismiss") || "Dismiss"}
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </Alert>
   );
 }

@@ -1,0 +1,2 @@
+# Times are UTC. 15:00 UTC = 09:00 America/Mexico_City
+0 15 * * * cd /app && bundle exec rails properties:on_hold_reminders

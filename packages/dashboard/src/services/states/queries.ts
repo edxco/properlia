@@ -6,6 +6,6 @@ import { stateApi } from '@properlia/shared/services/states/api';
 export const useStates = () =>
   useQuery({
     queryKey: ['states'],
-    queryFn: stateApi.getAll,
+    queryFn: () => stateApi.getAll(),
     select: (response) => response.data,
   });

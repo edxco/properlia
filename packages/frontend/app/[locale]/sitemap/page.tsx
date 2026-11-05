@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { buildMetadata } from "@/src/lib/metadata";
 import { enMessages as en, esMessages as es } from "@properlia/shared";
+import { PageTitle } from "@properlia/shared/components/ui";
 
 const dictionaries: Record<string, Record<string, string>> = { en, es };
 
@@ -42,6 +43,10 @@ export default async function SitemapPage({
       ],
     },
     {
+      title: dict["sitemapSectionContact"],
+      links: [{ label: dict["contact"], href: `/${locale}/contact` }],
+    },
+    {
       title: dict["sitemapSectionLegal"],
       links: [
         { label: dict["termsAndConditions"], href: `/${locale}/terms` },
@@ -52,13 +57,13 @@ export default async function SitemapPage({
 
   return (
     <section className="max-w-3xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold mb-2">{dict["sitemapTitle"]}</h1>
-      <p className="text-sm text-gray-500 mb-10">{dict["sitemapSubtitle"]}</p>
+      <PageTitle className="mb-2 text-3xl md:text-3xl">{dict["sitemapTitle"]}</PageTitle>
+      <p className="text-sm text-brand-gray mb-10">{dict["sitemapSubtitle"]}</p>
 
       <div className="space-y-10">
         {sections.map((section) => (
           <div key={section.title}>
-            <h2 className="text-lg font-semibold mb-4 border-b pb-2">{section.title}</h2>
+            <h2 className="font-display text-lg font-medium mb-4 border-b pb-2">{section.title}</h2>
             <ul className="space-y-2">
               {section.links.map((link) => (
                 <li key={link.href}>

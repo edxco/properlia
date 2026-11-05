@@ -40,6 +40,18 @@ import {
   getAbsoluteImageUrl,
   formatPriceInput,
 } from "@properlia/shared";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Chip,
+  Input,
+  Label,
+  Select,
+  Textarea,
+  controlClasses,
+} from "@properlia/shared/components/ui";
 import PreviewPDF from "./[id]/previewPDF";
 
 type FormState = {
@@ -138,27 +150,27 @@ const NewImageCard = memo(function NewImageCard({
       onDrop={(e) => onDrop(e, index)}
       className={`relative group cursor-grab active:cursor-grabbing transition-all ${
         isDragging ? "opacity-40 scale-95" : "opacity-100"
-      } ${isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}
+      } ${isDropTarget ? "ring-2 ring-brand-blue ring-offset-2" : ""}`}
     >
       <img
         src={objectUrl}
         alt={file.name}
-        className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
+        className="w-full h-20 object-cover rounded border border-brand-border pointer-events-none select-none"
         draggable={false}
       />
       {index === 0 && (
-        <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+        <div className="absolute bottom-1 left-1 bg-brand-blue text-white text-xs px-2 py-0.5 rounded-full pointer-events-none">
           Cover
         </div>
       )}
       <button
         type="button"
         onClick={() => onRemove(index)}
-        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 z-10"
+        className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-danger/90 z-10"
       >
         <X className="h-3 w-3" />
       </button>
-      <p className="text-xs text-gray-500 mt-1 truncate pointer-events-none">
+      <p className="text-xs text-brand-gray mt-1 truncate pointer-events-none">
         {file.name}
       </p>
     </div>
@@ -207,16 +219,16 @@ const ExistingImageCard = memo(function ExistingImageCard({
       onDrop={(e) => onDrop(e, index)}
       className={`relative group cursor-grab active:cursor-grabbing transition-all ${
         isDragging ? "opacity-40 scale-95" : "opacity-100"
-      } ${isDropTarget ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}
+      } ${isDropTarget ? "ring-2 ring-brand-blue ring-offset-2" : ""}`}
     >
       <img
         src={getAbsoluteImageUrl(image.url)}
         alt={image.filename}
-        className="w-full h-20 object-cover rounded border border-gray-200 pointer-events-none select-none"
+        className="w-full h-20 object-cover rounded border border-brand-border pointer-events-none select-none"
         draggable={false}
       />
       {index === 0 && (
-        <div className="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded pointer-events-none">
+        <div className="absolute bottom-1 left-1 bg-brand-blue text-white text-xs px-2 py-0.5 rounded-full pointer-events-none">
           Cover
         </div>
       )}
@@ -224,7 +236,7 @@ const ExistingImageCard = memo(function ExistingImageCard({
         type="button"
         onClick={() => onDelete(image.id)}
         disabled={deletingAttachment || reorderingImages}
-        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:opacity-50 z-10"
+        className="absolute top-1 right-1 bg-danger text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-danger/90 disabled:opacity-50 z-10"
       >
         <X className="h-3 w-3" />
       </button>
@@ -877,75 +889,66 @@ export default function PropertyForm({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <Card>
       <div className="flex items-center justify-between content-center">
         <div className="m-none">
-          <h3 className="text-lg font-semibold text-primary">
+          <h3 className="text-lg font-medium text-primary">
             {editingProperty ? t("editProperty") : t("addProperty")}
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-brand-gray">
             {editingProperty ? t("updateForm") : t("createForm")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <Chip
+            selected={form.featured}
+            size="md"
             onClick={() => handleChange("featured", !form.featured)}
-            className={`cursor-pointer relative px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
-              form.featured
-                ? "bg-blue-100 text-blue-700 border-blue-300"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-            }`}
+            className="relative"
           >
             {form.featured && (
-              <span className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5">
+              <span className="absolute -top-1.5 -right-1.5 bg-success rounded-full p-0.5">
                 <Check className="h-2.5 w-2.5 text-white" />
               </span>
             )}
             {t("featured")}
-          </button>
-          <button
-            type="button"
+          </Chip>
+          <Chip
+            selected={form.exclusive_listing}
+            size="md"
             onClick={() =>
               handleChange("exclusive_listing", !form.exclusive_listing)
             }
-            className={`cursor-pointer relative px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
-              form.exclusive_listing
-                ? "bg-blue-100 text-blue-700 border-blue-300"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-            }`}
+            className="relative"
           >
             {form.exclusive_listing && (
-              <span className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5">
+              <span className="absolute -top-1.5 -right-1.5 bg-success rounded-full p-0.5">
                 <Check className="h-2.5 w-2.5 text-white" />
               </span>
             )}
             {t("exclusiveListing")}
-          </button>
+          </Chip>
           {editingProperty && (
-            <button
-              onClick={onCancelEdit}
-              className="cursor-pointer  relative px-3 py-1.5 text-sm rounded-md border transition-colors bg-red-400 text-white border-gray-400"
-            >
+            <Button variant="destructive" size="sm" onClick={onCancelEdit}>
               {t("cancelEdit")}
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {formError && (
-        <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="danger" className="mt-4 p-3">
           {formError}
-        </div>
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t("propertyType")} <span className="text-red-600">*</span>
-            </label>
-            <select
+            <Label>
+              {t("propertyType")} <span className="text-danger">*</span>
+            </Label>
+            <Select
               value={form.property_type_id}
               onChange={(event) => {
                 const newPropertyTypeId = event.target.value;
@@ -967,7 +970,6 @@ export default function PropertyForm({
                   handleChange("property_category_ids", []);
                 }
               }}
-              className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               required
             >
               <option value="">{t("select")}</option>
@@ -978,20 +980,19 @@ export default function PropertyForm({
                   )}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <Label>
               {capitalizeFirstWord(t("listingType"))}{" "}
-              <span className="text-red-600">*</span>
-            </label>
-            <select
+              <span className="text-danger">*</span>
+            </Label>
+            <Select
               value={form.listing_type_id}
               onChange={(event) =>
                 handleChange("listing_type_id", event.target.value)
               }
-              className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               required
             >
               <option value="">{t("select")}</option>
@@ -1002,7 +1003,7 @@ export default function PropertyForm({
                   )}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 items-center my-6">
@@ -1016,19 +1017,20 @@ export default function PropertyForm({
             if (categories.length > 1) {
               return (
                 <div className="flex flex-wrap content-center items-center gap-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <Label>
                     {t("propertyCategory")}{" "}
-                    <span className="text-red-600">*</span>
-                  </label>
+                    <span className="text-danger">*</span>
+                  </Label>
                   <div className="flex gap-4">
                     {categories.map((category) => {
                       const isSelected = form.property_category_ids.includes(
                         category.id
                       );
                       return (
-                        <button
+                        <Chip
                           key={category.id}
-                          type="button"
+                          selected={isSelected}
+                          size="md"
                           onClick={() => {
                             const newIds = isSelected
                               ? form.property_category_ids.filter(
@@ -1037,21 +1039,17 @@ export default function PropertyForm({
                               : [...form.property_category_ids, category.id];
                             handleChange("property_category_ids", newIds);
                           }}
-                          className={`relative px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
-                            isSelected
-                              ? "bg-blue-100 text-blue-700 border-blue-300"
-                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                          }`}
+                          className="relative"
                         >
                           {isSelected && (
-                            <span className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5">
+                            <span className="absolute -top-1.5 -right-1.5 bg-success rounded-full p-0.5">
                               <Check className="h-2.5 w-2.5 text-white" />
                             </span>
                           )}
                           {capitalizeFirstWord(
                             locale === "es" ? category.es_name : category.name
                           )}
-                        </button>
+                        </Chip>
                       );
                     })}
                   </div>
@@ -1063,40 +1061,38 @@ export default function PropertyForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <Label>
             {t("address")}
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             value={form.address}
             onChange={(event) => handleChange("address", event.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             placeholder={t("streetNumberNeighborhood")}
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("neighborhood")} <span className="text-red-600">*</span>
-          </label>
-          <input
+          <Label>
+            {t("neighborhood")} <span className="text-danger">*</span>
+          </Label>
+          <Input
             type="text"
             value={form.neighborhood}
             onChange={(event) =>
               handleChange("neighborhood", event.target.value)
             }
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             placeholder={t("neighborhood")}
           />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t("state")} <span className="text-red-600">*</span>
-            </label>
-            <select
+            <Label>
+              {t("state")} <span className="text-danger">*</span>
+            </Label>
+            <Select
               value={form.state_id}
               onChange={(event) => {
                 handleChange("state_id", event.target.value);
@@ -1104,7 +1100,6 @@ export default function PropertyForm({
                 // -> property_category_ids reset above.
                 handleChange("city_id", "");
               }}
-              className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               required
             >
               <option value="">{t("select")}</option>
@@ -1115,16 +1110,15 @@ export default function PropertyForm({
                   )}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t("city")} <span className="text-red-600">*</span>
-            </label>
-            <select
+            <Label>
+              {t("city")} <span className="text-danger">*</span>
+            </Label>
+            <Select
               value={form.city_id}
               onChange={(event) => handleChange("city_id", event.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               required
               disabled={!form.state_id}
             >
@@ -1136,33 +1130,32 @@ export default function PropertyForm({
                   )}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t("zipCode")} <span className="text-red-600">*</span>
-            </label>
-            <input
+            <Label>
+              {t("zipCode")} <span className="text-danger">*</span>
+            </Label>
+            <Input
               type="text"
               value={form.zip_code}
               onChange={(event) => handleChange("zip_code", event.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
               placeholder="78640"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t("price")} <span className="text-red-600">*</span>
-            </label>
+            <Label>
+              {t("price")} <span className="text-danger">*</span>
+            </Label>
             <PriceInput
               value={form.price}
               onChange={(formatted) => handleChange("price", formatted)}
               wrapperClassName="mt-1"
-              className="w-full rounded-md border border-gray-300 pl-7 pr-3 py-2 text-sm"
+              className={controlClasses({ className: "pl-7 pr-3" })}
               placeholder="5,000,000"
               required
             />
@@ -1170,13 +1163,12 @@ export default function PropertyForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("status")} <span className="text-red-600">*</span>
-          </label>
-          <select
+          <Label>
+            {t("status")} <span className="text-danger">*</span>
+          </Label>
+          <Select
             value={form.status_id}
             onChange={(event) => handleChange("status_id", event.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
             required
           >
             <option value="">{t("select")}</option>
@@ -1187,76 +1179,72 @@ export default function PropertyForm({
                 )}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <Label>
               {capitalizeFirstWord(t("rooms"))}
-            </label>
-            <input
+            </Label>
+            <Input
               type="number"
               min={0}
               value={form.rooms}
               onChange={(event) => handleChange("rooms", event.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <Label>
               {t("parking")}
-            </label>
-            <input
+            </Label>
+            <Input
               type="number"
               min={0}
               value={form.parking_spaces}
               onChange={(event) =>
                 handleChange("parking_spaces", event.target.value)
               }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <Label>
               {capitalizeFirstWord(t("baths"))}
-            </label>
-            <input
+            </Label>
+            <Input
               type="number"
               min={0}
               value={form.bathrooms}
               onChange={(event) =>
                 handleChange("bathrooms", event.target.value)
               }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <Label>
               {capitalizeFirstWord(t("guestBath"))}
-            </label>
-            <input
+            </Label>
+            <Input
               type="number"
               min={0}
               value={form.half_bathrooms}
               onChange={(event) =>
                 handleChange("half_bathrooms", event.target.value)
               }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <Label>
               {capitalizeFirstWord(t("landArea_m2"))}
-              <span className="text-red-600">*</span>
-            </label>
-            <input
+              <span className="text-danger">*</span>
+            </Label>
+            <Input
               type="number"
               min={0}
               step="0.01"
@@ -1264,15 +1252,14 @@ export default function PropertyForm({
               onChange={(event) =>
                 handleChange("land_area", event.target.value)
               }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <Label>
               {capitalizeFirstWord(t("builtArea_m2"))}
-            </label>
-            <input
+            </Label>
+            <Input
               type="number"
               min={0}
               step="0.01"
@@ -1280,18 +1267,17 @@ export default function PropertyForm({
               onChange={(event) =>
                 handleChange("built_area", event.target.value)
               }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             />
           </div>
         </div>
 
         {/* Property Features */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <Label>
             {t("propertyFeatures")}
-          </label>
+          </Label>
           <div ref={featureRef} className="relative">
-            <input
+            <Input
               type="text"
               value={featureSearch}
               onChange={(e) => {
@@ -1300,10 +1286,9 @@ export default function PropertyForm({
               }}
               onFocus={() => setFeatureOpen(true)}
               placeholder={t("select")}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
             />
             {featureOpen && (
-              <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg text-sm">
+              <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-card border border-brand-border bg-white shadow-overlay text-sm">
                 {propertyFeatures
                   ?.filter((feature) => {
                     if (form.property_feature_ids.includes(feature.id))
@@ -1330,7 +1315,7 @@ export default function PropertyForm({
                         setFeatureSearch("");
                         setFeatureOpen(false);
                       }}
-                      className="cursor-pointer px-3 py-2 hover:bg-blue-50"
+                      className="cursor-pointer px-3 py-2 hover:bg-brand-pale"
                     >
                       {capitalizeFirstWord(
                         locale === "es" ? feature.es_name : feature.name
@@ -1353,17 +1338,18 @@ export default function PropertyForm({
                   if (!feature) return null;
                   const isFeatured = index === 0;
                   return (
-                    <span
+                    <Badge
                       key={featureId}
+                      tone={isFeatured ? "warning" : "info"}
                       title={isFeatured ? "Destacada — used in the AI title" : undefined}
-                      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm ${
+                      className={
                         isFeatured
-                          ? "bg-amber-100 text-amber-800 border border-amber-300"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
+                          ? "border border-warning/30 px-3 py-1 text-sm"
+                          : "px-3 py-1 text-sm text-brand-navy"
+                      }
                     >
                       {isFeatured && (
-                        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                        <Star className="h-3 w-3 fill-current" />
                       )}
                       {capitalizeFirstWord(
                         locale === "es" ? feature.es_name : feature.name
@@ -1378,11 +1364,11 @@ export default function PropertyForm({
                             )
                           )
                         }
-                        className="ml-1 text-blue-600 hover:text-blue-800"
+                        className="ml-1 text-brand-blue hover:text-brand-navy"
                       >
                         <X className="h-3 w-3" />
                       </button>
-                    </span>
+                    </Badge>
                   );
                 })}
             </div>
@@ -1392,39 +1378,39 @@ export default function PropertyForm({
         {/* Images Upload */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">
+            <Label className="mb-0">
               <ImageIcon className="inline h-4 w-4 mr-1" />
-              Images <span className="text-red-600">*</span>
-            </label>
+              Images <span className="text-danger">*</span>
+            </Label>
             {totalImages > 1 &&
               (confirmDeleteAll ? (
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-gray-600">
+                  <span className="text-brand-carbon/70">
                     {t("deleteAllConfirmation")}
                   </span>
-                  <button
-                    type="button"
+                  <Button
+                    variant="destructive"
+                    size="xs"
                     onClick={handleDeleteAllImages}
-                    className="cursor-pointer px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                   >
                     {t("confirm")}
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="xs"
                     onClick={() => setConfirmDeleteAll(false)}
-                    className="cursor-pointer px-2 py-1 border border-gray-400 text-gray-600 rounded hover:border-gray-600 hover:text-gray-800 transition-colors"
                   >
                     {t("cancel")}
-                  </button>
+                  </Button>
                 </div>
               ) : (
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="xs"
                   onClick={() => setConfirmDeleteAll(true)}
-                  className="cursor-pointer text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                 >
                   {t("deleteAll")}
-                </button>
+                </Button>
               ))}
           </div>
 
@@ -1433,7 +1419,7 @@ export default function PropertyForm({
             existingImageOrder.filter((id) => !deletedAttachmentIds.has(id))
               .length > 0 && (
               <div className="mb-3">
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs text-brand-gray mb-2">
                   {t("currentImages")} - Drag to reorder (first image will be
                   the cover):
                 </p>
@@ -1464,10 +1450,10 @@ export default function PropertyForm({
           <div className="flex items-center gap-2">
             <label className="flex-1 cursor-pointer">
               <div
-                className={`flex items-center justify-center gap-2 rounded-md border-2 border-dashed px-4 py-3 text-sm transition-colors ${
+                className={`flex items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-3 text-sm transition-colors ${
                   isDroppingImages
-                    ? "border-blue-500 bg-blue-50 text-blue-600"
-                    : "border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-600"
+                    ? "border-brand-blue bg-brand-pale text-brand-blue"
+                    : "border-input text-brand-carbon/70 hover:border-brand-blue/30 hover:text-brand-blue"
                 }`}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -1507,7 +1493,7 @@ export default function PropertyForm({
           {/* New Images Preview */}
           {form.images.length > 0 && (
             <div className="mt-2">
-              <p className="text-xs text-gray-500 mb-2">
+              <p className="text-xs text-brand-gray mb-2">
                 Drag to reorder images (first image will be the cover)
               </p>
               <div className="grid grid-cols-3 gap-2">
@@ -1535,10 +1521,10 @@ export default function PropertyForm({
 
         {/* Videos Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <Label>
             <VideoIcon className="inline h-4 w-4 mr-1" />
             Videos
-          </label>
+          </Label>
 
           {/* Existing Videos */}
           {editingProperty &&
@@ -1546,18 +1532,18 @@ export default function PropertyForm({
               (video) => !deletedAttachmentIds.has(video.id)
             ).length > 0 && (
               <div className="mb-3">
-                <p className="text-xs text-gray-500 mb-2">Current videos:</p>
+                <p className="text-xs text-brand-gray mb-2">Current videos:</p>
                 <div className="space-y-2">
                   {editingProperty.videos
                     .filter((video) => !deletedAttachmentIds.has(video.id))
                     .map((video) => (
                       <div
                         key={video.id}
-                        className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded border border-gray-200"
+                        className="flex items-center justify-between gap-2 p-2 bg-brand-bg rounded-lg border border-brand-border"
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <VideoIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          <span className="text-sm text-gray-700 truncate">
+                          <VideoIcon className="h-4 w-4 text-brand-gray flex-shrink-0" />
+                          <span className="text-sm text-brand-carbon truncate">
                             {video.filename}
                           </span>
                         </div>
@@ -1565,7 +1551,7 @@ export default function PropertyForm({
                           type="button"
                           onClick={() => handleDeleteAttachment(video.id)}
                           disabled={deletingAttachment}
-                          className="flex-shrink-0 text-red-600 hover:text-red-700 disabled:opacity-50"
+                          className="flex-shrink-0 text-danger hover:text-danger/80 disabled:opacity-50"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -1578,7 +1564,7 @@ export default function PropertyForm({
           {/* New Videos Upload */}
           <div className="flex items-center gap-2">
             <label className="flex-1 cursor-pointer">
-              <div className="flex items-center justify-center gap-2 rounded-md border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
+              <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input px-4 py-3 text-sm text-brand-carbon/70 hover:border-brand-blue/30 hover:text-brand-blue transition-colors">
                 <Upload className="h-4 w-4" />
                 <span>{t("uploadVideos")}</span>
               </div>
@@ -1598,15 +1584,15 @@ export default function PropertyForm({
               {form.videos.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between gap-2 p-2 bg-blue-50 rounded border border-blue-200"
+                  className="flex items-center justify-between gap-2 p-2 bg-brand-pale rounded-lg border border-brand-blue/30"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <VideoIcon className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                    <VideoIcon className="h-4 w-4 text-brand-blue flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-700 truncate">
+                      <p className="text-sm text-brand-carbon truncate">
                         {file.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-brand-gray">
                         {(file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
@@ -1614,7 +1600,7 @@ export default function PropertyForm({
                   <button
                     type="button"
                     onClick={() => removeFile("videos", index)}
-                    className="flex-shrink-0 text-red-600 hover:text-red-700"
+                    className="flex-shrink-0 text-danger hover:text-danger/80"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -1626,8 +1612,10 @@ export default function PropertyForm({
 
         {/* AI Generated Content */}
         <div>
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="xs"
             onClick={handleGenerateContent}
             disabled={!canGenerateContent || generatingContent}
             title={
@@ -1635,69 +1623,60 @@ export default function PropertyForm({
                 ? undefined
                 : "Fill in property type, listing type, city, state, and select at least one feature first"
             }
-            className="cursor-pointer inline-flex items-center gap-1 rounded-md border border-blue-300 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Sparkles className="h-3 w-3" />
             {generatingContent ? "Generating..." : t("generateWithAI")}
-          </button>
+          </Button>
           {generateContentError && (
-            <p className="mt-1 text-xs text-red-600">{generateContentError}</p>
+            <p className="mt-1 text-xs text-danger">{generateContentError}</p>
           )}
 
-          <label className="mt-3 block text-sm font-medium text-gray-700">
-            {t("title")} <span className="text-red-600">*</span>
-          </label>
-          <input
+          <Label className="mt-3">
+            {t("title")} <span className="text-danger">*</span>
+          </Label>
+          <Input
             type="text"
             value={form.title}
             onChange={(event) => handleChange("title", event.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
             placeholder={t("modernApartmentInLomas")}
             required
           />
 
-          <label className="mt-3 block text-sm font-medium text-gray-700">
-            English title
-          </label>
-          <input
+          <Label className="mt-3">English title</Label>
+          <Input
             type="text"
             value={form.title_en}
             onChange={(event) => handleChange("title_en", event.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
             placeholder="Title for this listing, in English"
           />
 
-          <label className="mt-3 block text-sm font-medium text-gray-700">
-            {t("description")} <span className="text-red-600">*</span>
-          </label>
-          <textarea
+          <Label className="mt-3">
+            {t("description")} <span className="text-danger">*</span>
+          </Label>
+          <Textarea
             value={form.description}
             onChange={(event) =>
               handleChange("description", event.target.value)
             }
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
             rows={3}
             placeholder={t("keyHighlightsForThisListing")}
             required
           />
 
-          <label className="mt-3 block text-sm font-medium text-gray-700">
-            English description
-          </label>
-          <textarea
+          <Label className="mt-3">English description</Label>
+          <Textarea
             value={form.description_en}
             onChange={(event) =>
               handleChange("description_en", event.target.value)
             }
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
             rows={3}
             placeholder="Key highlights for this listing, in English"
           />
         </div>
 
-        <button
+        <Button
           type="submit"
-          className="w-full rounded-md bg-primary cursor-pointer px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-50"
+          fullWidth
           disabled={creating || updating}
         >
           {creating || updating
@@ -1705,8 +1684,8 @@ export default function PropertyForm({
             : editingProperty
             ? t("updateProperty")
             : t("createProperty")}
-        </button>
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 }

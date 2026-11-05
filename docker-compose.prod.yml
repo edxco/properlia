@@ -62,9 +62,39 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
       FRONTEND_URL: ${FRONTEND_URL}
+      DASHBOARD_URL: ${DASHBOARD_URL:-https://dashboard.properlia.com}
+      FRONTEND_INTERNAL_URL: http://frontend:3001
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  scheduler:
+    image: ${BACKEND_IMAGE:-properlia-backend:latest}
+    # Skip the backend entrypoint (db:prepare/seed); the backend service handles migrations
+    entrypoint: []
+    command: supercronic /app/config/crontab
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      RAILS_ENV: ${RAILS_ENV:-production}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
+      ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE}
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET: ${AWS_BUCKET}
+      DEVISE_JWT_SECRET_KEY: ${DEVISE_JWT_SECRET_KEY}
+      HOST_URL: ${HOST_URL}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      DASHBOARD_URL: ${DASHBOARD_URL:-https://dashboard.properlia.com}
+      FRONTEND_INTERNAL_URL: http://frontend:3001
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+    depends_on:
+      - backend
     restart: unless-stopped
     networks:
       - app-network
@@ -77,6 +107,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
       INTERNAL_API_URL: http://backend:3000/api/v1
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
     depends_on:
       - backend
     restart: unless-stopped

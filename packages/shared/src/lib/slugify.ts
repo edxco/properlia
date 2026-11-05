@@ -19,3 +19,10 @@ export function buildPropertyUrl(property: {
   const slug = slugify(property.title);
   return `/properties/${state}/${city}/${property.id}/${slug}`;
 }
+
+export function hasPublicLocation(property: {
+  state?: { name: string } | null;
+  city?: { name: string } | null;
+}): boolean {
+  return Boolean(slugify(property.state?.name) && slugify(property.city?.name));
+}

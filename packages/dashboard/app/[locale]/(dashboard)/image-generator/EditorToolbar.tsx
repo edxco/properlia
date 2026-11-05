@@ -4,11 +4,12 @@ import type { Editor } from '@tiptap/react';
 import { Bold, Italic, AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, List, ListOrdered } from 'lucide-react';
 
 const COLOR_OPTIONS = [
-  { value: '#214c9b', label: 'Blue Navy' },
-  { value: '#373435', label: 'Charcoal' },
-  { value: '#47c5fb', label: 'Sky blue' },
-  { value: '#f6f6f6', label: 'Off white' },
-  { value: '#db0b0b', label: 'Red' },
+  { value: '#214c9b', label: 'Azul Properlia' },
+  { value: '#1a3a5c', label: 'Azul marino' },
+  { value: '#2c2c2a', label: 'Carbón' },
+  { value: '#888780', label: 'Gris' },
+  { value: '#c4a44a', label: 'Dorado (precio)' },
+  { value: '#f6f6f2', label: 'Fondo' },
 ];
 
 interface EditorToolbarProps {
@@ -19,7 +20,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
   if (!editor) return null;
 
   return (
-    <div className="flex items-center gap-1 p-2 bg-white border border-gray-200 rounded-md w-fit flex-wrap">
+    <div className="flex items-center gap-1 p-2 bg-white border border-brand-border rounded-lg w-fit flex-wrap">
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         active={editor.isActive('heading', { level: 1 })}
@@ -35,7 +36,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <Heading2 className="h-4 w-4" />
       </ToolbarButton>
 
-      <div className="w-px h-5 bg-gray-200 mx-1" />
+      <div className="w-px h-5 bg-brand-border mx-1" />
 
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBold().run()}
@@ -52,7 +53,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <Italic className="h-4 w-4" />
       </ToolbarButton>
 
-      <div className="w-px h-5 bg-gray-200 mx-1" />
+      <div className="w-px h-5 bg-brand-border mx-1" />
 
       <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('left').run()}
@@ -76,7 +77,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <AlignRight className="h-4 w-4" />
       </ToolbarButton>
 
-      <div className="w-px h-5 bg-gray-200 mx-1" />
+      <div className="w-px h-5 bg-brand-border mx-1" />
 
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -93,7 +94,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <ListOrdered className="h-4 w-4" />
       </ToolbarButton>
 
-      <div className="w-px h-5 bg-gray-200 mx-1" />
+      <div className="w-px h-5 bg-brand-border mx-1" />
 
       <div className="flex items-center gap-1.5">
         {COLOR_OPTIONS.map(({ value, label }) => {
@@ -105,7 +106,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
               title={label}
               onClick={() => editor.chain().focus().setColor(value).run()}
               className={`h-5 w-5 rounded-full border-2 cursor-pointer transition-shadow ${
-                isActive ? 'border-blue-500 shadow-md' : 'border-gray-300 hover:border-gray-400'
+                isActive ? 'border-brand-blue' : 'border-input hover:border-input'
               }`}
               style={{ backgroundColor: value }}
             />
@@ -132,8 +133,8 @@ function ToolbarButton({
       type="button"
       onClick={onClick}
       title={title}
-      className={`p-1.5 rounded transition-colors ${
-        active ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+      className={`p-1.5 rounded-lg transition-colors ${
+        active ? 'bg-brand-pale text-brand-blue' : 'text-brand-carbon/70 hover:bg-brand-bg'
       }`}
     >
       {children}

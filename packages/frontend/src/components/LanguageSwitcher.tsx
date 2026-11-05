@@ -2,6 +2,7 @@
 
 import { Languages } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { Button } from "@properlia/shared/components/ui";
 
 const SUPPORTED_LOCALES = ["es", "en"] as const;
 type Locale = (typeof SUPPORTED_LOCALES)[number];
@@ -36,13 +37,15 @@ export default function LanguageSwitcher() {
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={switchLanguage}
       aria-label={ariaLabel}
-      className="flex items-center gap-2 px-3 py-2 text-stone-700 text-sm font-medium tracking-wide rounded-md transition-all duration-200 hover:bg-stone-100 hover:text-stone-900 active:bg-stone-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2"
+      className="px-3 tracking-wide text-brand-carbon hover:bg-brand-bg hover:text-brand-navy active:bg-brand-border"
     >
       <Languages className="w-4 h-4" aria-hidden="true" />
       <span>{currentLabel}</span>
-    </button>
+    </Button>
   );
 }

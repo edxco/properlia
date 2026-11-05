@@ -8,6 +8,7 @@ import ProperliaLogo from "@/public/properlia.png";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
+import { Button, cardClasses } from "@properlia/shared/components/ui";
 
 const PROPERTY_CATEGORIES = [
   { key: "allProperties", param: "" },
@@ -34,15 +35,15 @@ export function Navigation() {
   const linkClass = (path: string) =>
     `transition-colors text-sm tracking-wide font-medium ${
       isActive(path)
-        ? "text-primary border-b-2 border-primary pb-0.5"
-        : "text-carbon hover:text-primary"
+        ? "text-brand-blue border-b-2 border-brand-blue pb-0.5"
+        : "text-brand-carbon hover:text-brand-blue"
     }`;
 
   const mobileLinkClass = (path: string) =>
     `block text-sm tracking-wide font-medium ${
       isActive(path)
-        ? "text-primary"
-        : "text-carbon hover:text-primary"
+        ? "text-brand-blue"
+        : "text-brand-carbon hover:text-brand-blue"
     }`;
 
   const handleMouseEnter = () => {
@@ -55,7 +56,7 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-border">
+    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-brand-border">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link href={`/${locale}`} className="flex items-center space-x-2">
@@ -69,10 +70,10 @@ export function Navigation() {
               onMouseLeave={handleMouseLeave}
             >
               <button
-                className={`flex items-center gap-1 transition-colors text-sm tracking-wide font-medium focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-primary focus-visible:rounded-sm ${
+                className={`flex items-center gap-1 transition-colors text-sm tracking-wide font-medium focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-brand-blue focus-visible:rounded-sm ${
                   isActive("/properties")
-                    ? "text-primary border-b-2 border-primary pb-0.5"
-                    : "text-carbon hover:text-primary"
+                    ? "text-brand-blue border-b-2 border-brand-blue pb-0.5"
+                    : "text-brand-carbon hover:text-brand-blue"
                 }`}
               >
                 {t("properties")}
@@ -83,12 +84,12 @@ export function Navigation() {
 
               {isPropertiesOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3">
-                  <div className="bg-white border border-border rounded-lg py-1.5 min-w-[160px]">
+                  <div className={cardClasses({ padding: "none", className: "min-w-[160px] py-1.5 shadow-overlay" })}>
                     {PROPERTY_CATEGORIES.map(({ key, param }) => (
                       <Link
                         key={key}
                         href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
-                        className="block px-4 py-2 text-sm text-carbon hover:text-primary hover:bg-blue-light transition-colors"
+                        className="block whitespace-nowrap px-4 py-2 text-sm text-brand-carbon hover:text-brand-blue hover:bg-brand-pale transition-colors"
                         onClick={() => setIsPropertiesOpen(false)}
                       >
                         {capitalizeEachWord(t(key))}
@@ -108,11 +109,16 @@ export function Navigation() {
             <Link href={`/${locale}/services`} className={linkClass("/services")}>
               {t("services")}
             </Link>
+            <Link href={`/${locale}/contact`} className={linkClass("/contact")}>
+              {t("contact")}
+            </Link>
             <LanguageSwitcher />
           </div>
 
-          <button
-            className="md:hidden text-carbon hover:text-primary transition-colors p-2 -mr-2 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-primary focus-visible:rounded-sm"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden text-brand-carbon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
@@ -120,17 +126,17 @@ export function Navigation() {
             ) : (
               <Menu className="w-6 h-6" />
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-border">
+        <div className="md:hidden bg-white border-t border-brand-border">
           <div className="px-6 py-6 space-y-4">
             <div>
               <button
                 className={`flex items-center gap-1 w-full text-left text-sm tracking-wide font-medium ${
-                  isActive("/properties") ? "text-primary" : "text-carbon hover:text-primary"
+                  isActive("/properties") ? "text-brand-blue" : "text-brand-carbon hover:text-brand-blue"
                 }`}
                 onClick={() => setIsMobilePropertiesOpen(!isMobilePropertiesOpen)}
               >
@@ -140,12 +146,12 @@ export function Navigation() {
                 />
               </button>
               {isMobilePropertiesOpen && (
-                <div className="mt-2 ml-3 space-y-2 border-l border-border pl-3">
+                <div className="mt-2 ml-3 space-y-2 border-l border-brand-border pl-3">
                   {PROPERTY_CATEGORIES.map(({ key, param }) => (
                     <Link
                       key={key}
                       href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
-                      className="block text-sm text-carbon hover:text-primary"
+                      className="block text-sm text-brand-carbon hover:text-brand-blue"
                       onClick={() => { setIsMenuOpen(false); setIsMobilePropertiesOpen(false); }}
                     >
                       {capitalizeEachWord(t(key))}
@@ -174,6 +180,13 @@ export function Navigation() {
               onClick={() => setIsMenuOpen(false)}
             >
               {t("services")}
+            </Link>
+            <Link
+              href={`/${locale}/contact`}
+              className={mobileLinkClass("/contact")}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {t("contact")}
             </Link>
             <div className="pt-2">
               <LanguageSwitcher />

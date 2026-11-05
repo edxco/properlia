@@ -30,7 +30,7 @@ export function Hero() {
 
   return (
     <div id="hero-section" className="relative h-[calc(100vh-5rem)]">
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-stone-900/50 to-primary/30 z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-brand-navy/50 to-primary/30 z-10"></div>
 
       <Image
         src={ProperliaBg}
@@ -43,10 +43,10 @@ export function Hero() {
       <div className="relative z-20 h-full flex items-center">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-2xl text-white font-medium tracking-wider bg-primary inline-block px-3 py-1">
+            <h1 className="text-2xl text-white font-medium tracking-wider bg-brand-blue inline-block px-3 py-1">
               {t("heroBadge")}
             </h1>
-            <p aria-hidden="true" className="text-2xl md:text-5xl lg:text-6xl font-display text-white leading-tight tracking-wide">
+            <p aria-hidden="true" className="font-medium text-2xl md:text-5xl lg:text-6xl font-display text-white leading-tight tracking-wide">
               <TypingAnimation
                 words={[
                   t("heroLine1"),
@@ -63,7 +63,7 @@ export function Hero() {
                 <button
                   key={category.key}
                   onClick={() => handleCategoryClick(category.value)}
-                  className="px-5 py-2 text-sm font-medium rounded-full border border-white bg-white/10 backdrop-blur-sm text-white shadow-sm hover:bg-white hover:text-stone-900 transition-colors cursor-pointer"
+                  className="cursor-pointer rounded-full border border-white bg-white/10 px-5 py-2 text-sm font-medium text-white shadow-pill backdrop-blur-sm transition-colors hover:bg-white hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-navy"
                 >
                   {capitalizeEachWord(t(category.key))}
                 </button>

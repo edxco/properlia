@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useProperties } from '@/src/services/properties/queries';
 import { usePropertyTypes } from '@/src/services/property-types/queries';
 import { useStatuses } from '@/src/services/statuses/queries';
+import { Card, DashboardTitle } from '@properlia/shared/components/ui';
 
 export default function DashboardPage() {
   const { data, isLoading } = useProperties({ items: 50 });
@@ -29,64 +30,64 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Dashboard overview</h2>
-        <p className="text-sm text-gray-500">
+        <DashboardTitle>Dashboard overview</DashboardTitle>
+        <p className="text-sm text-brand-gray">
           Live stats pulled from the properties API.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-gray-500">Total properties</p>
-          <p className="mt-2 text-3xl font-bold text-blue-600">
+        <Card>
+          <p className="text-sm text-brand-gray">Total properties</p>
+          <p className="mt-2 text-3xl font-medium tabular-nums text-brand-blue">
             {isLoading ? '—' : totalProperties}
           </p>
-        </div>
+        </Card>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-gray-500">Featured listings (page)</p>
-          <p className="mt-2 text-3xl font-bold text-green-600">
+        <Card>
+          <p className="text-sm text-brand-gray">Featured listings (page)</p>
+          <p className="mt-2 text-3xl font-medium tabular-nums text-success">
             {isLoading ? '—' : featuredCount}
           </p>
-          <p className="text-xs text-gray-500">Based on the fetched page.</p>
-        </div>
+          <p className="text-xs text-brand-gray">Based on the fetched page.</p>
+        </Card>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-gray-500">Property types available</p>
-          <p className="mt-2 text-3xl font-bold text-indigo-600">
+        <Card>
+          <p className="text-sm text-brand-gray">Property types available</p>
+          <p className="mt-2 text-3xl font-medium tabular-nums text-brand-blue">
             {types ? types.length : '—'}
           </p>
-        </div>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">Status breakdown</h3>
+        <Card>
+          <h3 className="text-lg font-medium text-brand-carbon">Status breakdown</h3>
           <div className="mt-4 space-y-2">
             {(statuses ?? []).map((status) => (
               <div key={status.id} className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">{status.name}</span>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm text-brand-carbon">{status.name}</span>
+                <span className="text-sm font-medium text-brand-carbon">
                   {statusBreakdown[status.name] ?? 0}
                 </span>
               </div>
             ))}
             {!statuses?.length && (
-              <p className="text-sm text-gray-500">No statuses registered yet.</p>
+              <p className="text-sm text-brand-gray">No statuses registered yet.</p>
             )}
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">Recently fetched</h3>
+        <Card>
+          <h3 className="text-lg font-medium text-brand-carbon">Recently fetched</h3>
           {isLoading ? (
-            <p className="mt-2 text-sm text-gray-500">Loading properties...</p>
+            <p className="mt-2 text-sm text-brand-gray">Loading properties...</p>
           ) : properties.length ? (
-            <ul className="mt-2 divide-y divide-gray-200">
+            <ul className="mt-2 divide-y divide-brand-border">
               {properties.slice(0, 5).map((property) => (
                 <li key={property.id} className="py-2">
-                  <p className="text-sm font-semibold text-gray-900">{property.title}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-brand-carbon">{property.title}</p>
+                  <p className="text-xs text-brand-gray">
                     {property.city?.name || '—'}, {property.state?.name || '—'} ·{' '}
                     {property.property_type?.name || 'No type'}
                   </p>
@@ -94,11 +95,11 @@ export default function DashboardPage() {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-brand-gray">
               No properties found. Create one from the properties tab.
             </p>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );
