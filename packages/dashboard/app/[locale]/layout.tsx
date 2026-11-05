@@ -1,5 +1,19 @@
 import type { Metadata } from "next";
 import "@properlia/shared/styles/globals.css";
+import { Playfair_Display, Inter } from "next/font/google";
+
+const displayFont = Playfair_Display({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-editorial-display",
+  display: "swap",
+});
+
+const bodyFont = Inter({
+  subsets: ["latin"],
+  variable: "--font-editorial-body",
+  display: "swap",
+});
 
 import { enMessages as en, esMessages as es } from "@properlia/shared";
 import { QueryProvider } from "@/src/providers/QueryProvider";
@@ -46,7 +60,7 @@ export default async function RootLayout({
   const dict = dictionaries[normalizedLocale];
 
   return (
-    <html lang={normalizedLocale}>
+    <html lang={normalizedLocale} className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body>
         <QueryProvider>
           <AuthProvider>
