@@ -790,7 +790,7 @@ class EmailService
       rows = properties.map do |property|
         keep_url = "#{api_url}/api/v1/on_hold_reminders?token=#{CGI.escape(OnHoldReminderToken.generate(property, 'keep'))}"
         sold_url = "#{api_url}/api/v1/on_hold_reminders?token=#{CGI.escape(OnHoldReminderToken.generate(property, 'sold'))}"
-        edit_url = "#{dashboard_url}/es/dashboard/properties/#{property.id}/edit"
+        edit_url = "#{dashboard_url}/es/properties/#{property.id}/edit"
         days = property.on_hold_since ? ((Time.current - property.on_hold_since) / 1.day).floor : nil
 
         <<~ROW

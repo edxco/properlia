@@ -77,7 +77,7 @@ module Api
       end
 
       def dashboard_url
-        "#{ENV.fetch('DASHBOARD_URL', 'http://localhost:3002').chomp('/')}/es/dashboard/properties"
+        "#{ENV.fetch('DASHBOARD_URL', 'http://localhost:3002').chomp('/')}/es/properties"
       end
 
       def h(value)
