@@ -69,6 +69,7 @@ jobs:
             echo "NEXT_PUBLIC_API_URL=${{ secrets.STAGE_API_URL }}" >> $GITHUB_OUTPUT
             echo "NEXT_PUBLIC_GA_ID=${{ secrets.STAGE_GA_ID }}" >> $GITHUB_OUTPUT
             echo "NEXT_PUBLIC_GTM_ID=${{ secrets.STAGE_GTM_ID }}" >> $GITHUB_OUTPUT
+            echo "DASHBOARD_URL=https://dashboard.properlia.com" >> $GITHUB_OUTPUT
           else
             echo "ENV_NAME=prod" >> $GITHUB_OUTPUT
             echo "EC2_HOST=${{ secrets.PROD_EC2_HOST }}" >> $GITHUB_OUTPUT
@@ -82,6 +83,7 @@ jobs:
             echo "NEXT_PUBLIC_API_URL=${{ secrets.PROD_API_URL }}" >> $GITHUB_OUTPUT
             echo "NEXT_PUBLIC_GA_ID=${{ secrets.PROD_GA_ID }}" >> $GITHUB_OUTPUT
             echo "NEXT_PUBLIC_GTM_ID=${{ secrets.PROD_GTM_ID }}" >> $GITHUB_OUTPUT
+            echo "DASHBOARD_URL=https://dashboard.properlia.com" >> $GITHUB_OUTPUT
           fi
 
       - name: Verify deploy artifacts exist
@@ -258,6 +260,8 @@ jobs:
             RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}
             FRONTEND_URL=${{ secrets.FRONTEND_URL }}
             ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+            DASHBOARD_URL=${{ steps.envmap.outputs.DASHBOARD_URL }}
+            REVALIDATE_SECRET=${{ secrets.REVALIDATE_SECRET }}
 
             # Database Configuration
             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
