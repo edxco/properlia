@@ -66,7 +66,7 @@ export function Footer() {
 
   return (
     <footer className="text-white flex flex-col">
-      <div className="bg-navy m-0 p-0">
+      <div className="bg-brand-navy m-0 p-0">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-12 m-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Logo and Company Info */}
@@ -234,7 +234,7 @@ export function Footer() {
           </div>
         </div>
       </div>
-      <div className="bg-navy border-t border-white/10 m-0 p-0">
+      <div className="bg-brand-navy border-t border-white/10 m-0 p-0">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 justify-between items-end gap-4">
             <div>
@@ -245,7 +245,7 @@ export function Footer() {
                 href="https://thecodetaco.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/80 font-normal hover:text-white transition-colors text-sm"
+                className="text-white/80 hover:text-white transition-colors text-sm"
               >
                 {t("builtWithLove")}
               </a>

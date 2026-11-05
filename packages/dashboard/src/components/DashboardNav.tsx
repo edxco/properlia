@@ -93,11 +93,11 @@ export function DashboardNav({ locale }: DashboardNavProps) {
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className={`
-            flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors
+            flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
             ${
               isDropdownActive
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                ? 'bg-brand-pale text-brand-blue'
+                : 'text-brand-carbon/70 hover:text-brand-carbon hover:bg-brand-bg'
             }
           `}
         >
@@ -108,7 +108,7 @@ export function DashboardNav({ locale }: DashboardNavProps) {
 
         {/* Dropdown Menu */}
         {isDropdownOpen && (
-          <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+          <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-card shadow-overlay border border-brand-border py-1 z-50">
             {dropdownItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -122,8 +122,8 @@ export function DashboardNav({ locale }: DashboardNavProps) {
                     flex items-center gap-3 px-4 py-2 text-sm transition-colors
                     ${
                       active
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-brand-pale text-brand-blue'
+                        : 'text-brand-carbon hover:bg-brand-bg'
                     }
                   `}
                 >

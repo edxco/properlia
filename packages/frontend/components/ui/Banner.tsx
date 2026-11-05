@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Card } from "@properlia/shared/components/ui";
 
 type BannerProps = {
   title: string;
@@ -9,18 +10,16 @@ type BannerProps = {
 
 export const Banner = ({ title, description, icon, className }: BannerProps) => {
   return (
-    <div
-      className={`bg-white border border-stone-200 rounded-lg p-6 ${className ?? ""}`}
-    >
+    <Card padding="none" className={`p-6 ${className ?? ""}`}>
       <div className="flex items-start gap-4">
         {icon && (
           <div className="flex-shrink-0 text-primary">{icon}</div>
         )}
         <div>
-          <h3 className="text-sm font-semibold text-stone-800 mb-1">{title}</h3>
-          <p className="text-sm text-stone-600 leading-relaxed">{description}</p>
+          <h3 className="text-sm font-medium text-brand-carbon mb-1">{title}</h3>
+          <p className="text-sm text-brand-carbon/70 leading-relaxed">{description}</p>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

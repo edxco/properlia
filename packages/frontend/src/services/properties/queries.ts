@@ -31,7 +31,7 @@ type PropertyFilters = {
 export const useProperties = (params?: PropertyFilters) => {
   return useQuery({
     queryKey: ['properties', params],
-    queryFn: () => propertyApi.getAll(params),
+    queryFn: () => propertyApi.getAll({ ...params, public: true }),
   });
 };
 

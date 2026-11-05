@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import styles from "./styles/PropertyDetailsGrid.module.css";
+import { Button, Card, CardTitle } from "./ui";
 
 interface PropertyDescriptionProps {
   description: string;
@@ -15,10 +16,10 @@ export const PropertyDescription: React.FC<PropertyDescriptionProps> = ({
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   return (
-    <div className={styles.card}>
-      <h2 className={styles.cardTitle}>
+    <Card padding="none" className="mb-6 min-w-0 overflow-hidden p-6">
+      <CardTitle className="mb-4">
         {locale === "es" ? "Descripción" : "Description"}
-      </h2>
+      </CardTitle>
       <div className={styles.descriptionWrapper}>
         <div
           className={`${styles.descriptionContent} ${
@@ -30,9 +31,10 @@ export const PropertyDescription: React.FC<PropertyDescriptionProps> = ({
             <div className={styles.descriptionGradient} />
           )}
         </div>
-        <button
+        <Button
+          variant="link"
           onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-          className={styles.readMoreButton}
+          className="mt-2"
         >
           {isDescriptionExpanded
             ? locale === "es"
@@ -41,8 +43,8 @@ export const PropertyDescription: React.FC<PropertyDescriptionProps> = ({
             : locale === "es"
             ? "Ver más"
             : "Read more"}
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 };

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
+import { Card } from "@properlia/shared/components/ui";
 
 type BannerItem = {
   title: string;
@@ -31,7 +32,7 @@ export function BannerSlideshow({ banners, intervalMs = 6700 }: BannerSlideshowP
   }, [banners.length, intervalMs]);
 
   return (
-    <div className="bg-white border border-stone-200 rounded-lg p-5">
+    <Card padding="sm">
       {/* All banners share the same grid cell so the container sizes to the tallest */}
       <div className="grid">
         {banners.map((banner, i) => (
@@ -41,11 +42,11 @@ export function BannerSlideshow({ banners, intervalMs = 6700 }: BannerSlideshowP
             style={{ opacity: i === current && visible ? 1 : 0, pointerEvents: i === current ? "auto" : "none" }}
           >
             {banner.icon && (
-              <div className="flex-shrink-0 text-stone-500 mt-0.5">{banner.icon}</div>
+              <div className="flex-shrink-0 text-brand-gray mt-0.5">{banner.icon}</div>
             )}
             <div>
-              <h3 className="text-sm font-semibold text-stone-800 mb-1">{banner.title}</h3>
-              <p className="text-sm text-stone-500 leading-relaxed">{banner.description}</p>
+              <h3 className="text-sm font-medium text-brand-carbon mb-1">{banner.title}</h3>
+              <p className="text-sm text-brand-gray leading-relaxed">{banner.description}</p>
             </div>
           </div>
         ))}
@@ -57,12 +58,12 @@ export function BannerSlideshow({ banners, intervalMs = 6700 }: BannerSlideshowP
               key={i}
               onClick={() => { setCurrent(i); setVisible(true); }}
               className={`h-1 rounded-full transition-all duration-300 ${
-                i === current ? "bg-stone-700 w-6" : "bg-stone-200 w-3"
+                i === current ? "bg-brand-navy w-6" : "bg-brand-border w-3"
               }`}
             />
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

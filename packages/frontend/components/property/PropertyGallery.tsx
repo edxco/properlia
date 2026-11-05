@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { textStyles } from "./typography";
+import { useT } from "@properlia/shared/components/TranslationProvider";
+import { buttonClasses } from "@properlia/shared/components/ui";
 
 interface PropertyGalleryProps {
   images: string[];
@@ -11,6 +12,7 @@ interface PropertyGalleryProps {
 }
 
 export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
+  const t = useT();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const isUnoptimized = (src: string) =>
@@ -33,10 +35,9 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
   if (images.length === 0) {
     return (
       <div
-        className="w-full rounded-2xl flex items-center justify-center"
-        style={{ height: 420, background: "#E8F0F8", ...textStyles.meta }}
+        className="flex h-[420px] w-full items-center justify-center rounded-card bg-brand-pale text-sm text-brand-gray"
       >
-        No images
+        {t("propertyDetailNoImages")}
       </div>
     );
   }
@@ -45,7 +46,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 rounded-2xl overflow-hidden" style={{ height: 440 }}>
+      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 rounded-card overflow-hidden" style={{ height: 440 }}>
         <button
           onClick={() => setLightboxIndex(0)}
           className="relative md:col-span-2 md:row-span-2 h-56 md:h-full"
@@ -77,8 +78,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
             />
             {i === 3 && images.length > 5 && (
               <div
-                className="absolute inset-0 flex items-center justify-center bg-black/50 text-white"
-                style={{ ...textStyles.h3, color: "#fff" }}
+                className="absolute inset-0 flex items-center justify-center bg-brand-navy/60 text-lg font-medium tabular-nums text-white"
               >
                 +{images.length - 5}
               </div>
@@ -90,24 +90,23 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
       {images.length > 1 && (
         <button
           onClick={() => setLightboxIndex(0)}
-          className="mt-3 md:hidden rounded-lg border w-full py-2"
-          style={{ ...textStyles.button, color: "#1A3A5C", borderColor: "#EAEAE3" }}
+          className={buttonClasses({ variant: "secondary", size: "sm", className: "mt-3 w-full md:hidden" })}
         >
-          See all {images.length} photos
+          {t("propertyDetailSeeAllPhotos").replace("{count}", String(images.length))}
         </button>
       )}
 
       {lightboxIndex !== null && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-brand-navy/95 flex items-center justify-center"
           onClick={() => setLightboxIndex(null)}
         >
           <button
             onClick={() => setLightboxIndex(null)}
             className="absolute top-5 right-5 text-white/80 hover:text-white"
-            aria-label="Close"
+            aria-label={t("propertyDetailCloseGallery")}
           >
-            <X size={28} />
+            <X size={28} strokeWidth={1.75} />
           </button>
 
           <button
@@ -116,9 +115,9 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
               setLightboxIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
             }}
             className="absolute left-4 md:left-8 text-white/80 hover:text-white"
-            aria-label="Previous image"
+            aria-label={t("propertyDetailPreviousImage")}
           >
-            <ChevronLeft size={36} />
+            <ChevronLeft size={36} strokeWidth={1.75} />
           </button>
 
           <div
@@ -141,14 +140,13 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
               setLightboxIndex((i) => (i === null ? i : (i + 1) % images.length));
             }}
             className="absolute right-4 md:right-8 text-white/80 hover:text-white"
-            aria-label="Next image"
+            aria-label={t("propertyDetailNextImage")}
           >
-            <ChevronRight size={36} />
+            <ChevronRight size={36} strokeWidth={1.75} />
           </button>
 
           <div
-            className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/80"
-            style={textStyles.meta}
+            className="absolute bottom-5 left-1/2 -translate-x-1/2 text-sm tabular-nums text-white/80"
           >
             {lightboxIndex + 1} / {images.length}
           </div>

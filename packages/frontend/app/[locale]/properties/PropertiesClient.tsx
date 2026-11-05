@@ -1,140 +1,102 @@
 "use client";
 
-import { useState, useMemo, useEffect, Fragment } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef, useTransition, Fragment, type ReactNode } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { PropertyFiltersBar } from "@/components/filters/PropertyFiltersBar";
 import { PropertyFiltersSidebar } from "@/components/filters/PropertyFiltersSidebar";
 import { NoResultsAlert } from "@/components/alerts/NoResultsAlert";
-import { useProperties } from "@/src/services/properties/queries";
-import { useStates } from "@/src/services/states/queries";
-import { useCities } from "@/src/services/cities/queries";
-import { useLocale, useT } from "@properlia/shared/components/TranslationProvider";
-import { Property } from "@properlia/shared/types";
-import { getAbsoluteImageUrl } from "@properlia/shared";
+import { useT } from "@properlia/shared/components/TranslationProvider";
+import type { City, Property, State } from "@properlia/shared/types";
 import { PropertyCard, PropertyCardSkeleton, BannerSlideshow } from "@/components/ui";
+import { buttonClasses } from "@properlia/shared/components/ui";
+import { toPropertyCardProps } from "@/src/lib/propertyCardProps";
+import { buildListingQuery, ITEMS_PER_PAGE, type Filters } from "./listingFilters";
 
-const ITEMS_PER_PAGE = 9;
+const DEBOUNCED_KEYS = new Set<keyof Filters>(["priceMin", "priceMax", "landAreaMin", "landAreaMax", "searchQuery"]);
+const DEBOUNCE_MS = 500;
 
-interface Filters {
-  rooms?: number;
-  bathrooms?: number;
-  city_id?: string;
-  state_id?: string;
-  priceMin?: number;
-  priceMax?: number;
-  landAreaMin?: number;
-  landAreaMax?: number;
-  searchQuery?: string;
-  listingType?: string;
-  category?: string;
+interface PropertiesClientProps {
+  header: ReactNode;
+  locale: string;
+  filters: Filters;
+  properties: Property[];
+  page: number;
+  totalPages: number;
+  totalCount: number;
+  hasNoResults: boolean;
+  isError: boolean;
+  cities: City[];
+  states: State[];
 }
 
-export default function PropertiesClient() {
+export default function PropertiesClient({
+  header,
+  locale,
+  filters: urlFilters,
+  properties,
+  page,
+  totalPages,
+  totalCount,
+  hasNoResults,
+  isError,
+  cities,
+  states,
+}: PropertiesClientProps) {
   const t = useT();
-  const locale = useLocale();
-  const searchParams = useSearchParams();
-  const [filters, setFilters] = useState<Filters>({});
-  const [currentPage, setCurrentPage] = useState(1);
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const [filters, setFilters] = useState<Filters>(urlFilters);
+  const filtersRef = useRef<Filters>(urlFilters);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const urlFiltersKey = JSON.stringify(urlFilters);
 
-  // Sync filters from URL params
+  // Keep local state in sync when the URL changes (back/forward, links)
   useEffect(() => {
-    const search = searchParams.get("search");
-    const type = searchParams.get("type");
-    const category = searchParams.get("category");
+    if (!debounceRef.current) updateFilters(JSON.parse(urlFiltersKey));
+  }, [urlFiltersKey]);
 
-    setFilters((prev) => ({
-      ...prev,
-      searchQuery: search || undefined,
-      listingType: type || undefined,
-      category: category || undefined,
-    }));
-  }, [searchParams]);
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+  }, []);
 
-  // Build API query params from filters
-  const apiParams = useMemo(() => {
-    const params: Record<string, any> = { items: 100 };
-
-    if (filters.searchQuery) params.search = filters.searchQuery;
-    if (filters.city_id) params.city_id = filters.city_id;
-    if (filters.state_id) params.state_id = filters.state_id;
-    if (filters.priceMin) params.price_min = filters.priceMin;
-    if (filters.priceMax) params.price_max = filters.priceMax;
-    if (filters.rooms) params.rooms_min = filters.rooms;
-    if (filters.bathrooms) params.bathrooms_min = filters.bathrooms;
-
-    if (filters.category) {
-      if (filters.category === "land") {
-        params.property_type_name = "land";
-      } else {
-        params.category_slug = filters.category;
-      }
-    }
-
-    return params;
-  }, [filters]);
-
-  const {
-    data: propertiesData,
-    isLoading,
-    isError,
-  } = useProperties(apiParams);
-
-  const { data: statesData } = useStates();
-  const states = statesData?.data ?? [];
-  const { data: citiesData } = useCities(filters.state_id);
-  const cities = citiesData?.data ?? [];
-
-  const selectedState = states.find((s) => s.id === filters.state_id);
-  const selectedCity = cities.find((c) => c.id === filters.city_id);
-
-  // Client-side filtering for fields not yet supported by backend
-  const filteredProperties = useMemo(() => {
-    if (!propertiesData?.data) return [];
-
-    return propertiesData.data.filter((property: Property) => {
-      // Listing type filter (client-side until backend supports name-based filtering)
-      if (filters.listingType) {
-        const listingTypeName = property.listing_type?.name?.toLowerCase();
-        if (filters.listingType === "rent" && listingTypeName !== "rent")
-          return false;
-        if (filters.listingType === "buy" && listingTypeName !== "sale")
-          return false;
-      }
-
-      // Land area filters (not yet in backend)
-      if (
-        filters.landAreaMin &&
-        (property.land_area || 0) < filters.landAreaMin
-      )
-        return false;
-      if (
-        filters.landAreaMax &&
-        (property.land_area || 0) > filters.landAreaMax
-      )
-        return false;
-
-      return true;
+  const navigate = (next: Filters) => {
+    startTransition(() => {
+      router.push(`${pathname}${buildListingQuery(next)}`, { scroll: false });
     });
-  }, [propertiesData, filters]);
+  };
+
+  const updateFilters = (next: Filters) => {
+    filtersRef.current = next;
+    setFilters(next);
+  };
 
   const handleFilterChange = (key: keyof Filters, value: any) => {
-    setFilters((prev) => {
-      const next = { ...prev, [key]: value || undefined };
-      // Selecting a new state invalidates any previously selected city.
-      if (key === "state_id") next.city_id = undefined;
-      return next;
-    });
-    setCurrentPage(1);
+    const next = { ...filtersRef.current, [key]: value || undefined };
+    // Selecting a new state invalidates any previously selected city.
+    if (key === "state_id") next.city_id = undefined;
+    updateFilters(next);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (DEBOUNCED_KEYS.has(key)) {
+      debounceRef.current = setTimeout(() => {
+        debounceRef.current = null;
+        navigate(filtersRef.current);
+      }, DEBOUNCE_MS);
+    } else {
+      debounceRef.current = null;
+      navigate(next);
+    }
   };
 
   const clearFilters = () => {
-    setFilters({});
-    setCurrentPage(1);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = null;
+    updateFilters({});
+    navigate({});
   };
 
-  const activeFilterCount = Object.values(filters).filter(
-    (v) => v !== undefined
-  ).length;
+  const activeFilterCount = Object.values(filters).filter((v) => v !== undefined).length;
   const advancedFilterCount = [
     filters.city_id,
     filters.state_id,
@@ -142,27 +104,22 @@ export default function PropertiesClient() {
     filters.landAreaMax,
   ].filter((v) => v !== undefined).length;
 
-  const hasNoResults = filteredProperties.length === 0 && activeFilterCount > 0;
-  const allProperties = hasNoResults
-    ? propertiesData?.data || []
-    : filteredProperties;
-
-  const totalPages = Math.ceil(allProperties.length / ITEMS_PER_PAGE);
-  const propertiesToDisplay = allProperties.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
   const sharedFilterProps = {
     filters,
     onFilterChange: handleFilterChange,
     onClearFilters: clearFilters,
     activeFilterCount,
-    currentCount: propertiesToDisplay.length,
-    totalCount: propertiesData?.data.length || 0,
+    currentCount: properties.length,
+    totalCount,
     cities,
     states,
   };
+
+  const locationLabel = (entity: State | City) => (locale === "es" && entity.es_name) || entity.name;
+  const selectedState = states.find((s) => s.id === urlFilters.state_id);
+  const selectedCity = cities.find((c) => c.id === urlFilters.city_id);
+
+  const pageHref = (target: number) => `${pathname}${buildListingQuery(urlFilters, target)}`;
 
   const banners = [
     {
@@ -185,11 +142,13 @@ export default function PropertiesClient() {
     },
   ];
 
-  const mobileBannerIndex = Math.ceil(propertiesToDisplay.length / 2);
+  const mobileBannerIndex = Math.ceil(properties.length / 2);
 
   return (
-    <section className="py-12 bg-gray-50 min-h-screen">
+    <section className="py-12 bg-brand-bg min-h-screen">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+        {header}
+
         {/* Mobile filter bar */}
         <div className="lg:hidden">
           <PropertyFiltersBar
@@ -208,31 +167,31 @@ export default function PropertiesClient() {
           </aside>
 
           {/* Main content */}
-          <div className="flex-1 min-w-0">
-            {isLoading ? (
+          <div className="flex-1 min-w-0" aria-busy={isPending}>
+            {hasNoResults && !isPending && (
+              <NoResultsAlert
+                filters={urlFilters}
+                cityName={selectedCity && locationLabel(selectedCity)}
+                stateName={selectedState && locationLabel(selectedState)}
+                onClearFilters={clearFilters}
+                autoDismissSeconds={10}
+              />
+            )}
+
+            {isPending ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {Array.from({ length: ITEMS_PER_PAGE }, (_, i) => (
+                {Array.from({ length: Math.min(ITEMS_PER_PAGE, properties.length || ITEMS_PER_PAGE) }, (_, i) => (
                   <PropertyCardSkeleton key={i} />
                 ))}
               </div>
             ) : isError ? (
               <div className="text-center py-12">
-                <div className="text-red-600">
-                  {t("errorLoading") || "Error loading properties"}
-                </div>
+                <div className="text-danger">{t("errorLoading")}</div>
               </div>
-            ) : hasNoResults ? (
-              <NoResultsAlert
-                filters={filters}
-                cityName={selectedCity ? (locale === "es" ? selectedCity.es_name : selectedCity.name) : undefined}
-                stateName={selectedState ? (locale === "es" ? selectedState.es_name : selectedState.name) : undefined}
-                onClearFilters={clearFilters}
-                autoDismissSeconds={10}
-              />
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {propertiesToDisplay.map((property: Property, index: number) => (
+                  {properties.map((property, index) => (
                     <Fragment key={property.id}>
                       {index === mobileBannerIndex && (
                         <div className="col-span-full lg:hidden py-2">
@@ -240,81 +199,60 @@ export default function PropertiesClient() {
                         </div>
                       )}
                       <PropertyCard
-                        id={property.id}
-                        title={property.title}
-                        property_type={
-                          property?.property_type ?? {
-                            id: "",
-                            name: "Unknown",
-                            es_name: "Desconocido",
-                          }
-                        }
-                        status={
-                          property?.status ?? {
-                            id: "",
-                            name: "Unknown",
-                            es_name: "Desconocido",
-                          }
-                        }
-                        listing_types={
-                          property?.listing_type ?? {
-                            id: "",
-                            name: "Unknown",
-                            es_name: "Desconocido",
-                          }
-                        }
-                        images={property.images.map((img) => getAbsoluteImageUrl(img.url))}
-                        landArea={property.land_area ?? 0}
-                        builtArea={property.built_area ?? 0}
-                        price={property.price}
-                        rooms={property.rooms}
-                        bathrooms={property.bathrooms}
-                        compact={true}
-                        half_bathrooms={property.half_bathrooms}
-                        property_features={property.property_features}
-                        property_categories={property.property_categories}
-                        neighborhood={property.neighborhood}
-                        city={property.city}
-                        state={property.state}
+                        {...toPropertyCardProps(property, locale)}
+                        compact
+                        priority={index < 3}
                       />
                     </Fragment>
                   ))}
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-2 mt-8">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t("previous") || "Previous"}
-                    </button>
+                  <nav
+                    aria-label={t("paginationLabel")}
+                    className="flex flex-wrap justify-center items-center gap-2 mt-8"
+                  >
+                    {page > 1 && (
+                      <Link
+                        href={pageHref(page - 1)}
+                        rel="prev"
+                        scroll={false}
+                        className={buttonClasses({ variant: "secondary", className: "h-10 bg-white px-4" })}
+                      >
+                        {t("previous")}
+                      </Link>
+                    )}
 
                     <div className="flex gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`w-10 h-10 rounded-lg border ${
-                            currentPage === page
-                              ? "bg-stone-800 text-white border-stone-800"
-                              : "bg-white text-stone-700 border-stone-300 hover:bg-stone-50"
-                          }`}
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((target) => (
+                        <Link
+                          key={target}
+                          href={pageHref(target)}
+                          scroll={false}
+                          aria-label={t("pageLabel").replace("{page}", String(target))}
+                          aria-current={target === page ? "page" : undefined}
+                          className={buttonClasses({
+                            variant: target === page ? "primary" : "secondary",
+                            size: "icon",
+                            className: `tabular-nums ${target === page ? "" : "bg-white"}`,
+                          })}
                         >
-                          {page}
-                        </button>
+                          {target}
+                        </Link>
                       ))}
                     </div>
 
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t("next") || "Next"}
-                    </button>
-                  </div>
+                    {page < totalPages && (
+                      <Link
+                        href={pageHref(page + 1)}
+                        rel="next"
+                        scroll={false}
+                        className={buttonClasses({ variant: "secondary", className: "h-10 bg-white px-4" })}
+                      >
+                        {t("next")}
+                      </Link>
+                    )}
+                  </nav>
                 )}
               </>
             )}

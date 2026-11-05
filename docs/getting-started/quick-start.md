@@ -206,4 +206,4 @@ Both apps share the same backend API.
 
 ## More Information
 
-See [MONOREPO_STRUCTURE.md](./MONOREPO_STRUCTURE.md) for detailed documentation.
+See [monorepo-structure.md](monorepo-structure.md) for detailed documentation.

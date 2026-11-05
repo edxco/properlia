@@ -177,4 +177,4 @@ make db-reset       # Reset database
 make shell-backend  # Open backend shell
 ```
 
-For detailed information, see [DOCKER.md](./DOCKER.md)
+For detailed information, see [docker.md](docker.md)

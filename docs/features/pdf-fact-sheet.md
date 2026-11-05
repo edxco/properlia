@@ -22,7 +22,7 @@ A complete PDF generation system for property listings with 4 customized templat
    - [`packages/backend/app/views/property_mailer/send_pdf.text.erb`](packages/backend/app/views/property_mailer/send_pdf.text.erb) - Plain text email template
 
 5. **Documentation**
-   - [`packages/backend/docs/PDF_GENERATION.md`](packages/backend/docs/PDF_GENERATION.md) - Complete API documentation and usage guide
+   - [`pdf-generation.md`](pdf-generation.md) - Complete API documentation and usage guide
 
 ### Modified Files
 
@@ -203,7 +203,7 @@ The system automatically selects templates based on `property_type.name`:
 
 ## Documentation
 
-See [`packages/backend/docs/PDF_GENERATION.md`](packages/backend/docs/PDF_GENERATION.md) for:
+See [`pdf-generation.md`](pdf-generation.md) for:
 - Complete API documentation
 - Frontend integration examples
 - Troubleshooting guide
@@ -228,7 +228,7 @@ See [`packages/backend/docs/PDF_GENERATION.md`](packages/backend/docs/PDF_GENERA
 For issues or questions, check:
 1. Logs: `make dev-logs`
 2. Rails console: `make shell-backend`
-3. Documentation: [`packages/backend/docs/PDF_GENERATION.md`](packages/backend/docs/PDF_GENERATION.md)
+3. Documentation: [`pdf-generation.md`](pdf-generation.md)
 
 ---
 

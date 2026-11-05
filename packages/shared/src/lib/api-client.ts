@@ -7,7 +7,6 @@ const API_BASE_URL = isServer ? INTERNAL_API_URL : PUBLIC_API_URL;
 const API_ROOT_URL = API_BASE_URL.replace(/\/api\/v1$/, '');
 // Image URLs must always use the public URL so the browser can resolve them
 const PUBLIC_API_ROOT = PUBLIC_API_URL.replace(/\/api\/v1$/, '');
-console.log('API Client initialized', API_BASE_URL);
 
 export class ApiError extends Error {
   constructor(
@@ -20,8 +19,14 @@ export class ApiError extends Error {
   }
 }
 
+export interface CacheOptions {
+  revalidate?: number | false;
+  tags?: string[];
+}
+
 interface RequestOptions extends RequestInit {
   requiresAuth?: boolean;
+  next?: CacheOptions;
 }
 
 class ApiClient {
@@ -125,8 +130,12 @@ class ApiClient {
     return { data, token };
   }
 
-  get<T>(endpoint: string, requiresAuth = false): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET', requiresAuth });
+  get<T>(endpoint: string, requiresAuth = false, cache?: CacheOptions): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'GET',
+      requiresAuth,
+      ...(cache && { next: cache }),
+    });
   }
 
   post<T>(endpoint: string, data?: unknown, requiresAuth = true): Promise<T> {

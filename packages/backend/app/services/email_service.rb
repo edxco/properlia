@@ -133,6 +133,22 @@ class EmailService
       send_email(params)
     end
 
+    # Digest asking the admin whether on-hold properties are still on hold or sold
+    # @param properties [Array<Property>] On-hold properties due for a reminder
+    # @return [Hash] Resend API response or error
+    def send_on_hold_reminder(properties:)
+      validate_resend_configured!
+
+      params = {
+        from: ENV.fetch('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
+        to: GeneralInfo.instance.email_to,
+        subject: "Propiedades apartadas: ¿siguen apartadas? (#{properties.size})",
+        html: on_hold_reminder_html(properties: properties)
+      }
+
+      send_email(params)
+    end
+
     private
 
     def validate_resend_configured!
@@ -765,6 +781,61 @@ class EmailService
       when '6-12' then '6-12 meses'
       else timeframe
       end
+    end
+
+    def on_hold_reminder_html(properties:)
+      api_url = ENV.fetch('HOST_URL', 'http://localhost:3000').chomp('/')
+      dashboard_url = ENV.fetch('DASHBOARD_URL', 'http://localhost:3002').chomp('/')
+
+      rows = properties.map do |property|
+        keep_url = "#{api_url}/api/v1/on_hold_reminders?token=#{CGI.escape(OnHoldReminderToken.generate(property, 'keep'))}"
+        sold_url = "#{api_url}/api/v1/on_hold_reminders?token=#{CGI.escape(OnHoldReminderToken.generate(property, 'sold'))}"
+        edit_url = "#{dashboard_url}/es/dashboard/properties/#{property.id}/edit"
+        days = property.on_hold_since ? ((Time.current - property.on_hold_since) / 1.day).floor : nil
+
+        <<~ROW
+          <div class="property">
+            <div class="title"><a href="#{edit_url}">#{ERB::Util.html_escape(property.title)}</a></div>
+            <div class="meta">#{ERB::Util.html_escape(property.address)}#{days ? " · Apartada hace #{days} días" : ''}</div>
+            <a href="#{keep_url}" class="btn btn-keep">Sigue apartada</a>
+            <a href="#{sold_url}" class="btn btn-sold">Marcar como vendida</a>
+          </div>
+        ROW
+      end
+
+      <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #214c9b; color: white; padding: 20px; text-align: center; }
+              .content { background-color: #f9fafb; padding: 20px; }
+              .property { background: white; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; margin-bottom: 12px; }
+              .title { font-weight: bold; font-size: 16px; }
+              .title a { color: #214c9b; }
+              .meta { color: #6b7280; font-size: 13px; margin-bottom: 12px; }
+              .btn { display: inline-block; padding: 8px 16px; border-radius: 5px; color: white; text-decoration: none; margin-right: 8px; }
+              .btn-keep { background-color: #6b7280; }
+              .btn-sold { background-color: #16a34a; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h2>Propiedades apartadas</h2>
+              </div>
+              <div class="content">
+                <p>Las siguientes propiedades siguen con estatus <strong>apartada</strong>. ¿Siguen apartadas o ya se vendieron?</p>
+                #{rows.join}
+                <p style="font-size: 12px; color: #6b7280;">Los botones expiran en 7 días. Recibirás otro recordatorio en 3 días por cada propiedad que siga apartada.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      HTML
     end
   end
 end

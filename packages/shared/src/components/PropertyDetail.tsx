@@ -7,43 +7,46 @@ import { ImageCarousel, type CarouselImage } from "./ImageCarousel";
 import { PropertyDetailsGrid } from "./PropertyDetailsGrid";
 import { getAbsoluteImageUrl } from "../lib/api-client";
 import styles from "./styles/PropertyDetail.module.css";
+import { PageTitle, Price } from "./ui";
 
 interface PropertyDetailProps {
   property: Property;
   locale?: string;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
 export const PropertyDetail: React.FC<PropertyDetailProps> = ({
   property,
   locale = "en",
+  breadcrumbs,
 }) => {
   // Build breadcrumb items: State > City > Zip Code > Neighborhood
-  const breadcrumbItems: BreadcrumbItem[] = [];
+  const breadcrumbItems: BreadcrumbItem[] = breadcrumbs ? [...breadcrumbs] : [];
 
-  if (property.state) {
-    const stateLabel = locale === "es" ? property.state.es_name : property.state.name;
+  if (!breadcrumbs && property.state) {
+    const stateLabel = (locale === "es" && property.state.es_name) || property.state.name;
     breadcrumbItems.push({
       label: stateLabel,
       href: `/properties?state_id=${encodeURIComponent(property.state.id)}`,
     });
   }
 
-  if (property.city) {
-    const cityLabel = locale === "es" ? property.city.es_name : property.city.name;
+  if (!breadcrumbs && property.city) {
+    const cityLabel = (locale === "es" && property.city.es_name) || property.city.name;
     breadcrumbItems.push({
       label: cityLabel,
       href: `/properties?city_id=${encodeURIComponent(property.city.id)}`,
     });
   }
 
-  if (property.zip_code) {
+  if (!breadcrumbs && property.zip_code) {
     breadcrumbItems.push({
       label: property.zip_code,
       href: `/properties?zip_code=${encodeURIComponent(property.zip_code)}`,
     });
   }
 
-  if (property.neighborhood) {
+  if (!breadcrumbs && property.neighborhood) {
     breadcrumbItems.push({
       label: property.neighborhood,
     });
@@ -77,10 +80,10 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({
 
       {/* Title and Price */}
       <div className={styles.header}>
-        <h1 className={styles.title}>{property.title}</h1>
-        <p className={styles.price}>{formattedPrice}</p>
+        <PageTitle className="mb-2 text-3xl md:text-4xl">{property.title}</PageTitle>
+        <Price className="block text-2xl">{formattedPrice}</Price>
         {property.address && (
-          <p className={styles.address}>{property.address}</p>
+          <p className="mt-2 text-brand-carbon/70">{property.address}</p>
         )}
       </div>
 
