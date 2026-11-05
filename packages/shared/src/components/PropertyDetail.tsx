@@ -7,6 +7,7 @@ import { ImageCarousel, type CarouselImage } from "./ImageCarousel";
 import { PropertyDetailsGrid } from "./PropertyDetailsGrid";
 import { getAbsoluteImageUrl } from "../lib/api-client";
 import styles from "./styles/PropertyDetail.module.css";
+import { PageTitle, Price } from "./ui";
 
 interface PropertyDetailProps {
   property: Property;
@@ -75,10 +76,10 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({
 
       {/* Title and Price */}
       <div className={styles.header}>
-        <h1 className={styles.title}>{property.title}</h1>
-        <p className={styles.price}>{formattedPrice}</p>
+        <PageTitle className="mb-2 text-3xl md:text-4xl">{property.title}</PageTitle>
+        <Price className="block text-2xl">{formattedPrice}</Price>
         {property.address && (
-          <p className={styles.address}>{property.address}</p>
+          <p className="mt-2 text-brand-carbon/70">{property.address}</p>
         )}
       </div>
 

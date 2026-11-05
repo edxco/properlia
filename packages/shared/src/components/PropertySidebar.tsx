@@ -3,6 +3,7 @@
 import React from "react";
 import type { Property } from "../types";
 import styles from "./styles/PropertyDetailsGrid.module.css";
+import { Button, Card } from "./ui";
 
 interface PropertySidebarProps {
   property: Property;
@@ -15,8 +16,8 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({
 }) => {
   return (
     <div className={styles.sidebar}>
-      <div className={styles.sidebarCard}>
-        <h3 className={styles.sidebarTitle}>
+      <Card padding="none" className="w-full p-6 lg:sticky lg:top-8">
+        <h3 className="mb-4 text-xl font-medium text-brand-navy">
           {locale === "es"
             ? "Información Adicional"
             : "Additional Information"}
@@ -82,10 +83,10 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({
           )}
         </div>
 
-        <button className={styles.contactButton}>
+        <Button fullWidth className="mt-6">
           {locale === "es" ? "Contactar" : "Contact Us"}
-        </button>
-      </div>
+        </Button>
+      </Card>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 "use client";
 
-import { formatPriceInput, parsePriceInput } from "../lib/utils";
+import { cn, formatPriceInput, parsePriceInput } from "../lib/utils";
+import { controlClasses } from "./ui";
 
 export interface PriceInputProps {
   /** Current value (formatted or raw) */
@@ -65,9 +66,9 @@ export function PriceInput({
   };
 
   return (
-    <div className={`relative ${wrapperClassName}`}>
+    <div className={cn("relative", wrapperClassName)}>
       <span
-        className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm ${symbolClassName}`}
+        className={cn("absolute left-3 top-1/2 -translate-y-1/2 text-sm text-brand-gray", symbolClassName)}
       >
         {currencySymbol}
       </span>
@@ -81,7 +82,7 @@ export function PriceInput({
         required={required}
         disabled={disabled}
         inputMode="numeric"
-        className={className}
+        className={controlClasses({ invalid: hasError, className: cn("pl-7 tabular-nums", className) })}
         aria-invalid={hasError}
       />
     </div>

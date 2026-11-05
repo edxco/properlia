@@ -10,6 +10,7 @@ import bed from "./public/bed.svg";
 import land_area from "./public/land_area.svg";
 import home_area from "./public/construction-house.svg";
 import { useT } from "./TranslationProvider";
+import { Card, CardTitle } from "./ui";
 
 interface PropertyMainDetailsProps {
   property: Property;
@@ -23,11 +24,8 @@ export const PropertyMainDetails: React.FC<PropertyMainDetailsProps> = ({
   const t = useT();
 
   return (
-    <div className={styles.card}>
-      <h2 className={styles.cardTitle}>
-        {t("propertyDetails")}
-        {locale === "es" ? "Detalles de la Propiedad" : "Property Details"}
-      </h2>
+    <Card padding="none" className="mb-6 min-w-0 overflow-hidden p-6">
+      <CardTitle className="mb-4">{t("propertyDetails")}</CardTitle>
       <div className={styles.detailsGrid}>
         {property.built_area && (
           <div className={styles.detailItem}>
@@ -148,6 +146,6 @@ export const PropertyMainDetails: React.FC<PropertyMainDetailsProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 };

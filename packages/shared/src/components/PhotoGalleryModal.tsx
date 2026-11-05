@@ -3,6 +3,7 @@
 import React from 'react';
 import styles from './styles/PhotoGalleryModal.module.css';
 import { useT } from './TranslationProvider';
+import { Button } from './ui';
 
 export interface CarouselImage {
   url: string;
@@ -107,22 +108,17 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.headerInfo}>
-              <h2 className={styles.title}>
+              <h2 className="truncate text-base font-medium text-brand-navy">
                 {title}
               </h2>
-              <p className={styles.photoCount}>
+              <p className="text-sm tabular-nums text-brand-gray">
                 {currentIndex + 1} / {images.length} {t('galleryPhoto')}
               </p>
             </div>
 
-            <button
-              ref={closeBtnRef}
-              type="button"
-              onClick={onClose}
-              className={styles.closeButton}
-            >
+            <Button ref={closeBtnRef} size="sm" onClick={onClose}>
               {t('galleryClose')}
-            </button>
+            </Button>
           </div>
 
           {/* Carousel area */}
