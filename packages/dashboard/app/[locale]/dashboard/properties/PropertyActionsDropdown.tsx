@@ -11,6 +11,7 @@ import {
 import type { Property } from "@properlia/shared/types";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import { useUpdateProperty } from "@/src/services/properties/queries";
+import { Button } from "@properlia/shared/components/ui";
 
 interface PropertyActionsDropdownProps {
   property: Property;
@@ -28,17 +29,19 @@ export default function PropertyActionsDropdown({
   return (
     <div className="absolute bottom-4 right-3 sm:bottom-auto sm:top-4 sm:right-6">
       <div className="relative">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             setIsOpen(!isOpen);
           }}
-          className="p-2 hover:bg-gray-200 rounded-md transition-colors cursor-pointer"
+          className="size-9"
           aria-label="Actions"
         >
-          <MoreVertical className="h-5 w-5 text-gray-500" />
-        </button>
+          <MoreVertical className="h-5 w-5 text-brand-gray" />
+        </Button>
 
         {isOpen && (
           <>
@@ -46,15 +49,15 @@ export default function PropertyActionsDropdown({
               className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
             />
-            <div className="absolute right-0 mt-2 rounded-md shadow-lg bg-white ring ring-gray-400 ring-opacity-5 z-50">
-              <div className="flex flex-col divide-y divide-gray-200">
+            <div className="absolute right-0 mt-2 rounded-card shadow-overlay bg-white ring ring-input ring-opacity-5 z-50">
+              <div className="flex flex-col divide-y divide-brand-border">
                 <button
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     window.location.href = `/dashboard/properties/${property.id}/edit`;
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-md cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-brand-carbon hover:bg-brand-bg first:rounded-t-md cursor-pointer"
                 >
                   <EditIcon className="h-4 w-4" />
                   {t("edit")}
@@ -69,7 +72,7 @@ export default function PropertyActionsDropdown({
                     );
                     setIsOpen(false);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-brand-carbon hover:bg-brand-bg cursor-pointer"
                 >
                   <Eye className="h-4 w-4" />
                   {t("details")}
@@ -81,7 +84,7 @@ export default function PropertyActionsDropdown({
                     onFactSheetClick(property.id);
                     setIsOpen(false);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-brand-carbon hover:bg-brand-bg cursor-pointer"
                 >
                   <Download className="h-4 w-4" />
                   {t("download")}
@@ -112,7 +115,7 @@ export default function PropertyActionsDropdown({
                       }
                     }
                   }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-md cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-danger hover:bg-danger-soft last:rounded-b-md cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" />
                   {t("suspend")}

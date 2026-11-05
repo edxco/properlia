@@ -21,22 +21,6 @@
   }
 }
 
-.card {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.cardTitle {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
 .detailsGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -92,8 +76,9 @@
 
 .detailNumber {
   font-size: 13px;
-  font-weight: bold;
-  color: #111827;
+  font-weight: 500;
+  color: var(--brand-carbon);
+  font-variant-numeric: tabular-nums;
   text-align: center;
   overflow-wrap: break-word;
 }
@@ -112,7 +97,7 @@
 
 .detailLabel {
   font-size: 11px;
-  color: #4b5563;
+  color: var(--brand-gray);
   text-transform: uppercase;
   text-align: center;
   overflow-wrap: break-word;
@@ -149,7 +134,7 @@
 }
 
 .description {
-  color: #374151;
+  color: var(--brand-carbon);
   white-space: pre-line;
   line-height: 1.5;
   margin: 0;
@@ -165,49 +150,10 @@
   pointer-events: none;
 }
 
-.readMoreButton {
-  background: none;
-  border: none;
-  color: #214c9b;
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  padding: 0.5rem 0 0 0;
-  margin-top: 0.5rem;
-  transition: color 0.2s;
-}
-
-.readMoreButton:hover {
-  color: #1d4ed8;
-  text-decoration: underline;
-}
-
 .sidebar {
   grid-column: span 1;
   min-width: 0;
   width: 100%;
-}
-
-.sidebarCard {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-@media (min-width: 1024px) {
-  .sidebarCard {
-    position: sticky;
-    top: 2rem;
-  }
-}
-
-.sidebarTitle {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
 }
 
 .infoList {
@@ -224,12 +170,12 @@
   gap: 0.5rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--brand-border);
   min-width: 0;
 }
 
 .infoLabel {
-  color: #4b5563;
+  color: var(--brand-gray);
   flex-shrink: 0;
 }
 
@@ -238,21 +184,4 @@
   text-align: right;
   word-break: break-word;
   min-width: 0;
-}
-
-.contactButton {
-  width: 100%;
-  margin-top: 1.5rem;
-  background-color: #214c9b;
-  color: white;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.contactButton:hover {
-  background-color: #1d4ed8;
 }

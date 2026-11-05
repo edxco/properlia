@@ -192,7 +192,7 @@ function Accordion({
   onToggle: () => void;
 }) {
   return (
-    <div className="border border-border rounded-xl overflow-hidden shadow-sm">
+    <div className="border border-border rounded-card overflow-hidden shadow-card">
       <button
         onClick={onToggle}
         className="flex items-center gap-3 w-full px-5 py-3.5 bg-card text-foreground font-medium hover:bg-primary/10 hover:text-primary transition-all duration-200"
@@ -231,7 +231,7 @@ export default function Home() {
     setOpenAccordion((prev) => (prev === key ? null : key));
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-pale via-white to-brand-pale">
       <div className="w-full max-w-md mx-auto px-6 py-12">
         <div className="text-center mb-10">
           <Image
@@ -256,7 +256,7 @@ export default function Home() {
                 link.href.startsWith("http") ? "noopener noreferrer" : undefined
               }
               onClick={() => trackEvent(link.eventName)}
-              className="flex items-center gap-3 w-full px-5 py-3.5 bg-card border border-border rounded-xl text-foreground font-medium hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all duration-200 shadow-sm hover:shadow-md"
+              className="flex items-center gap-3 w-full px-5 py-3.5 bg-card border border-border rounded-card text-foreground font-medium hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all duration-200 shadow-card hover:shadow-card"
             >
               <span className="text-primary">{link.icon}</span>
               <span className="flex-1 text-center pr-8">

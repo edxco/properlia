@@ -8,6 +8,7 @@ import ProperliaLogo from "@/public/properlia.png";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
+import { Button, cardClasses } from "@properlia/shared/components/ui";
 
 const PROPERTY_CATEGORIES = [
   { key: "allProperties", param: "" },
@@ -34,15 +35,15 @@ export function Navigation() {
   const linkClass = (path: string) =>
     `transition-colors text-sm tracking-wide font-medium ${
       isActive(path)
-        ? "text-primary font-semibold border-b-2 border-stone-900 pb-0.5"
-        : "text-stone-600 hover:text-stone-900"
+        ? "text-primary font-medium border-b-2 border-brand-navy pb-0.5"
+        : "text-brand-carbon/70 hover:text-brand-carbon"
     }`;
 
   const mobileLinkClass = (path: string) =>
     `block text-sm tracking-wide font-medium ${
       isActive(path)
-        ? "text-stone-900"
-        : "text-stone-700 hover:text-stone-900"
+        ? "text-brand-carbon"
+        : "text-brand-carbon hover:text-brand-carbon"
     }`;
 
   const handleMouseEnter = () => {
@@ -55,7 +56,7 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-stone-100">
+    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-brand-border">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link href={`/${locale}`} className="flex items-center space-x-2">
@@ -71,8 +72,8 @@ export function Navigation() {
               <button
                 className={`flex items-center gap-1 transition-colors text-sm tracking-wide font-medium ${
                   isActive("/properties")
-                    ? "text-primary font-semibold border-b-2 border-stone-900 pb-0.5"
-                    : "text-stone-600 hover:text-stone-900"
+                    ? "text-primary font-medium border-b-2 border-brand-navy pb-0.5"
+                    : "text-brand-carbon/70 hover:text-brand-carbon"
                 }`}
               >
                 {t("properties")}
@@ -83,12 +84,12 @@ export function Navigation() {
 
               {isPropertiesOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3">
-                  <div className="bg-white border border-stone-100 rounded-lg shadow-lg py-1.5 min-w-[160px]">
+                  <div className={cardClasses({ padding: "none", className: "min-w-[160px] py-1.5 shadow-overlay" })}>
                     {PROPERTY_CATEGORIES.map(({ key, param }) => (
                       <Link
                         key={key}
                         href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
-                        className="block px-4 py-2 text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-colors"
+                        className="block whitespace-nowrap px-4 py-2 text-sm text-brand-carbon/70 hover:text-brand-carbon hover:bg-brand-bg transition-colors"
                         onClick={() => setIsPropertiesOpen(false)}
                       >
                         {capitalizeEachWord(t(key))}
@@ -114,8 +115,10 @@ export function Navigation() {
             <LanguageSwitcher />
           </div>
 
-          <button
-            className="md:hidden text-stone-900"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden text-brand-carbon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
@@ -123,17 +126,17 @@ export function Navigation() {
             ) : (
               <Menu className="w-6 h-6" />
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-stone-100">
+        <div className="md:hidden bg-white border-t border-brand-border">
           <div className="px-6 py-6 space-y-4">
             <div>
               <button
                 className={`flex items-center gap-1 w-full text-left text-sm tracking-wide font-medium ${
-                  isActive("/properties") ? "text-stone-900" : "text-stone-700 hover:text-stone-900"
+                  isActive("/properties") ? "text-brand-carbon" : "text-brand-carbon hover:text-brand-carbon"
                 }`}
                 onClick={() => setIsMobilePropertiesOpen(!isMobilePropertiesOpen)}
               >
@@ -143,12 +146,12 @@ export function Navigation() {
                 />
               </button>
               {isMobilePropertiesOpen && (
-                <div className="mt-2 ml-3 space-y-2 border-l border-stone-200 pl-3">
+                <div className="mt-2 ml-3 space-y-2 border-l border-brand-border pl-3">
                   {PROPERTY_CATEGORIES.map(({ key, param }) => (
                     <Link
                       key={key}
                       href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
-                      className="block text-sm text-stone-600 hover:text-stone-900"
+                      className="block text-sm text-brand-carbon/70 hover:text-brand-carbon"
                       onClick={() => { setIsMenuOpen(false); setIsMobilePropertiesOpen(false); }}
                     >
                       {capitalizeEachWord(t(key))}

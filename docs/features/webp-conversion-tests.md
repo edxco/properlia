@@ -75,7 +75,7 @@ Comprehensive test suite with **50+ test cases** covering:
 
 ### 4. Documentation
 
-**[`packages/dashboard/__tests__/README.md`](packages/dashboard/__tests__/README.md)**
+**[`../dashboard/tests.md`](../dashboard/tests.md)**
 
 Complete testing guide including:
 - Setup instructions

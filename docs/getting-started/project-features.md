@@ -446,9 +446,9 @@ properlia2025/
 ## Documentación Adicional
 
 - `README.md` - Guía de instalación y uso
-- `ARCHITECTURE.md` - Arquitectura del sistema
-- `DOCKER_QUICK_REFERENCE.md` - Comandos Docker
-- `GENERAL_INFO_CACHING.md` - Estrategia de caché
+- `architecture.md` - Arquitectura del sistema
+- `../docker/quick-reference.md` - Comandos Docker
+- `../features/general-info-caching.md` - Estrategia de caché
 
 ---
 

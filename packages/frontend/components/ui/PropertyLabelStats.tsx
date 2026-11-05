@@ -36,34 +36,34 @@ export function PropertyLabelStats({
     <>
       {isResidential && (
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-brand-carbon/70">
             <Bed className="w-4 h-4 flex-shrink-0" />
             <div className="text-sm">
-              <span className="font-medium text-gray-900">{rooms}</span>
+              <span className="font-medium tabular-nums text-brand-carbon">{rooms}</span>
               <span className="text-xs ml-1">{t("rooms")}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-brand-carbon/70">
             <ShowerHead className="w-4 h-4 flex-shrink-0" />
             <div className="text-sm">
-              <span className="font-medium text-gray-900">{bathrooms}</span>
+              <span className="font-medium tabular-nums text-brand-carbon">{bathrooms}</span>
               <span className="text-xs ml-1">{t("baths")}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-brand-carbon/70">
             <Toilet className="w-4 h-4 flex-shrink-0" />
             <div className="text-sm">
-              <span className="font-medium text-gray-900">
+              <span className="font-medium tabular-nums text-brand-carbon">
                 {half_bathrooms}
               </span>
               <span className="text-xs ml-1">{t("guestBaths")}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-gray-600">
+          <div className="flex items-center gap-2 text-brand-carbon/70">
             <Car className="w-4 h-4 flex-shrink-0" />
             <div className="text-sm">
-              <span className="font-medium text-gray-900">{rooms}</span>
+              <span className="font-medium tabular-nums text-brand-carbon">{rooms}</span>
               <span className="text-xs ml-1">{t("car")}</span>
             </div>
           </div>

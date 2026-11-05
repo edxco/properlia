@@ -6,6 +6,7 @@ import { propertyApi } from '@properlia/shared/services/properties/api';
 import { PropertyDetail } from '@properlia/shared';
 import type { Property } from '@properlia/shared/types';
 import { useLocale } from '@properlia/shared/components/TranslationProvider';
+import { Button, DashboardTitle } from '@properlia/shared/components/ui';
 
 export default function PropertyPage() {
   const params = useParams();
@@ -42,8 +43,8 @@ export default function PropertyPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading property...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto"></div>
+          <p className="mt-4 text-brand-carbon/70">Loading property...</p>
         </div>
       </div>
     );
@@ -53,14 +54,11 @@ export default function PropertyPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Not Found</h1>
-          <p className="text-gray-600 mb-4">{error || 'The property you are looking for does not exist.'}</p>
-          <button
-            onClick={() => router.push('/dashboard/properties')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
+          <DashboardTitle className="mb-2">Property Not Found</DashboardTitle>
+          <p className="text-brand-carbon/70 mb-4">{error || 'The property you are looking for does not exist.'}</p>
+          <Button size="sm" onClick={() => router.push('/dashboard/properties')}>
             Back to Properties
-          </button>
+          </Button>
         </div>
       </div>
     );

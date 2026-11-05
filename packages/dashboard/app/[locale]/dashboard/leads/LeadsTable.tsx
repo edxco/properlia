@@ -13,6 +13,7 @@ import {
 import { capitalizeFirstWord } from "@properlia/shared";
 import { Phone, Mail, Calendar, MapPin, Home, ChevronDown } from "lucide-react";
 import { useChangeLeadStatus } from "@/src/services/leads/queries";
+import { Badge, Button, Card, Chip, type BadgeTone } from "@properlia/shared/components/ui";
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -42,71 +43,25 @@ const STATUS_OPTIONS: LeadStatus[] = [
 
 const INTEREST_OPTIONS: InterestOperation[] = ["buy", "rent", "invest", "sell"];
 
-const getInterestBadgeColor = (interest: InterestOperation) => {
-  const colors: Record<InterestOperation, string> = {
-    buy: "bg-indigo-100 text-indigo-800",
-    rent: "bg-teal-100 text-teal-800",
-    invest: "bg-amber-100 text-amber-800",
-    sell: "bg-rose-100 text-rose-800",
-  };
-  return colors[interest] || "bg-gray-100 text-gray-800";
-};
-
-const getPropertyTypeBadgeColor = (propertyType: string) => {
-  const lowerType = propertyType.toLowerCase();
-  if (lowerType.includes("casa") || lowerType.includes("house"))
-    return "bg-cyan-100 text-cyan-800";
-  if (lowerType.includes("departamento") || lowerType.includes("apartment"))
-    return "bg-violet-100 text-violet-800";
-  if (lowerType.includes("terreno") || lowerType.includes("land"))
-    return "bg-lime-100 text-lime-800";
-  if (lowerType.includes("oficina") || lowerType.includes("office"))
-    return "bg-sky-100 text-sky-800";
-  if (lowerType.includes("local") || lowerType.includes("commercial"))
-    return "bg-fuchsia-100 text-fuchsia-800";
-  return "bg-gray-100 text-gray-800";
+const INTEREST_BADGE_TONES: Record<InterestOperation, BadgeTone> = {
+  buy: "info",
+  rent: "neutral",
+  invest: "success",
+  sell: "warning",
 };
 
 const STATUS_DROPDOWN_COLORS: Record<
   LeadStatus,
   { bg: string; hover: string; text: string }
 > = {
-  new_lead: {
-    bg: "bg-blue-500",
-    hover: "hover:bg-blue-600",
-    text: "text-white",
-  },
-  contacted: {
-    bg: "bg-yellow-500",
-    hover: "hover:bg-yellow-600",
-    text: "text-white",
-  },
-  qualified: {
-    bg: "bg-green-500",
-    hover: "hover:bg-green-600",
-    text: "text-white",
-  },
-  proposal: {
-    bg: "bg-purple-500",
-    hover: "hover:bg-purple-600",
-    text: "text-white",
-  },
-  negotiation: {
-    bg: "bg-orange-500",
-    hover: "hover:bg-orange-600",
-    text: "text-white",
-  },
-  won: {
-    bg: "bg-emerald-600",
-    hover: "hover:bg-emerald-700",
-    text: "text-white",
-  },
-  lost: { bg: "bg-red-500", hover: "hover:bg-red-600", text: "text-white" },
-  unqualified: {
-    bg: "bg-gray-500",
-    hover: "hover:bg-gray-600",
-    text: "text-white",
-  },
+  new_lead: { bg: "bg-brand-blue", hover: "hover:opacity-90", text: "text-white" },
+  contacted: { bg: "bg-brand-navy", hover: "hover:opacity-90", text: "text-white" },
+  qualified: { bg: "bg-success/80", hover: "hover:opacity-90", text: "text-white" },
+  proposal: { bg: "bg-brand-carbon", hover: "hover:opacity-90", text: "text-white" },
+  negotiation: { bg: "bg-warning", hover: "hover:opacity-90", text: "text-white" },
+  won: { bg: "bg-success", hover: "hover:opacity-90", text: "text-white" },
+  lost: { bg: "bg-danger", hover: "hover:opacity-90", text: "text-white" },
+  unqualified: { bg: "bg-brand-gray", hover: "hover:opacity-90", text: "text-white" },
 };
 
 const formatStatusLabel = (status: LeadStatus): string => {
@@ -145,12 +100,13 @@ function StatusDropdown({
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
         disabled={isLoading}
-        className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+        className={`inline-flex h-8 items-center gap-1 px-3 text-xs font-medium rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 ${
           colors.bg
         } ${colors.hover} ${colors.text} ${
           isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
@@ -164,7 +120,7 @@ function StatusDropdown({
         />
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-full mt-1 z-50 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 z-50 w-40 bg-white rounded-card shadow-overlay border border-brand-border py-1 overflow-hidden">
           {STATUS_OPTIONS.map((status) => {
             const statusColors = STATUS_DROPDOWN_COLORS[status];
             const isSelected = status === currentStatus;
@@ -179,12 +135,12 @@ function StatusDropdown({
                   setIsOpen(false);
                 }}
                 className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors flex items-center gap-2 ${
-                  isSelected ? "bg-gray-100" : "hover:bg-gray-50"
+                  isSelected ? "bg-brand-bg" : "hover:bg-brand-bg"
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${statusColors.bg}`} />
                 {capitalizeFirstWord(formatStatusLabel(status))}
-                {isSelected && <span className="ml-auto text-primary">✓</span>}
+                {isSelected && <span className="ml-auto text-brand-blue">✓</span>}
               </button>
             );
           })}
@@ -232,79 +188,63 @@ export default function LeadsTable({
       <div className="flex flex-wrap gap-4 pb-3">
         {/* Status Filter */}
         <div className="flex items-center gap-2 overflow-x-auto">
-          <span className="text-sm font-medium text-gray-600">
+          <span className="text-sm font-medium text-brand-carbon/70">
             {t("status")}:
           </span>
-          <button
+          <Chip
+            selected={!filters.status}
             onClick={() => onFilterChange({ ...filters, status: undefined })}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-              !filters.status
-                ? "bg-primary text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
           >
             {capitalizeFirstWord(t("all"))}
-          </button>
+          </Chip>
           {STATUS_OPTIONS.map((status) => (
-            <button
+            <Chip
               key={status}
+              selected={filters.status === status}
               onClick={() => onFilterChange({ ...filters, status })}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-                filters.status === status
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
             >
               {capitalizeFirstWord(formatStatusLabel(status))}
-            </button>
+            </Chip>
           ))}
         </div>
 
         {/* Interest Operation Filter */}
         <div className="flex items-center gap-2 overflow-x-auto">
-          <span className="text-sm font-medium text-gray-600">
+          <span className="text-sm font-medium text-brand-carbon/70">
             {t("interest")}:
           </span>
-          <button
+          <Chip
+            selected={!filters.interest_operation}
             onClick={() =>
               onFilterChange({ ...filters, interest_operation: undefined })
             }
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-              !filters.interest_operation
-                ? "bg-primary text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
           >
             {capitalizeFirstWord(t("all"))}
-          </button>
+          </Chip>
           {INTEREST_OPTIONS.map((interest) => (
-            <button
+            <Chip
               key={interest}
+              selected={filters.interest_operation === interest}
               onClick={() =>
                 onFilterChange({ ...filters, interest_operation: interest })
               }
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-                filters.interest_operation === interest
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
             >
               {capitalizeFirstWord(interest)}
-            </button>
+            </Chip>
           ))}
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-visible rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+      <Card padding="none" className="overflow-visible">
+        <div className="flex items-center justify-between border-b border-brand-border px-6 py-4">
           <div>
-            <p className="text-sm font-semibold text-gray-800">
+            <p className="text-sm font-medium text-brand-carbon">
               {metadata?.count ?? 0} {t("leads")}
             </p>
           </div>
           {metadata && (
-            <div className="text-right text-xs text-gray-500">
+            <div className="text-right text-xs text-brand-gray">
               {t("page")} {metadata.page} {t("of")} {metadata.pages}
             </div>
           )}
@@ -312,43 +252,42 @@ export default function LeadsTable({
 
         <div className="max-h-[calc(100vh-350px)] overflow-y-auto">
           {isLoading ? (
-            <div className="flex justify-center px-6 py-12 text-gray-500">
+            <div className="flex justify-center px-6 py-12 text-brand-gray">
               {t("loadingLeads")}...
             </div>
           ) : leads.length ? (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-brand-border">
               {leads.map((lead) => (
                 <div key={lead.id} className="relative group">
-                  <div className="block px-6 py-4 hover:bg-gray-50 transition-colors">
+                  <div className="block px-6 py-4 hover:bg-brand-bg transition-colors">
                     <div className="space-y-3">
                       {/* Row 1: Name, Badges, Status Dropdown, and Date */}
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-base text-primary">
+                          <h3 className="font-medium text-base text-brand-blue">
                             {lead.full_name}
                           </h3>
                           <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <span
-                              className={`px-2 py-0.5 text-xs font-medium rounded-full ${getInterestBadgeColor(
-                                lead.interest_operation
-                              )}`}
+                            <Badge
+                              tone={INTEREST_BADGE_TONES[lead.interest_operation] ?? "neutral"}
+                              className={
+                                lead.interest_operation === "rent"
+                                  ? "bg-brand-navy/10 text-brand-navy"
+                                  : undefined
+                              }
                             >
                               {capitalizeFirstWord(t(`${lead.interest_operation}`))}
-                            </span>
+                            </Badge>
                             {lead.interest_property_type && (
-                              <span
-                                className={`px-2 py-0.5 text-xs font-medium rounded-full flex items-center gap-1 ${getPropertyTypeBadgeColor(
-                                  lead.interest_property_type
-                                )}`}
-                              >
+                              <Badge tone="navy">
                                 <Home className="h-3 w-3" />
                                 {lead.interest_property_type}
-                              </span>
+                              </Badge>
                             )}
                             {lead.source && (
-                              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-700">
+                              <Badge tone="neutral">
                                 {lead.source.replace(/_/g, " ")}
-                              </span>
+                              </Badge>
                             )}
                           </div>
                         </div>
@@ -363,14 +302,14 @@ export default function LeadsTable({
                             }
                             isLoading={changeStatusMutation.isPending}
                           />
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-brand-gray">
                             {t("createdAt")} {formatDate(lead.created_at)}
                           </div>
                         </div>
                       </div>
 
                       {/* Row 2: Contact Info */}
-                      <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
+                      <div className="flex items-center gap-4 text-sm text-brand-carbon/70 flex-wrap">
                         {lead.email && (
                           <span className="flex items-center gap-1">
                             <Mail className="h-4 w-4" />
@@ -387,9 +326,9 @@ export default function LeadsTable({
 
                       {/* Row 3: Desired Location */}
                       {(lead.neighborhood || lead.city || lead.state) && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-brand-carbon/70">
+                          <MapPin className="h-4 w-4 text-brand-gray" />
+                          <span className="font-medium text-brand-gray">
                             {t("desiredLocation")}:
                           </span>
                           <span>
@@ -402,13 +341,13 @@ export default function LeadsTable({
 
                       {/* Row 4: Budget and Desired Date */}
                       <div className="flex items-center justify-between gap-4 text-sm">
-                        <div className="flex items-center gap-4 text-gray-600">
+                        <div className="flex items-center gap-4 text-brand-carbon/70">
                           <span className="font-medium">
                             {t("budget")}:{" "}
                             {formatBudget(lead.min_budget, lead.max_budget)}
                           </span>
                           {lead.desired_date && (
-                            <span className="flex items-center gap-1 text-gray-600">
+                            <span className="flex items-center gap-1 text-brand-carbon/70">
                               <Calendar className="h-4 w-4" />
                               <span className="font-medium">
                                 {t("desiredDateTo")}{" "}
@@ -418,19 +357,19 @@ export default function LeadsTable({
                             </span>
                           )}
                           {lead.property && (
-                            <span className="text-primary">
+                            <span className="text-brand-blue">
                               {t("property")}: {lead.property.title}
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-gray-500">
+                        <div className="flex items-center gap-2 text-brand-gray">
                           {lead.contact_attempts > 0 && (
                             <span className="text-xs">
                               {lead.contact_attempts} {t("contacts")}
                             </span>
                           )}
                           {lead.next_follow_up_at && (
-                            <span className="flex items-center gap-1 text-xs text-orange-600">
+                            <span className="flex items-center gap-1 text-xs text-warning">
                               <Calendar className="h-3 w-3" />
                               {formatDate(lead.next_follow_up_at)}
                             </span>
@@ -440,7 +379,7 @@ export default function LeadsTable({
 
                       {/* Notes preview */}
                       {lead.notes && (
-                        <p className="text-sm text-gray-500 line-clamp-2">
+                        <p className="text-sm text-brand-gray line-clamp-2">
                           {lead.notes}
                         </p>
                       )}
@@ -450,13 +389,13 @@ export default function LeadsTable({
               ))}
             </div>
           ) : (
-            <div className="px-6 py-12 text-center text-gray-500">
-              <p className="font-medium text-gray-700">{t("noLeadsFound")}</p>
-              <p className="text-sm text-gray-500">{t("noLeadsDescription")}</p>
+            <div className="px-6 py-12 text-center text-brand-gray">
+              <p className="font-medium text-brand-carbon">{t("noLeadsFound")}</p>
+              <p className="text-sm text-brand-gray">{t("noLeadsDescription")}</p>
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

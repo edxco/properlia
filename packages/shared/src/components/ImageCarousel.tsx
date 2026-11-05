@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import styles from "./styles/ImageCarousel.module.css";
 import { PhotoGalleryModal, CarouselImage } from "./PhotoGalleryModal";
+import { Button } from "./ui";
 
 export type { CarouselImage };
 
@@ -46,41 +47,43 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                 <img src={main.url} alt={title} loading="lazy" onLoad={() => markLoaded(0)} />
               </>
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-sm text-zinc-500">
+              <div className="flex h-full w-full items-center justify-center text-sm text-brand-gray">
                 No image
               </div>
             )}
 
             {/* See all photos button */}
-            <button
+            <Button
+              variant="inverse"
+              size="sm"
               onClick={open}
-              className={styles.seeAllButton}
+              className="absolute bottom-4 left-4 z-10 shadow-pill"
               aria-label={`See all ${images.length} photos`}
             >
               See all {images.length} photos →
-            </button>
+            </Button>
           </section>
           <section className={styles.right}>
             {preview[1] && (
-              <div className={`${styles.card} ${styles.green}`}>
+              <div className={styles.card}>
                 {!loadedImages.has(1) && <div className={styles.skeleton} />}
                 <img src={preview[1].url} alt={title} loading="lazy" onLoad={() => markLoaded(1)} />
               </div>
             )}
             {preview[2] && (
-              <div className={`${styles.card} ${styles.yellow}`}>
+              <div className={styles.card}>
                 {!loadedImages.has(2) && <div className={styles.skeleton} />}
                 <img src={preview[2].url} alt={title} loading="lazy" onLoad={() => markLoaded(2)} />
               </div>
             )}
             {preview[3] && (
-              <div className={`${styles.card} ${styles.red}`}>
+              <div className={styles.card}>
                 {!loadedImages.has(3) && <div className={styles.skeleton} />}
                 <img src={preview[3].url} alt={title} loading="lazy" onLoad={() => markLoaded(3)} />
               </div>
             )}
             {preview[4] && (
-              <div className={`${styles.card} ${styles.purple}`}>
+              <div className={styles.card}>
                 {!loadedImages.has(4) && <div className={styles.skeleton} />}
                 <img src={preview[4].url} alt={title} loading="lazy" onLoad={() => markLoaded(4)} />
               </div>

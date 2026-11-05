@@ -25,7 +25,7 @@ export function ImagePreview({ editor, aspectRatio, previewRef }: ImagePreviewPr
         style={{
           backgroundColor: 'white',
           aspectRatio,
-          color: '#373435',
+          color: '#2c2c2a',
           width: '100%',
           maxWidth: '520px',
           padding: '40px',
@@ -33,7 +33,7 @@ export function ImagePreview({ editor, aspectRatio, previewRef }: ImagePreviewPr
           paddingBottom: '0',
           boxSizing: 'border-box',
           fontSize: '16px',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontFamily: 'var(--font-editorial-body), system-ui, sans-serif',
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -62,7 +62,7 @@ export function ImagePreview({ editor, aspectRatio, previewRef }: ImagePreviewPr
               color: '#ffffff',
               padding: '15px',
               fontSize: '14px',
-              fontWeight: 600,
+              fontWeight: 500,
               paddingRight: '45px',
               paddingLeft: '25px',
             }}
@@ -95,7 +95,7 @@ export function ImagePreview({ editor, aspectRatio, previewRef }: ImagePreviewPr
         {/* Footer */}
         <div
           style={{
-            backgroundColor: '#373435',
+            backgroundColor: '#2c2c2a',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',

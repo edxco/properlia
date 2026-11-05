@@ -38,6 +38,12 @@ module Api
         # Filter by listing_type_id (sale, rent, pre-sale)
         properties = properties.where(listing_type_id: params[:listing_type_id]) if params[:listing_type_id].present?
 
+        # Filter by listing type name (sale, rent)
+        if params[:listing_type].present?
+          properties = properties.joins(:listing_type)
+                                 .where('LOWER(listing_types.name) = ?', params[:listing_type].downcase)
+        end
+
         # Location filters (case-insensitive partial match)
         properties = properties.where('LOWER(city) LIKE ?', "%#{params[:city].downcase}%") if params[:city].present?
 
@@ -51,6 +57,10 @@ module Api
         properties = properties.where('price >= ?', params[:price_min].to_f) if params[:price_min].present?
 
         properties = properties.where('price <= ?', params[:price_max].to_f) if params[:price_max].present?
+
+        properties = properties.where('land_area >= ?', params[:land_area_min].to_f) if params[:land_area_min].present?
+
+        properties = properties.where('land_area <= ?', params[:land_area_max].to_f) if params[:land_area_max].present?
 
         # Room and bathroom filters (minimum values)
         properties = properties.where('rooms >= ?', params[:rooms_min].to_i) if params[:rooms_min].present?
@@ -342,7 +352,7 @@ module Api
 
       def property_json(property)
         # include signed URLs for immediate consumption by your frontend
-        base_attributes = property.attributes.except('created_at', 'updated_at')
+        base_attributes = property.attributes.except('created_at')
 
         # Hide address if exclusive_listing is false
         base_attributes = base_attributes.except('address') unless property.exclusive_listing

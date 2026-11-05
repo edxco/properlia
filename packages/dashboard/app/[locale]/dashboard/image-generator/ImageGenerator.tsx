@@ -8,6 +8,13 @@ import { Color } from "@tiptap/extension-color";
 import { Download } from "lucide-react";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { ImagePreview } from "./ImagePreview";
+import {
+  Button,
+  DashboardTitle,
+  Field,
+  Label,
+  Select,
+} from "@properlia/shared/components/ui";
 
 const PRESETS = {
   square: { label: "Square (1:1)", ratio: "1 / 1" },
@@ -20,7 +27,7 @@ type Preset = keyof typeof PRESETS;
 
 export function ImageGenerator() {
   const previewRef = useRef<HTMLDivElement>(null);
-  const [bgColor, setBgColor] = useState("#fffff");
+  const [bgColor, setBgColor] = useState("#ffffff");
   const [preset, setPreset] = useState<Preset>("square");
   const [isCapturing, setIsCapturing] = useState(false);
 
@@ -70,7 +77,7 @@ export function ImageGenerator() {
             const s = view.getComputedStyle(el);
             if (isUnsupported(s.backgroundColor))
               el.style.backgroundColor = "transparent";
-            if (isUnsupported(s.color)) el.style.color = "#373435";
+            if (isUnsupported(s.color)) el.style.color = "#2c2c2a";
           });
         },
       });
@@ -92,8 +99,8 @@ export function ImageGenerator() {
     <>
       <style>{`
         .ig-editor { text-align: center; }
-        .ig-editor h1 { font-size: 2em; font-weight: 700; margin-bottom: 0.1em; line-height: 1.2; color: #214c9b; }
-        .ig-editor h2 { font-size: 1.4em; font-weight: 600; margin-bottom: 0.4em; line-height: 1.3; }
+        .ig-editor h1 { font-size: 2em; font-weight: 500; margin-bottom: 0.1em; line-height: 1.2; color: #214c9b; }
+        .ig-editor h2 { font-size: 1.4em; font-weight: 500; margin-bottom: 0.4em; line-height: 1.3; }
         .ig-editor p { margin-bottom: 0.6em; line-height: 1.6; }
         .ig-editor p:last-child { margin-bottom: 0; }
         .ig-editor strong { font-weight: 700; }
@@ -106,40 +113,32 @@ export function ImageGenerator() {
         {/* Left: Controls */}
         <div className="w-64 shrink-0 space-y-6">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900 mb-1">
-              Image Generator
-            </h1>
-            <p className="text-sm text-gray-500">
+            <DashboardTitle className="mb-1">Image Generator</DashboardTitle>
+            <p className="text-sm text-brand-gray">
               Design and export marketing images
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Background color
-              </label>
+              <Label>Background color</Label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
                   value={bgColor}
                   onChange={(e) => setBgColor(e.target.value)}
-                  className="h-9 w-14 rounded border border-gray-300 cursor-pointer p-0.5"
+                  className="h-9 w-14 rounded-lg border border-input cursor-pointer p-0.5"
                 />
-                <span className="text-sm text-gray-500 font-mono">
+                <span className="text-sm text-brand-gray font-mono">
                   {bgColor}
                 </span>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dimensions
-              </label>
-              <select
+            <Field label="Dimensions">
+              <Select
                 value={preset}
                 onChange={(e) => setPreset(e.target.value as Preset)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {(
                   Object.entries(PRESETS) as [
@@ -151,18 +150,14 @@ export function ImageGenerator() {
                     {label}
                   </option>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </Field>
           </div>
 
-          <button
-            onClick={handleDownload}
-            disabled={isCapturing}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer disabled:cursor-not-allowed"
-          >
+          <Button onClick={handleDownload} disabled={isCapturing} fullWidth>
             <Download className="h-4 w-4" />
             {isCapturing ? "Generating..." : "Download PNG"}
-          </button>
+          </Button>
         </div>
 
         {/* Right: Preview */}

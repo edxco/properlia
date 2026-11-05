@@ -6,6 +6,7 @@ import {
   useT,
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
+import { cardClasses } from "@properlia/shared/components/ui";
 
 declare global {
   interface Window {
@@ -71,11 +72,15 @@ function trackEvent(eventName: string) {
 
 const ICON_STROKE = 1.75;
 
-const cardClass =
-  "flex items-center gap-3 w-full px-5 py-3.5 bg-white border border-[#EAEAE3] rounded-2xl text-[#2C2C2A] font-medium shadow-[0_1px_2px_rgba(20,30,50,.06),0_14px_30px_-22px_rgba(20,30,50,.38)] hover:-translate-y-0.5 hover:border-[#214C9B]/40 hover:text-[#214C9B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B]";
+const cardClass = cardClasses({
+  padding: "none",
+  interactive: true,
+  className:
+    "flex w-full items-center gap-3 px-5 py-3.5 font-medium text-brand-carbon duration-200 hover:border-brand-blue/40 hover:text-brand-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue",
+});
 
 const sectionHeadingClass =
-  "flex items-center justify-center gap-2 text-xs font-medium text-[#888780] uppercase tracking-[0.18em] mb-3";
+  "flex items-center justify-center gap-2 text-xs font-medium text-brand-gray uppercase tracking-[0.18em] mb-3";
 
 export default function ContactClient() {
   const t = useT();
@@ -95,13 +100,13 @@ export default function ContactClient() {
   ];
 
   return (
-    <section className="bg-[#F6F6F2] font-[family-name:var(--font-editorial-body)]">
+    <section className="bg-brand-bg">
       <div className="w-full max-w-md mx-auto px-6 py-16">
         <div className="text-center mb-10">
-          <h1 className="font-[family-name:var(--font-editorial-display)] text-4xl font-medium tracking-[-0.01em] text-[#1A3A5C]">
+          <h1 className="font-display text-4xl font-medium tracking-[-0.01em] text-brand-navy">
             {t("contactTitle")}
           </h1>
-          <p className="mt-3 text-sm text-[#888780]">{t("linksSubtitle")}</p>
+          <p className="mt-3 text-sm text-brand-gray">{t("linksSubtitle")}</p>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -114,7 +119,7 @@ export default function ContactClient() {
               onClick={() => trackEvent(link.eventName)}
               className={cardClass}
             >
-              <Icon className="w-5 h-5 text-[#214C9B]" strokeWidth={ICON_STROKE} />
+              <Icon className="w-5 h-5 text-brand-blue" strokeWidth={ICON_STROKE} />
               <span className="flex-1 text-center pr-8">{t(link.labelKey)}</span>
             </a>
           ))}
@@ -134,7 +139,7 @@ export default function ContactClient() {
                 className={cardClass}
               >
                 <span className="flex-1 text-center pl-5">{t(opt.labelKey)}</span>
-                <ChevronRight className="w-5 h-5 text-[#888780]" strokeWidth={ICON_STROKE} />
+                <ChevronRight className="w-5 h-5 text-brand-gray" strokeWidth={ICON_STROKE} />
               </Link>
             ))}
           </div>
@@ -152,7 +157,7 @@ export default function ContactClient() {
                 onClick={() => trackEvent(social.eventName)}
                 aria-label={social.name}
                 title={social.name}
-                className="p-2.5 rounded-full bg-white border border-[#EAEAE3] text-[#1A3A5C] shadow-[0_1px_2px_rgba(20,30,50,.14)] hover:text-[#214C9B] hover:border-[#214C9B]/40 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B]"
+                className="p-2.5 rounded-full bg-white border border-brand-border text-brand-navy shadow-pill hover:text-brand-blue hover:border-brand-blue/40 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
               >
                 <SocialIcon path={social.path} />
               </a>
