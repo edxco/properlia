@@ -4,6 +4,15 @@ import { useState, useEffect } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeFirstWord } from "@properlia/shared";
+import { cn } from "@properlia/shared/lib/utils";
+import {
+  Badge,
+  Button,
+  Input,
+  Label,
+  Select,
+  cardClasses,
+} from "@properlia/shared/components/ui";
 
 interface PropertyFilters {
   rooms?: number;
@@ -79,11 +88,11 @@ export function PropertyFiltersBar({
     <div className="mb-8">
       <div className="flex justify-between items-center flex-wrap gap-4">
         {/* Label Row */}
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-brand-carbon/70">
           {t("showing") || "Showing"}{" "}
-          <span className="font-semibold text-gray-900">{currentCount}</span>{" "}
+          <span className="font-medium text-brand-carbon">{currentCount}</span>{" "}
           {t("of") || "of"}{" "}
-          <span className="font-semibold text-gray-900">{totalCount}</span>{" "}
+          <span className="font-medium text-brand-carbon">{totalCount}</span>{" "}
           {t("properties")?.toLowerCase() || "properties"}
           {locationText()}
         </p>
@@ -92,30 +101,33 @@ export function PropertyFiltersBar({
         <div className="flex flex-wrap gap-2 items-center">
           {/* Price Range */}
           <div className="flex gap-1 items-center">
-          <input
+          <Input
+            controlSize="sm"
             type="text"
             inputMode="numeric"
             value={priceMinDisplay}
             onChange={(e) => handlePriceChange("priceMin", e.target.value, setPriceMinDisplay)}
             placeholder={t("minPrice") || "Min $"}
-            className="w-28 px-2 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900"
+            className="w-28 tabular-nums"
           />
-          <span className="text-gray-400 text-xs">-</span>
-          <input
+          <span className="text-brand-gray text-xs">-</span>
+          <Input
+            controlSize="sm"
             type="text"
             inputMode="numeric"
             value={priceMaxDisplay}
             onChange={(e) => handlePriceChange("priceMax", e.target.value, setPriceMaxDisplay)}
             placeholder={t("maxPrice") || "Max $"}
-            className="w-28 px-2 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900"
+            className="w-28 tabular-nums"
           />
           </div>
 
           {/* Separator */}
-          <div className="h-6 w-px bg-gray-300"></div>
+          <div className="h-6 w-px bg-input"></div>
 
           {/* Rooms Filter */}
-          <select
+          <Select
+          controlSize="sm"
           value={filters.rooms || ""}
           onChange={(e) =>
             onFilterChange(
@@ -123,22 +135,21 @@ export function PropertyFiltersBar({
               e.target.value ? Number(e.target.value) : undefined
             )
           }
-          className={`px-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900 ${
-            !filters.rooms ? "text-gray-500" : "text-gray-900"
-          }`}
+          className={cn("w-auto", !filters.rooms ? "text-brand-gray" : "text-brand-carbon")}
         >
-          <option value="" className="text-gray-500">
+          <option value="" className="text-brand-gray">
             {capitalizeFirstWord(t("rooms") || "Rooms")}
           </option>
-          <option value="1" className="text-gray-900">1+</option>
-          <option value="2" className="text-gray-900">2+</option>
-          <option value="3" className="text-gray-900">3+</option>
-          <option value="4" className="text-gray-900">4+</option>
-          <option value="5" className="text-gray-900">5+</option>
-          </select>
+          <option value="1" className="text-brand-carbon">1+</option>
+          <option value="2" className="text-brand-carbon">2+</option>
+          <option value="3" className="text-brand-carbon">3+</option>
+          <option value="4" className="text-brand-carbon">4+</option>
+          <option value="5" className="text-brand-carbon">5+</option>
+          </Select>
 
           {/* Bathrooms Filter */}
-          <select
+          <Select
+          controlSize="sm"
           value={filters.bathrooms || ""}
           onChange={(e) =>
             onFilterChange(
@@ -146,44 +157,46 @@ export function PropertyFiltersBar({
               e.target.value ? Number(e.target.value) : undefined
             )
           }
-          className={`px-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900 ${
-            !filters.bathrooms ? "text-gray-500" : "text-gray-900"
-          }`}
+          className={cn("w-auto", !filters.bathrooms ? "text-brand-gray" : "text-brand-carbon")}
         >
-          <option value="" className="text-gray-500">
+          <option value="" className="text-brand-gray">
             {capitalizeFirstWord(t("baths") || "Baths")}
           </option>
-          <option value="1" className="text-gray-900">1+</option>
-          <option value="2" className="text-gray-900">2+</option>
-          <option value="3" className="text-gray-900">3+</option>
-          <option value="4" className="text-gray-900">4+</option>
-          </select>
+          <option value="1" className="text-brand-carbon">1+</option>
+          <option value="2" className="text-brand-carbon">2+</option>
+          <option value="3" className="text-brand-carbon">3+</option>
+          <option value="4" className="text-brand-carbon">4+</option>
+          </Select>
 
           {/* Separator */}
-          <div className="h-6 w-px bg-gray-300"></div>
+          <div className="h-6 w-px bg-input"></div>
 
           {/* More Filters Button */}
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setShowMoreFilters(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-50 transition-colors text-xs relative text-gray-700 hover:text-gray-900"
+            className="relative gap-1.5 px-3 text-xs"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span>{capitalizeFirstWord(t("moreFilters") || "More")}</span>
             {advancedFilterCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 bg-stone-900 text-white text-xs rounded-full min-w-[18px] text-center">
+              <Badge tone="navy" className="ml-1 min-w-[18px] justify-center px-1.5 tabular-nums">
                 {advancedFilterCount}
-              </span>
+              </Badge>
             )}
-          </button>
+          </Button>
 
           {/* Clear Filters */}
           {activeFilterCount > 0 && (
-            <button
+            <Button
+              variant="link"
+              size="sm"
               onClick={onClearFilters}
-              className="px-3 py-1.5 text-xs text-stone-600 hover:text-stone-900 underline"
+              className="px-3 text-xs"
             >
               {t("clear") || "Clear"}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -198,35 +211,42 @@ export function PropertyFiltersBar({
           />
 
           {/* Modal */}
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl border border-gray-200 p-6 z-50 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+          <div
+            className={cardClasses({
+              padding: "none",
+              className:
+                "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 shadow-overlay z-50 w-full max-w-2xl max-h-[80vh] overflow-y-auto",
+            })}
+          >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="font-display text-xl font-medium text-brand-navy">
                 {t("moreFilters") || "More Filters"}
               </h2>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowMoreFilters(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="rounded-full"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-6">
               {/* Location Section */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                <h3 className="text-sm font-medium text-brand-carbon mb-3">
                   {t("location") || "Location"}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   {/* City Filter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label className="mb-2">
                       {t("city") || "City"}
-                    </label>
-                    <select
+                    </Label>
+                    <Select
                       value={filters.city || ""}
                       onChange={(e) => onFilterChange("city", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-900"
                     >
                       <option value="">{t("all") || "All"}</option>
                       {cities.map((city) => (
@@ -234,18 +254,17 @@ export function PropertyFiltersBar({
                           {city}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
 
                   {/* State Filter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label className="mb-2">
                       {t("state") || "State"}
-                    </label>
-                    <select
+                    </Label>
+                    <Select
                       value={filters.state || ""}
                       onChange={(e) => onFilterChange("state", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-900"
                     >
                       <option value="">{t("all") || "All"}</option>
                       {states.map((state) => (
@@ -253,23 +272,23 @@ export function PropertyFiltersBar({
                           {state}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                 </div>
               </div>
 
               {/* Land Area Section */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                <h3 className="text-sm font-medium text-brand-carbon mb-3">
                   {t("landArea") || "Land Area"} (m²)
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   {/* Land Area Min Filter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label className="mb-2">
                       {t("minimum") || "Minimum"}
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="number"
                       value={filters.landAreaMin || ""}
                       onChange={(e) =>
@@ -279,16 +298,15 @@ export function PropertyFiltersBar({
                         )
                       }
                       placeholder="0 m²"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-900"
                     />
                   </div>
 
                   {/* Land Area Max Filter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label className="mb-2">
                       {t("maximum") || "Maximum"}
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="number"
                       value={filters.landAreaMax || ""}
                       onChange={(e) =>
@@ -298,7 +316,6 @@ export function PropertyFiltersBar({
                         )
                       }
                       placeholder="∞ m²"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-900"
                     />
                   </div>
                 </div>
@@ -306,24 +323,21 @@ export function PropertyFiltersBar({
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
-              <button
+            <div className="flex items-center justify-between mt-6 pt-6 border-t border-brand-border">
+              <Button
+                variant="ghost"
                 onClick={() => {
                   onFilterChange("city", undefined);
                   onFilterChange("state", undefined);
                   onFilterChange("landAreaMin", undefined);
                   onFilterChange("landAreaMax", undefined);
                 }}
-                className="px-4 py-2 text-sm text-stone-700 hover:text-stone-900 font-medium"
               >
                 {t("clearFilters") || "Clear filters"}
-              </button>
-              <button
-                onClick={() => setShowMoreFilters(false)}
-                className="px-6 py-2 bg-stone-900 text-white rounded-md hover:bg-stone-800 transition-colors font-medium"
-              >
+              </Button>
+              <Button onClick={() => setShowMoreFilters(false)}>
                 {t("showResults") || "Show Results"}
-              </button>
+              </Button>
             </div>
           </div>
         </>

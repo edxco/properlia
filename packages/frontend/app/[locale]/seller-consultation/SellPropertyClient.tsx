@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MotionConfig } from "motion/react";
 import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
 import { PriceInput } from "@properlia/shared/components";
+import { Alert, Button, controlClasses, Label } from "@properlia/shared/components/ui";
 import { parsePriceInput } from "@properlia/shared";
 import { usePropertyTypes } from "@/src/services/property-types/queries";
 import { useCreatePublicLead } from "@/src/services/leads/mutations";
@@ -19,23 +20,11 @@ declare global {
   }
 }
 
-const labelClass =
-  "block font-[family-name:var(--font-editorial-body)] text-sm font-medium text-[#1A3A5C] mb-1.5";
 const errorTextClass =
-  "mt-1.5 font-[family-name:var(--font-editorial-body)] text-sm text-red-600";
-const requiredMarkClass = "text-red-500";
+  "mt-1.5 text-sm text-danger";
+const requiredMarkClass = "text-danger";
 
-function fieldClass(hasError?: boolean) {
-  return `w-full h-12 px-4 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-[#1A3A5C] placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:border-[#214C9B] ${
-    hasError ? "border-red-400" : "border-slate-300"
-  }`;
-}
 
-function textareaClass(hasError?: boolean) {
-  return `w-full px-4 py-3 border rounded-sm bg-white font-[family-name:var(--font-editorial-body)] text-sm text-[#1A3A5C] placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#214C9B] focus:border-[#214C9B] resize-none ${
-    hasError ? "border-red-400" : "border-slate-300"
-  }`;
-}
 
 interface FormData {
   full_name: string;
@@ -156,21 +145,18 @@ export default function SellPropertyClient() {
 
   if (isSuccess) {
     return (
-      <section className="flex min-h-[60vh] items-center bg-[#EEF1F5] py-24 font-[family-name:var(--font-editorial-body)]">
+      <section className="flex min-h-[60vh] items-center bg-brand-pale py-24">
         <div className="mx-auto w-full max-w-xl px-6 lg:px-8">
-          <div className="border-t-2 border-[#C4A44A] bg-white px-8 py-12 text-center shadow-[0_24px_64px_-32px_rgba(26,58,92,0.35)] md:px-12 md:py-14">
-            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#1A3A5C]">
-              <IconCheck size={30} stroke={2} className="text-[#C4A44A]" />
+          <div className="border-t-2 border-brand-gold bg-white px-8 py-12 text-center shadow-overlay md:px-12 md:py-14">
+            <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-brand-navy">
+              <IconCheck size={30} stroke={2} className="text-brand-gold" />
             </div>
-            <h2 className="font-[family-name:var(--font-editorial-display)] text-2xl font-semibold leading-snug text-[#1A3A5C] md:text-3xl">
+            <h2 className="font-display text-2xl font-medium leading-snug text-brand-navy md:text-3xl">
               {t("formSuccess")}
             </h2>
-            <button
-              onClick={() => setIsSuccess(false)}
-              className="mt-10 inline-flex h-12 items-center bg-[#1A3A5C] px-8 font-[family-name:var(--font-editorial-body)] text-sm font-medium text-white transition-colors hover:bg-[#214C9B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2"
-            >
+            <Button size="lg" onClick={() => setIsSuccess(false)} className="mt-10 text-sm">
               {t("submitForm")}
-            </button>
+            </Button>
           </div>
         </div>
       </section>
@@ -183,20 +169,20 @@ export default function SellPropertyClient() {
       <SellerMethod />
       <ProofStrip />
 
-      <section id="seller-consultation-form" className="bg-[#EEF1F5] py-20 md:py-28">
+      <section id="seller-consultation-form" className="bg-brand-pale py-20 md:py-28">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           {/* Editorial section header, aligned with the card */}
           <div className="max-w-2xl">
-            <h2 className="font-[family-name:var(--font-editorial-display)] text-4xl font-semibold tracking-[-0.01em] text-[#1A3A5C] md:text-5xl">
+            <h2 className="font-display text-4xl font-medium tracking-[-0.01em] text-brand-navy md:text-5xl">
               {t("sellFormTitle")}
             </h2>
           </div>
 
           {/* The consultation card: advisor rail + client side */}
-          <div className="mt-12 grid overflow-hidden border-t-2 border-[#C4A44A] shadow-[0_32px_80px_-40px_rgba(26,58,92,0.4)] lg:grid-cols-[320px_1fr]">
+          <div className="mt-12 grid overflow-hidden border-t-2 border-brand-gold shadow-overlay lg:grid-cols-[320px_1fr]">
             {/* Advisor rail: method recap + trust microcopy (desktop only) */}
-            <aside className="hidden flex-col bg-[#1A3A5C] px-10 py-12 lg:flex">
-              <p className="font-[family-name:var(--font-editorial-body)] text-xs font-medium uppercase tracking-[0.22em] text-white/50">
+            <aside className="hidden flex-col bg-brand-navy px-10 py-12 lg:flex">
+              <p className=" text-xs font-medium uppercase tracking-[0.22em] text-white/50">
                 {t("sellerRailTitle")}
               </p>
 
@@ -208,11 +194,11 @@ export default function SellPropertyClient() {
                   >
                     <span
                       aria-hidden="true"
-                      className="w-9 font-[family-name:var(--font-editorial-display)] text-2xl font-medium italic leading-none text-white/40"
+                      className="w-9 font-display text-2xl font-medium italic leading-none text-white/40"
                     >
                       0{n}
                     </span>
-                    <span className="font-[family-name:var(--font-editorial-body)] text-sm text-white/80">
+                    <span className=" text-sm text-white/80">
                       {t(`sellerMethod${n}Title`)}
                     </span>
                   </li>
@@ -220,12 +206,12 @@ export default function SellPropertyClient() {
               </ol>
 
               <div className="mt-auto space-y-3 border-t border-white/10 pt-8">
-                <p className="flex items-start gap-3 font-[family-name:var(--font-editorial-body)] text-sm leading-relaxed text-white/70">
-                  <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#C4A44A]" />
+                <p className="flex items-start gap-3 text-sm leading-relaxed text-white/70">
+                  <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-gold" />
                   {t("buyerTrustStripPart2")}
                 </p>
-                <p className="flex items-start gap-3 font-[family-name:var(--font-editorial-body)] text-sm leading-relaxed text-white/70">
-                  <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#C4A44A]" />
+                <p className="flex items-start gap-3 text-sm leading-relaxed text-white/70">
+                  <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-gold" />
                   {t("buyerTrustStripPart1")}
                 </p>
               </div>
@@ -233,20 +219,17 @@ export default function SellPropertyClient() {
 
             <div className="bg-white px-6 py-10 md:px-10 lg:px-14 lg:py-12">
               {errors.general && (
-                <div
-                  role="alert"
-                  className="mb-8 border-l-2 border-red-500 bg-red-50 p-4 font-[family-name:var(--font-editorial-body)] text-sm text-red-700"
-                >
+                <Alert tone="danger" className="mb-8">
                   {errors.general}
-                </div>
+                </Alert>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Full Name */}
                 <div>
-                  <label htmlFor="full_name" className={labelClass}>
+                  <Label htmlFor="full_name">
                     {t("fullName")} <span className={requiredMarkClass}>*</span>
-                  </label>
+                  </Label>
                   <input
                     type="text"
                     id="full_name"
@@ -254,7 +237,7 @@ export default function SellPropertyClient() {
                     value={formData.full_name}
                     onChange={handleChange}
                     placeholder={t("enterFullName")}
-                    className={fieldClass(!!errors.full_name)}
+                    className={controlClasses({ invalid: !!errors.full_name })}
                   />
                   {errors.full_name && (
                     <p className={errorTextClass}>{errors.full_name}</p>
@@ -264,9 +247,9 @@ export default function SellPropertyClient() {
                 {/* Email & Phone */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label htmlFor="email" className={labelClass}>
+                    <Label htmlFor="email">
                       {t("email")}
-                    </label>
+                    </Label>
                     <input
                       type="email"
                       id="email"
@@ -274,16 +257,16 @@ export default function SellPropertyClient() {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder={t("enterEmail")}
-                      className={fieldClass(!!errors.email)}
+                      className={controlClasses({ invalid: !!errors.email })}
                     />
                     {errors.email && (
                       <p className={errorTextClass}>{errors.email}</p>
                     )}
                   </div>
                   <div>
-                    <label htmlFor="phone" className={labelClass}>
+                    <Label htmlFor="phone">
                       {t("phone")}
-                    </label>
+                    </Label>
                     <input
                       type="tel"
                       id="phone"
@@ -291,7 +274,7 @@ export default function SellPropertyClient() {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder={t("enterPhone")}
-                      className={fieldClass(!!errors.phone)}
+                      className={controlClasses({ invalid: !!errors.phone })}
                     />
                     {errors.phone && (
                       <p className={errorTextClass}>{errors.phone}</p>
@@ -302,15 +285,15 @@ export default function SellPropertyClient() {
                 {/* Property Type & Desired Date */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label htmlFor="property_type_id" className={labelClass}>
+                    <Label htmlFor="property_type_id">
                       {t("propertyType")}
-                    </label>
+                    </Label>
                     <select
                       id="property_type_id"
                       name="property_type_id"
                       value={formData.property_type_id}
                       onChange={handleChange}
-                      className={fieldClass()}
+                      className={controlClasses()}
                     >
                       <option value="">{t("selectPropertyType")}</option>
                       {propertyTypes.map((type) => (
@@ -321,25 +304,25 @@ export default function SellPropertyClient() {
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="desired_date" className={labelClass}>
+                    <Label htmlFor="desired_date">
                       {t("desiredDate")}
-                    </label>
+                    </Label>
                     <input
                       type="date"
                       id="desired_date"
                       name="desired_date"
                       value={formData.desired_date}
                       onChange={handleChange}
-                      className={fieldClass()}
+                      className={controlClasses()}
                     />
                   </div>
                 </div>
 
                 {/* Max Budget */}
                 <div>
-                  <label htmlFor="max_budget" className={labelClass}>
+                  <Label htmlFor="max_budget">
                     {t("maxBudget")}
-                  </label>
+                  </Label>
                   <PriceInput
                     id="max_budget"
                     name="max_budget"
@@ -348,17 +331,17 @@ export default function SellPropertyClient() {
                       setFormData((prev) => ({ ...prev, max_budget: formatted }))
                     }
                     placeholder={t("enterMaxBudget")}
-                    className={`${fieldClass()} pl-8 pr-4`}
-                    symbolClassName="text-slate-500"
+                    className="pl-8 pr-4"
+                    symbolClassName="text-brand-gray"
                   />
                 </div>
 
                 {/* Location */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
-                    <label htmlFor="neighborhood" className={labelClass}>
+                    <Label htmlFor="neighborhood">
                       {t("neighborhood")}
-                    </label>
+                    </Label>
                     <input
                       type="text"
                       id="neighborhood"
@@ -366,13 +349,13 @@ export default function SellPropertyClient() {
                       value={formData.neighborhood}
                       onChange={handleChange}
                       placeholder={t("enterNeighborhood")}
-                      className={fieldClass()}
+                      className={controlClasses()}
                     />
                   </div>
                   <div>
-                    <label htmlFor="city" className={labelClass}>
+                    <Label htmlFor="city">
                       {t("city")}
-                    </label>
+                    </Label>
                     <input
                       type="text"
                       id="city"
@@ -380,13 +363,13 @@ export default function SellPropertyClient() {
                       value={formData.city}
                       onChange={handleChange}
                       placeholder={t("enterCity")}
-                      className={fieldClass()}
+                      className={controlClasses()}
                     />
                   </div>
                   <div>
-                    <label htmlFor="state" className={labelClass}>
+                    <Label htmlFor="state">
                       {t("state")}
-                    </label>
+                    </Label>
                     <input
                       type="text"
                       id="state"
@@ -394,16 +377,16 @@ export default function SellPropertyClient() {
                       value={formData.state}
                       onChange={handleChange}
                       placeholder={t("enterState")}
-                      className={fieldClass()}
+                      className={controlClasses()}
                     />
                   </div>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label htmlFor="notes" className={labelClass}>
+                  <Label htmlFor="notes">
                     {t("propertyDescription")}
-                  </label>
+                  </Label>
                   <textarea
                     id="notes"
                     name="notes"
@@ -411,7 +394,7 @@ export default function SellPropertyClient() {
                     value={formData.notes}
                     onChange={handleChange}
                     placeholder={t("enterDescription")}
-                    className={textareaClass()}
+                    className={controlClasses({ multiline: true, className: "resize-none" })}
                   />
                 </div>
 
@@ -423,25 +406,26 @@ export default function SellPropertyClient() {
                     name="consent_marketing"
                     checked={formData.consent_marketing}
                     onChange={handleChange}
-                    className="mt-1 h-4 w-4 rounded border-slate-300 accent-[#214C9B]"
+                    className="mt-1 h-4 w-4 rounded border-input accent-brand-blue"
                   />
                   <label
                     htmlFor="consent_marketing"
-                    className="ml-3 font-[family-name:var(--font-editorial-body)] text-sm text-slate-600"
+                    className="ml-3 text-sm text-brand-carbon/70"
                   >
                     {t("consentMarketing")}
                   </label>
                 </div>
 
                 {/* Submit Button */}
-                <div className="border-t border-slate-200 pt-6">
-                  <button
+                <div className="border-t border-brand-border pt-6">
+                  <Button
                     type="submit"
+                    size="lg"
                     disabled={createLead.isPending}
-                    className="flex h-12 w-full items-center justify-center gap-2 bg-[#C4A44A] px-7 font-[family-name:var(--font-editorial-body)] text-sm font-semibold text-[#1A3A5C] transition-colors hover:bg-[#B69544] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#214C9B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 md:ml-auto md:w-auto"
+                    className="flex w-full px-7 text-sm md:ml-auto md:w-auto"
                   >
                     {createLead.isPending ? t("submitting") : t("submitForm")}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>

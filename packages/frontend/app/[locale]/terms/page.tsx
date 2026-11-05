@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/src/lib/metadata";
 import { enMessages as en, esMessages as es } from "@properlia/shared";
+import { PageTitle } from "@properlia/shared/components/ui";
 
 const dictionaries: Record<string, Record<string, string>> = { en, es };
 
@@ -34,23 +35,23 @@ export default async function TermsPage({
 
   return (
     <section className="max-w-3xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold mb-2">{dict["termsTitle"]}</h1>
-      <p className="text-sm text-gray-500 mb-10">{dict["termsLastUpdated"]}</p>
+      <PageTitle className="mb-2 text-3xl md:text-3xl">{dict["termsTitle"]}</PageTitle>
+      <p className="text-sm text-brand-gray mb-10">{dict["termsLastUpdated"]}</p>
 
       <div className="space-y-8">
         {SECTIONS.map(([titleKey, bodyKey]) => (
           <div key={titleKey}>
-            <h2 className="text-lg font-semibold mb-2">{dict[titleKey]}</h2>
-            <p className="text-gray-700 leading-relaxed">{dict[bodyKey]}</p>
+            <h2 className="font-display text-lg font-medium mb-2">{dict[titleKey]}</h2>
+            <p className="text-brand-carbon leading-relaxed">{dict[bodyKey]}</p>
           </div>
         ))}
       </div>
 
       <div className="mt-12 border-t pt-8">
-        <h2 className="text-lg font-semibold mb-2">{dict["termsContactTitle"]}</h2>
-        <p className="text-gray-700">
+        <h2 className="font-display text-lg font-medium mb-2">{dict["termsContactTitle"]}</h2>
+        <p className="text-brand-carbon">
           {dict["termsContactBody"]}{" "}
-          <a href="mailto:contacto@properlia.com" className="text-blue-600 hover:underline">
+          <a href="mailto:contacto@properlia.com" className="text-brand-blue hover:underline">
             contacto@properlia.com
           </a>
         </p>
