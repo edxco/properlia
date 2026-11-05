@@ -496,5 +496,18 @@
   "contactMetaTitle": "Contacto | Properlia",
   "contactMetaDescription": "Contáctanos por WhatsApp, teléfono, correo o redes sociales. Asesoría inmobiliaria en Puebla.",
   "contactTitle": "Contáctanos",
-  "sitemapSectionContact": "Contacto"
+  "sitemapSectionContact": "Contacto",
+  "propertyTitleTemplate": "{type} en {operation}",
+  "propertyMetaDescriptionTemplate": "{title}. Precio: {price}. Contacta a Properlia para más información o para agendar una visita.",
+  "propertiesListingTitle": "Propiedades en venta y renta en Puebla",
+  "propertiesListingIntro": "Casas, departamentos, terrenos, locales y bodegas en Puebla, seleccionados y verificados por asesores de Properlia.",
+  "propertiesListingTitle_residential": "Propiedades residenciales en Puebla",
+  "propertiesListingTitle_commercial": "Propiedades comerciales en Puebla",
+  "propertiesListingTitle_industrial": "Propiedades industriales en Puebla",
+  "propertiesListingTitle_investment": "Propiedades para inversión en Puebla",
+  "propertiesListingTitle_land": "Terrenos en venta en Puebla",
+  "paginationLabel": "Paginación",
+  "pageLabel": "Página {page}",
+  "similarPropertiesTitle": "Propiedades similares",
+  "breadcrumbHome": "Inicio"
 }

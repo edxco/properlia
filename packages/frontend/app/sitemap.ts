@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { slugify } from "@properlia/shared/lib/slugify";
+import { buildPropertyUrl, hasPublicLocation } from "@properlia/shared/lib/slugify";
 
 const BASE_URL = "https://properlia.com";
 const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
@@ -26,7 +26,7 @@ async function fetchAllProperties(): Promise<Property[]> {
   while (page <= totalPages) {
     try {
       const res = await fetch(`${API_URL}/properties?page=${page}&items=100&public=true`, {
-        next: { revalidate: 3600 },
+        next: { revalidate: 3600, tags: ["properties"] },
       });
       if (!res.ok) break;
       const json: PaginatedResponse = await res.json();
@@ -41,13 +41,6 @@ async function fetchAllProperties(): Promise<Property[]> {
   return properties;
 }
 
-function buildPropertyPath(property: Property): string {
-  const state = slugify(property.state) || "na";
-  const city = slugify(property.city) || "na";
-  const slug = slugify(property.title);
-  return `/properties/${state}/${city}/${property.id}/${slug}`;
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     { path: "", priority: 1.0, changeFrequency: "weekly" as const },
@@ -57,13 +50,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/contact", priority: 0.6, changeFrequency: "monthly" as const },
   ];
 
+  const properties = (await fetchAllProperties()).filter(hasPublicLocation);
+  const latestPropertyUpdate = properties.reduce<Date | undefined>((latest, property) => {
+    if (!property.updated_at) return latest;
+    const date = new Date(property.updated_at);
+    return !latest || date > latest ? date : latest;
+  }, undefined);
+
   const entries: MetadataRoute.Sitemap = [];
 
   for (const route of staticRoutes) {
+    const lastModified = route.path === "/properties" ? latestPropertyUpdate : undefined;
     for (const locale of LOCALES) {
       entries.push({
         url: `${BASE_URL}/${locale}${route.path}`,
-        lastModified: new Date(),
+        ...(lastModified && { lastModified }),
         changeFrequency: route.changeFrequency,
         priority: route.priority,
         alternates: {
@@ -76,14 +77,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  const properties = await fetchAllProperties();
-
   for (const property of properties) {
-    const path = buildPropertyPath(property);
+    const path = buildPropertyUrl(property);
     for (const locale of LOCALES) {
       entries.push({
         url: `${BASE_URL}/${locale}${path}`,
-        lastModified: property.updated_at ? new Date(property.updated_at) : new Date(),
+        ...(property.updated_at && { lastModified: new Date(property.updated_at) }),
         changeFrequency: "weekly",
         priority: 0.6,
         alternates: {

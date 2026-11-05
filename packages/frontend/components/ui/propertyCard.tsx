@@ -139,6 +139,8 @@ interface PropertyCardProps {
   city?: string | null;
   state?: string | null;
   autoplay?: boolean;
+  displayTitle?: string;
+  priority?: boolean;
 }
 
 export const PropertyCard = ({
@@ -157,6 +159,8 @@ export const PropertyCard = ({
   city,
   state,
   autoplay = false,
+  displayTitle,
+  priority = false,
 }: PropertyCardProps) => {
   const locale = useLocale();
 
@@ -164,6 +168,7 @@ export const PropertyCard = ({
   const [isHovered, setIsHovered] = useState(false);
 
   const propertyPath = `/${locale}${buildPropertyUrl({ id, title, state, city })}`;
+  const imageAlt = displayTitle ?? title;
 
   useEffect(() => {
     if (!autoplay || images.length <= 1 || isHovered) return;
@@ -238,13 +243,13 @@ export const PropertyCard = ({
               <Image
                 key={index}
                 src={image}
-                alt={`${title} - Image ${index + 1}`}
+                alt={`${imageAlt} - ${index + 1}`}
                 fill
                 className={`object-cover transition-opacity duration-700 ease-in-out ${
                   index === currentImageIndex ? "opacity-100" : "opacity-0"
                 }`}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={index === 0}
+                priority={priority && index === 0}
                 unoptimized={
                   image.includes("localhost") ||
                   image.includes("rails/active_storage")
@@ -254,11 +259,11 @@ export const PropertyCard = ({
           : images[0] && (
               <Image
                 src={images[0]}
-                alt={title}
+                alt={imageAlt}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority
+                priority={priority}
                 unoptimized={
                   images[0].includes("localhost") ||
                   images[0].includes("rails/active_storage")

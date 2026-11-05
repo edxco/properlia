@@ -12,37 +12,39 @@ import { PageTitle, Price } from "./ui";
 interface PropertyDetailProps {
   property: Property;
   locale?: string;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
 export const PropertyDetail: React.FC<PropertyDetailProps> = ({
   property,
   locale = "en",
+  breadcrumbs,
 }) => {
   // Build breadcrumb items: State > City > Zip Code > Neighborhood
-  const breadcrumbItems: BreadcrumbItem[] = [];
+  const breadcrumbItems: BreadcrumbItem[] = breadcrumbs ? [...breadcrumbs] : [];
 
-  if (property.state) {
+  if (!breadcrumbs && property.state) {
     breadcrumbItems.push({
       label: property.state,
       href: `/properties?state=${encodeURIComponent(property.state)}`,
     });
   }
 
-  if (property.city) {
+  if (!breadcrumbs && property.city) {
     breadcrumbItems.push({
       label: property.city,
       href: `/properties?city=${encodeURIComponent(property.city)}`,
     });
   }
 
-  if (property.zip_code) {
+  if (!breadcrumbs && property.zip_code) {
     breadcrumbItems.push({
       label: property.zip_code,
       href: `/properties?zip_code=${encodeURIComponent(property.zip_code)}`,
     });
   }
 
-  if (property.neighborhood) {
+  if (!breadcrumbs && property.neighborhood) {
     breadcrumbItems.push({
       label: property.neighborhood,
     });

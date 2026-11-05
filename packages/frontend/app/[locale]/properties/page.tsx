@@ -1,21 +1,80 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { enMessages, esMessages } from "@properlia/shared";
+import { PageTitle } from "@properlia/shared/components/ui";
 import PropertiesClient from "./PropertiesClient";
 import { buildMetadata } from "@/src/lib/metadata";
+import { getPublicProperties, getPublicPropertiesPool } from "@/src/lib/propertyQueries";
+import {
+  ITEMS_PER_PAGE,
+  hasActiveFilters,
+  parseFilters,
+  parsePage,
+  toApiParams,
+  type Filters,
+} from "./listingFilters";
 
-export async function generateMetadata({
-  params,
-}: {
+type PageProps = {
   params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  return buildMetadata(locale, "/properties", "propertiesMetaTitle", "propertiesMetaDescription");
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function fetchListing(filters: Filters, page: number) {
+  return getPublicProperties({ ...toApiParams(filters), page, items: ITEMS_PER_PAGE });
 }
 
-export default function PropertiesPage() {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
+  const [{ locale }, sp] = await Promise.all([params, searchParams]);
+  const metadata = buildMetadata(locale, "/properties", "propertiesMetaTitle", "propertiesMetaDescription");
+
+  const filters = parseFilters(sp);
+  const page = parsePage(sp);
+  if (!hasActiveFilters(filters)) {
+    if (page === 1) return metadata;
+    const canonical = `${metadata.alternates?.canonical}?page=${page}`;
+    return { ...metadata, alternates: { ...metadata.alternates, canonical } };
+  }
+
+  const result = await fetchListing(filters, page);
+  if (result && result.metadata.count === 0) {
+    return { ...metadata, robots: { index: false, follow: true } };
+  }
+  return metadata;
+}
+
+export default async function PropertiesPage({ params, searchParams }: PageProps) {
+  const [{ locale }, sp] = await Promise.all([params, searchParams]);
+  const dict: Record<string, string> = locale === "en" ? enMessages : esMessages;
+  const filters = parseFilters(sp);
+  const page = parsePage(sp);
+
+  const [listing, pool] = await Promise.all([fetchListing(filters, page), getPublicPropertiesPool()]);
+
+  const hasNoResults = hasActiveFilters(filters) && listing?.metadata.count === 0;
+  const result = hasNoResults ? await fetchListing({}, 1) : listing;
+
+  const cities = Array.from(new Set(pool.map((p) => p.city).filter(Boolean) as string[])).sort();
+  const states = Array.from(new Set(pool.map((p) => p.state).filter(Boolean) as string[])).sort();
+
+  const title = (filters.category && dict[`propertiesListingTitle_${filters.category}`]) || dict.propertiesListingTitle;
+
   return (
-    <Suspense fallback={<div className="py-12 text-center">Loading...</div>}>
-      <PropertiesClient />
-    </Suspense>
+    <PropertiesClient
+      header={
+        <header className="mb-8">
+          <PageTitle className="mb-3 text-3xl md:text-4xl">{title}</PageTitle>
+          <p className="max-w-3xl text-brand-carbon/70">{dict.propertiesListingIntro}</p>
+        </header>
+      }
+      locale={locale}
+      filters={filters}
+      properties={result?.data ?? []}
+      page={hasNoResults ? 1 : page}
+      totalPages={result?.metadata.pages ?? 0}
+      totalCount={result?.metadata.count ?? 0}
+      hasNoResults={hasNoResults}
+      isError={!result}
+      cities={cities}
+      states={states}
+    />
   );
 }

@@ -1,4 +1,4 @@
-import { apiClient } from '../../lib/api-client';
+import { apiClient, type CacheOptions } from '../../lib/api-client';
 import type {
   CreatePropertyDto,
   PaginatedResponse,
@@ -7,7 +7,7 @@ import type {
   UpdatePropertyDto,
 } from '../../types';
 
-type PropertyQueryParams = {
+export type PropertyQueryParams = {
   public?: boolean;
   featured?: boolean;
   status_id?: string;
@@ -25,6 +25,9 @@ type PropertyQueryParams = {
   // Room filters
   rooms_min?: number;
   bathrooms_min?: number;
+  land_area_min?: number;
+  land_area_max?: number;
+  listing_type?: string;
   // Text search
   search?: string;
   // Category filters
@@ -77,7 +80,8 @@ const buildFormData = (payload: Partial<PropertyPayload>) => {
 export const propertyApi = {
   // Get all properties
   getAll: async (
-    params?: PropertyQueryParams
+    params?: PropertyQueryParams,
+    cache?: CacheOptions
   ): Promise<PaginatedResponse<Property>> => {
     const query = new URLSearchParams();
 
@@ -98,6 +102,9 @@ export const propertyApi = {
     // Room filters
     if (params?.rooms_min !== undefined) query.set('rooms_min', String(params.rooms_min));
     if (params?.bathrooms_min !== undefined) query.set('bathrooms_min', String(params.bathrooms_min));
+    if (params?.land_area_min !== undefined) query.set('land_area_min', String(params.land_area_min));
+    if (params?.land_area_max !== undefined) query.set('land_area_max', String(params.land_area_max));
+    if (params?.listing_type) query.set('listing_type', params.listing_type);
     // Text search
     if (params?.search) query.set('search', params.search);
     // Category filters
@@ -107,12 +114,12 @@ export const propertyApi = {
     const queryString = query.toString();
     const endpoint = queryString ? `/properties?${queryString}` : '/properties';
 
-    return apiClient.get<PaginatedResponse<Property>>(endpoint);
+    return apiClient.get<PaginatedResponse<Property>>(endpoint, false, cache);
   },
 
   // Get a single property by ID
-  getById: async (id: string): Promise<Property> => {
-    return apiClient.get<Property>(`/properties/${id}`);
+  getById: async (id: string, cache?: CacheOptions): Promise<Property> => {
+    return apiClient.get<Property>(`/properties/${id}`, false, cache);
   },
 
   // Create a new property

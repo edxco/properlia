@@ -496,5 +496,18 @@
   "contactMetaTitle": "Contact | Properlia",
   "contactMetaDescription": "Get in touch with Properlia via WhatsApp, phone, email or social media. Real estate advisory in Puebla.",
   "contactTitle": "Contact us",
-  "sitemapSectionContact": "Contact"
+  "sitemapSectionContact": "Contact",
+  "propertyTitleTemplate": "{type} for {operation}",
+  "propertyMetaDescriptionTemplate": "{title}. Price: {price}. Contact Properlia for more details or to schedule a visit.",
+  "propertiesListingTitle": "Properties for sale and rent in Puebla",
+  "propertiesListingIntro": "Houses, apartments, land, retail spaces and warehouses in Puebla, selected and verified by Properlia advisors.",
+  "propertiesListingTitle_residential": "Residential properties in Puebla",
+  "propertiesListingTitle_commercial": "Commercial properties in Puebla",
+  "propertiesListingTitle_industrial": "Industrial properties in Puebla",
+  "propertiesListingTitle_investment": "Investment properties in Puebla",
+  "propertiesListingTitle_land": "Land for sale in Puebla",
+  "paginationLabel": "Pagination",
+  "pageLabel": "Page {page}",
+  "similarPropertiesTitle": "Similar properties",
+  "breadcrumbHome": "Home"
 }

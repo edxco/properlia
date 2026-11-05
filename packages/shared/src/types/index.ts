@@ -49,6 +49,8 @@ export interface Property {
   exclusive_listing: boolean;
   title: string;
   description?: string | null;
+  title_en?: string | null;
+  description_en?: string | null;
   land_area?: number | null;
   built_area?: number | null;
   rooms: number;
