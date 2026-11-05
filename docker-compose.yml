@@ -39,6 +39,8 @@ services:
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
       DASHBOARD_URL: ${DASHBOARD_URL:-http://localhost:3002}
+      FRONTEND_INTERNAL_URL: http://frontend:3001
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
     depends_on:
       db:
         condition: service_healthy
@@ -65,6 +67,7 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
       NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID}
       INTERNAL_API_URL: http://backend:3000/api/v1
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
     depends_on:
       - backend
     stdin_open: true

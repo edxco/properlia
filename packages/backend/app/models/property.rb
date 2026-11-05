@@ -7,6 +7,8 @@ class Property < ApplicationRecord
   has_many_attached :videos
   has_many :leads, dependent: :nullify
 
+  after_commit :revalidate_frontend_cache
+
   # Direct many-to-many relationship with categories
   # Users select which categories apply when creating a listing
   # (e.g., Land can be residential, commercial, industrial, or any combination)
@@ -70,5 +72,9 @@ class Property < ApplicationRecord
     videos.each do |vid|
       errors.add(:videos, "must be a video") unless vid.content_type.start_with?("video/")
     end
+  end
+
+  def revalidate_frontend_cache
+    RevalidateFrontendCacheJob.perform_later
   end
 end
