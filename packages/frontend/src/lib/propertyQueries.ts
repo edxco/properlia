@@ -20,7 +20,7 @@ export async function getPublicPropertiesPool(): Promise<Property[]> {
   return (await getPublicProperties({ items: 100 }))?.data ?? [];
 }
 
-const LOCATIONS_CACHE = { revalidate: 3600 };
+const LOCATIONS_CACHE = { revalidate: 300, tags: ["properties"] };
 
 export async function getStates(): Promise<State[]> {
   try {
