@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useT } from "@properlia/shared/components/TranslationProvider";
+import { Button, Card, Switch } from "@properlia/shared/components/ui";
 
 interface FactSheetModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ export default function FactSheetModal({
   const t = useT();
   const [includeProperliaInfo, setIncludeProperliaInfo] = useState(true);
   const [generateInSpanish, setGenerateInSpanish] = useState(true);
+  const properliaInfoLabelId = useId();
+  const spanishLabelId = useId();
 
   if (!isOpen) return null;
 
@@ -39,9 +42,9 @@ export default function FactSheetModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-20">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
+      <Card padding="none" className="shadow-overlay max-w-md w-full mx-4">
+        <div className="px-6 py-4 border-b border-brand-border">
+          <h3 className="text-lg font-medium text-brand-carbon">
             {t("factSheetOptions")}
           </h3>
         </div>
@@ -49,59 +52,39 @@ export default function FactSheetModal({
           <div className="space-y-4 mb-6">
             {/* Option 1: Display Properlia Info */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">
+              <span id={properliaInfoLabelId} className="text-sm text-brand-carbon">
                 {t("displayProperliaInfo")}
               </span>
-              <button
-                onClick={() => setIncludeProperliaInfo(!includeProperliaInfo)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  includeProperliaInfo ? "bg-primary" : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    includeProperliaInfo ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
+              <Switch
+                checked={includeProperliaInfo}
+                onCheckedChange={setIncludeProperliaInfo}
+                aria-labelledby={properliaInfoLabelId}
+              />
             </div>
 
             {/* Option 2: Generate Info in Spanish */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">
+              <span id={spanishLabelId} className="text-sm text-brand-carbon">
                 {t("generateInfoInSpanish")}
               </span>
-              <button
-                onClick={() => setGenerateInSpanish(!generateInSpanish)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  generateInSpanish ? "bg-primary" : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    generateInSpanish ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
+              <Switch
+                checked={generateInSpanish}
+                onCheckedChange={setGenerateInSpanish}
+                aria-labelledby={spanishLabelId}
+              />
             </div>
           </div>
 
           <div className="flex gap-3 justify-end">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-            >
+            <Button variant="secondary" size="sm" onClick={onClose}>
               {t("cancel")}
-            </button>
-            <button
-              onClick={handleDownload}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors"
-            >
+            </Button>
+            <Button size="sm" onClick={handleDownload}>
               {t("download")}
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

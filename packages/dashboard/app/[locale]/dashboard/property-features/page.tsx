@@ -9,6 +9,13 @@ import {
   useDeletePropertyFeature,
 } from '@/src/services/property-features/queries';
 import { useToast } from '@/src/contexts/ToastContext';
+import {
+  Button,
+  Card,
+  DashboardTitle,
+  Field,
+  Input,
+} from '@properlia/shared/components/ui';
 
 export default function PropertyFeaturesPage() {
   const t = useT();
@@ -63,126 +70,106 @@ export default function PropertyFeaturesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{t('propertyFeatures')}</h2>
-          <p className="text-sm text-gray-500">{t('propertyFeaturesDescription')}</p>
+          <DashboardTitle>{t('propertyFeatures')}</DashboardTitle>
+          <p className="text-sm text-brand-gray">{t('propertyFeaturesDescription')}</p>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
+        <Button onClick={() => setShowForm(!showForm)}>
           <Plus className="h-4 w-4" />
           {t('addPropertyFeature')}
-        </button>
+        </Button>
       </div>
 
       {/* Create Form */}
       {showForm && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold">{t('addPropertyFeature')}</h3>
+        <Card>
+          <h3 className="mb-4 text-lg font-medium text-brand-carbon">{t('addPropertyFeature')}</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t('englishName')}
-                </label>
-                <input
+              <Field label={t('englishName')}>
+                <Input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   required
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t('spanishName')}
-                </label>
-                <input
+              </Field>
+              <Field label={t('spanishName')}>
+                <Input
                   type="text"
                   value={formData.es_name}
                   onChange={(e) => setFormData({ ...formData, es_name: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   required
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Slug
-                </label>
-                <input
+              </Field>
+              <Field label="Slug">
+                <Input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   required
                 />
-              </div>
+              </Field>
             </div>
             <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-              >
+              <Button type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 {t('save')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
+              </Button>
+              <Button variant="secondary" onClick={() => setShowForm(false)}>
                 {t('cancel')}
-              </button>
+              </Button>
             </div>
           </form>
-        </div>
+        </Card>
       )}
 
       {/* Features List */}
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+      <Card padding="none" className="overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            <Loader2 className="h-8 w-8 animate-spin text-brand-gray" />
           </div>
         ) : features && features.length > 0 ? (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-brand-border">
+            <thead className="bg-brand-bg">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-brand-gray">
                   {t('name')} (EN)
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-brand-gray">
                   {t('name')} (ES)
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-brand-gray">
                   Slug
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-brand-gray">
                   {t('actions')}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-brand-border bg-white">
               {features.map((feature) => (
-                <tr key={feature.id} className="hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                <tr key={feature.id} className="hover:bg-brand-bg">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-brand-carbon">
                     {feature.name}
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-brand-carbon">
                     {feature.es_name}
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-brand-gray">
                     {feature.slug}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleDelete(feature.id)}
                       disabled={deleteMutation.isPending}
-                      className="text-red-600 hover:text-red-800 disabled:opacity-50"
+                      className="size-8 text-danger hover:bg-danger-soft"
+                      aria-label={t('delete')}
                     >
                       <Trash2 className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -190,10 +177,10 @@ export default function PropertyFeaturesPage() {
           </table>
         ) : (
           <div className="py-12 text-center">
-            <p className="text-sm text-gray-500">{t('noPropertyFeatures')}</p>
+            <p className="text-sm text-brand-gray">{t('noPropertyFeatures')}</p>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }
