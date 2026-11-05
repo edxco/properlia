@@ -239,10 +239,10 @@ docker-compose logs -f backend
 
 ## Related Documentation
 
-- [DOCKER_LIGHTNINGCSS_FIX.md](DOCKER_LIGHTNINGCSS_FIX.md) - Detailed explanation of Alpine vs Debian issue
-- [DOCKER.md](DOCKER.md) - Complete Docker setup guide
-- [DOCKER_QUICK_REFERENCE.md](DOCKER_QUICK_REFERENCE.md) - Quick command reference
-- [MONOREPO_STRUCTURE.md](MONOREPO_STRUCTURE.md) - Monorepo architecture
+- [lightningcss-fix.md](lightningcss-fix.md) - Detailed explanation of Alpine vs Debian issue
+- [docker.md](docker.md) - Complete Docker setup guide
+- [quick-reference.md](quick-reference.md) - Quick command reference
+- [../getting-started/monorepo-structure.md](../getting-started/monorepo-structure.md) - Monorepo architecture
 
 ## Summary
 

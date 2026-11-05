@@ -24,8 +24,8 @@ The Properlia monorepo is now fully configured for Docker.
 - [packages/dashboard/.dockerignore](packages/dashboard/.dockerignore)
 
 ### ✅ Documentation
-- [DOCKER.md](DOCKER.md) - Complete Docker guide
-- [DOCKER_QUICK_REFERENCE.md](DOCKER_QUICK_REFERENCE.md) - Quick command reference
+- [docker.md](docker.md) - Complete Docker guide
+- [quick-reference.md](quick-reference.md) - Quick command reference
 
 ### ✅ Next.js Configuration
 - Frontend: `output: "standalone"` ✓
@@ -90,8 +90,8 @@ properlia2025/
 ├── docker-build.sh                 # Build script
 ├── Makefile                        # Make commands
 ├── .dockerignore                   # Root ignore
-├── DOCKER.md                       # Full documentation
-├── DOCKER_QUICK_REFERENCE.md       # Quick reference
+├── docker.md                       # Full documentation
+├── quick-reference.md       # Quick reference
 │
 └── packages/
     ├── frontend/
@@ -236,7 +236,7 @@ Development volumes (for caching):
 
 ## Troubleshooting
 
-See [DOCKER.md](DOCKER.md#troubleshooting) for detailed troubleshooting guide.
+See [docker.md](docker.md#troubleshooting) for detailed troubleshooting guide.
 
 Common issues:
 - Port conflicts → Change ports in docker-compose.yml
@@ -246,16 +246,16 @@ Common issues:
 
 ## Documentation
 
-- [DOCKER.md](DOCKER.md) - Complete Docker guide with examples
-- [DOCKER_QUICK_REFERENCE.md](DOCKER_QUICK_REFERENCE.md) - Quick command reference
-- [MONOREPO_STRUCTURE.md](MONOREPO_STRUCTURE.md) - Monorepo architecture
-- [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
-- [QUICK_START.md](QUICK_START.md) - Getting started guide
+- [docker.md](docker.md) - Complete Docker guide with examples
+- [quick-reference.md](quick-reference.md) - Quick command reference
+- [../getting-started/monorepo-structure.md](../getting-started/monorepo-structure.md) - Monorepo architecture
+- [../getting-started/architecture.md](../getting-started/architecture.md) - System architecture
+- [../getting-started/quick-start.md](../getting-started/quick-start.md) - Getting started guide
 
 ## Support
 
 For issues:
-1. Check [DOCKER.md](DOCKER.md#troubleshooting)
+1. Check [docker.md](docker.md#troubleshooting)
 2. View logs: `docker-compose logs -f [service]`
 3. Check service status: `docker-compose ps`
 4. Restart service: `docker-compose restart [service]`
