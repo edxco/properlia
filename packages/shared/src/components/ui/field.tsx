@@ -59,6 +59,8 @@ export function Textarea({
   );
 }
 
+const SELECT_ARROW = "select-chevron cursor-pointer pr-10";
+
 export function Select({
   invalid,
   controlSize,
@@ -68,7 +70,7 @@ export function Select({
   return (
     <select
       aria-invalid={invalid || undefined}
-      className={controlClasses({ invalid, size: controlSize, className: cn("cursor-pointer", className) })}
+      className={controlClasses({ invalid, size: controlSize, className: cn(SELECT_ARROW, className) })}
       {...props}
     />
   );

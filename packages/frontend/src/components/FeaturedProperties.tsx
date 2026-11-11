@@ -4,6 +4,7 @@ import { SectionTitle, buttonClasses } from "@properlia/shared/components/ui";
 import { PropertyCard } from "@/components/ui";
 import { toPropertyCardProps } from "@/src/lib/propertyCardProps";
 import { getPublicProperties } from "@/src/lib/propertyQueries";
+import { localizedPath } from "@properlia/shared/lib/routes";
 
 export async function FeaturedProperties({ locale }: { locale: string }) {
   const dict: Record<string, string> = locale === "en" ? enMessages : esMessages;
@@ -32,7 +33,7 @@ export async function FeaturedProperties({ locale }: { locale: string }) {
         )}
 
         <div className="mt-10 text-center">
-          <Link href={`/${locale}/properties`} className={buttonClasses({ variant: "secondary" })}>
+          <Link href={localizedPath(locale, "properties")} className={buttonClasses({ variant: "secondary" })}>
             {dict.viewAllProperties}
           </Link>
         </div>

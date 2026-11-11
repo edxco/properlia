@@ -14,6 +14,13 @@ export interface CommonEntity {
   updated_at?: string;
 }
 
+// States and cities carry permanent URL slugs (es / en) and the slugs they used to have.
+export interface LocationEntity extends CommonEntity {
+  slug: string;
+  slug_en: string;
+  previous_slugs?: string[];
+}
+
 export interface Attachment {
   id: string;
   url: string;
@@ -45,6 +52,7 @@ export interface PropertyFeaturePayload {
 
 export interface Property {
   id: string;
+  code: string;
   featured: boolean;
   exclusive_listing: boolean;
   title: string;
@@ -70,8 +78,9 @@ export interface Property {
   property_type?: CommonEntity | null;
   status?: CommonEntity | null;
   listing_type?: CommonEntity | null;
-  state?: CommonEntity | null;
-  city?: CommonEntity | null;
+  state?: LocationEntity | null;
+  city?: LocationEntity | null;
+  public_url?: { es: string; en: string };
   property_categories?: PropertyCategory[];
   property_features?: PropertyFeature[];
   images: Attachment[];
@@ -88,10 +97,11 @@ export interface Status extends CommonEntity {}
 
 export interface ListingType extends CommonEntity {}
 
-export interface State extends CommonEntity {}
+export interface State extends LocationEntity {}
 
-export interface City extends CommonEntity {
+export interface City extends LocationEntity {
   state_id: string;
+  code?: string;
 }
 
 export interface PropertyPayload {
@@ -168,4 +178,31 @@ export interface PaginationMeta {
 export interface PaginatedResponse<T> {
   data: T[];
   metadata: PaginationMeta;
+}
+
+// GET /public_paths: compact index of every public URL (proxy redirects, sitemap, geo counts)
+export interface PublicPropertyPath {
+  id: string;
+  code: string;
+  slug_es: string;
+  slug_en: string;
+  state_id: string;
+  city_id: string;
+  listing_type: string | null;
+  updated_at: string;
+}
+
+export interface PublicLocationPath {
+  id: string;
+  name: string;
+  es_name: string;
+  slug: string;
+  slug_en: string;
+  previous_slugs: string[];
+}
+
+export interface PublicPaths {
+  properties: PublicPropertyPath[];
+  states: PublicLocationPath[];
+  cities: (PublicLocationPath & { state_id: string })[];
 }

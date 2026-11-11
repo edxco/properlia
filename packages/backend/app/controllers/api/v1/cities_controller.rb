@@ -7,6 +7,10 @@ module Api
       before_action :set_city, only: %i[show update destroy]
       after_action { pagy_headers_merge(@pagy) if @pagy }
 
+      rescue_from ActiveRecord::RecordNotUnique do
+        render json: { errors: ['City already exists'] }, status: :unprocessable_entity
+      end
+
       # GET /api/v1/cities
       def index
         cities = City.all.order(:es_name)
@@ -74,7 +78,7 @@ module Api
       end
 
       def city_params
-        params.require(:city).permit(:name, :es_name, :state_id)
+        params.require(:city).permit(:name, :es_name, :state_id, :code, :slug, :slug_en)
       end
     end
   end

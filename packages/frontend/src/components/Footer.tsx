@@ -9,6 +9,8 @@ import {
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
 import { useGeneralInfo } from "@/src/services/general-info/queries";
+import { localizedPath } from "@properlia/shared/lib/routes";
+import type { GeoLink } from "@/src/lib/geo";
 
 const LinkedinIcon = () => (
   <svg
@@ -58,7 +60,7 @@ const formatPhone = (number: string) => {
   return number.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
 };
 
-export function Footer() {
+export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
   const t = useT();
   const locale = useLocale();
   const currentYear = new Date().getFullYear();
@@ -68,10 +70,10 @@ export function Footer() {
     <footer className="text-white flex flex-col">
       <div className="bg-brand-navy m-0 p-0">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-12 m-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
             {/* Logo and Company Info */}
             <div className="space-y-4 lg:col-span-2">
-              <Link href={`/${locale}`} aria-label="Properlia Home">
+              <Link href={localizedPath(locale, "home")} aria-label="Properlia Home">
                 <Image
                   src={ProperliaLogo}
                   alt="Properlia - Real Estate"
@@ -136,7 +138,7 @@ export function Footer() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href={`/${locale}/properties?category=residential`}
+                    href={localizedPath(locale, "properties", "?category=residential")}
                     className="text-white/80 hover:text-white transition-colors text-sm"
                   >
                     {t("residential")}
@@ -144,7 +146,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href={`/${locale}/properties?category=commercial`}
+                    href={localizedPath(locale, "properties", "?category=commercial")}
                     className="text-white/80 hover:text-white transition-colors text-sm"
                   >
                     {t("commercial")}
@@ -152,7 +154,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href={`/${locale}/properties?category=industrial`}
+                    href={localizedPath(locale, "properties", "?category=industrial")}
                     className="text-white/80 hover:text-white transition-colors text-sm"
                   >
                     {t("industrial")}
@@ -161,13 +163,29 @@ export function Footer() {
               </ul>
             </nav>
 
+            {/* Cities with the most listings (server-rendered links to geo pages) */}
+            {cityLinks.length > 0 && (
+              <nav aria-label={t("geoCitiesTitle")} className="hidden md:block text-right">
+                <h3 className="font-display font-medium text-lg mb-4">{t("geoCitiesTitle")}</h3>
+                <ul className="space-y-2">
+                  {cityLinks.map((city) => (
+                    <li key={city.key}>
+                      <Link href={city.href} className="text-white/80 hover:text-white transition-colors text-sm">
+                        {city.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+
             {/* Services */}
             <nav aria-label="Services" className="hidden md:block text-right">
               <h3 className="font-display font-medium text-lg mb-4">{t("services")}</h3>
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href={`/${locale}/buyer-consultation`}
+                    href={localizedPath(locale, "buyerConsultation")}
                     className="text-white/80 hover:text-white transition-colors text-sm"
                   >
                     {t("lookingToBuy")}
@@ -175,7 +193,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href={`/${locale}/seller-consultation`}
+                    href={localizedPath(locale, "sellerConsultation")}
                     className="text-white/80 hover:text-white transition-colors text-sm"
                   >
                     {t("lookingToSell")}
@@ -183,7 +201,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href={`/${locale}/properties`}
+                    href={localizedPath(locale, "properties")}
                     className="text-white/80 hover:text-white transition-colors text-sm"
                   >
                     {t("lookingToInvest")}
@@ -257,19 +275,19 @@ export function Footer() {
               </div>
               <div className="flex justify-end gap-4 text-right text-xs">
                 <Link
-                  href={`/${locale}/terms`}
+                  href={localizedPath(locale, "terms")}
                   className="text-white/70 hover:text-white transition-colors"
                 >
                   {t("termsAndConditions")}
                 </Link>
                 <Link
-                  href={`/${locale}/privacy`}
+                  href={localizedPath(locale, "privacy")}
                   className="text-white/70 hover:text-white transition-colors"
                 >
                   {t("privacyNotice")}
                 </Link>
                 <Link
-                  href={`/${locale}/sitemap`}
+                  href={localizedPath(locale, "sitemap")}
                   className="text-white/70 hover:text-white transition-colors"
                 >
                   {t("sitemap")}

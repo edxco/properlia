@@ -9,6 +9,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import { useT, useLocale } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
 import { Button, cardClasses } from "@properlia/shared/components/ui";
+import { localizedPath, type RouteKey } from "@properlia/shared/lib/routes";
 
 const PROPERTY_CATEGORIES = [
   { key: "allProperties", param: "" },
@@ -27,21 +28,21 @@ export function Navigation() {
   const [isPropertiesOpen, setIsPropertiesOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isActive = (path: string) => {
-    const fullPath = `/${locale}${path}`;
+  const isActive = (key: RouteKey) => {
+    const fullPath = localizedPath(locale, key);
     return pathname === fullPath || pathname.startsWith(`${fullPath}/`);
   };
 
-  const linkClass = (path: string) =>
+  const linkClass = (key: RouteKey) =>
     `transition-colors text-sm tracking-wide font-medium ${
-      isActive(path)
+      isActive(key)
         ? "text-brand-blue border-b-2 border-brand-blue pb-0.5"
         : "text-brand-carbon hover:text-brand-blue"
     }`;
 
-  const mobileLinkClass = (path: string) =>
+  const mobileLinkClass = (key: RouteKey) =>
     `block text-sm tracking-wide font-medium ${
-      isActive(path)
+      isActive(key)
         ? "text-brand-blue"
         : "text-brand-carbon hover:text-brand-blue"
     }`;
@@ -59,7 +60,7 @@ export function Navigation() {
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-brand-border">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <Link href={`/${locale}`} className="flex items-center space-x-2">
+          <Link href={localizedPath(locale, "home")} className="flex items-center space-x-2">
             <Image src={ProperliaLogo} alt="Properlia logo" width={200} />
           </Link>
 
@@ -71,7 +72,7 @@ export function Navigation() {
             >
               <button
                 className={`flex items-center gap-1 transition-colors text-sm tracking-wide font-medium focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-brand-blue focus-visible:rounded-sm ${
-                  isActive("/properties")
+                  isActive("properties")
                     ? "text-brand-blue border-b-2 border-brand-blue pb-0.5"
                     : "text-brand-carbon hover:text-brand-blue"
                 }`}
@@ -88,7 +89,7 @@ export function Navigation() {
                     {PROPERTY_CATEGORIES.map(({ key, param }) => (
                       <Link
                         key={key}
-                        href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
+                        href={param ? localizedPath(locale, "properties", `?category=${param}`) : localizedPath(locale, "properties")}
                         className="block whitespace-nowrap px-4 py-2 text-sm text-brand-carbon hover:text-brand-blue hover:bg-brand-pale transition-colors"
                         onClick={() => setIsPropertiesOpen(false)}
                       >
@@ -100,16 +101,16 @@ export function Navigation() {
               )}
             </div>
 
-            <Link href={`/${locale}/buyer-consultation`} className={linkClass("/buyer-consultation")}>
+            <Link href={localizedPath(locale, "buyerConsultation")} className={linkClass("buyerConsultation")}>
               {t("imABuyer")}
             </Link>
-            <Link href={`/${locale}/seller-consultation`} className={linkClass("/seller-consultation")}>
+            <Link href={localizedPath(locale, "sellerConsultation")} className={linkClass("sellerConsultation")}>
               {t("imASeller")}
             </Link>
-            <Link href={`/${locale}/services`} className={linkClass("/services")}>
+            <Link href={localizedPath(locale, "services")} className={linkClass("services")}>
               {t("services")}
             </Link>
-            <Link href={`/${locale}/contact`} className={linkClass("/contact")}>
+            <Link href={localizedPath(locale, "contact")} className={linkClass("contact")}>
               {t("contact")}
             </Link>
             <LanguageSwitcher />
@@ -136,7 +137,7 @@ export function Navigation() {
             <div>
               <button
                 className={`flex items-center gap-1 w-full text-left text-sm tracking-wide font-medium ${
-                  isActive("/properties") ? "text-brand-blue" : "text-brand-carbon hover:text-brand-blue"
+                  isActive("properties") ? "text-brand-blue" : "text-brand-carbon hover:text-brand-blue"
                 }`}
                 onClick={() => setIsMobilePropertiesOpen(!isMobilePropertiesOpen)}
               >
@@ -150,7 +151,7 @@ export function Navigation() {
                   {PROPERTY_CATEGORIES.map(({ key, param }) => (
                     <Link
                       key={key}
-                      href={param ? `/${locale}/properties?category=${param}` : `/${locale}/properties`}
+                      href={param ? localizedPath(locale, "properties", `?category=${param}`) : localizedPath(locale, "properties")}
                       className="block text-sm text-brand-carbon hover:text-brand-blue"
                       onClick={() => { setIsMenuOpen(false); setIsMobilePropertiesOpen(false); }}
                     >
@@ -161,29 +162,29 @@ export function Navigation() {
               )}
             </div>
             <Link
-              href={`/${locale}/buyer-consultation`}
-              className={mobileLinkClass("/buyer-consultation")}
+              href={localizedPath(locale, "buyerConsultation")}
+              className={mobileLinkClass("buyerConsultation")}
               onClick={() => setIsMenuOpen(false)}
             >
               {t("imABuyer")}
             </Link>
             <Link
-              href={`/${locale}/seller-consultation`}
-              className={mobileLinkClass("/seller-consultation")}
+              href={localizedPath(locale, "sellerConsultation")}
+              className={mobileLinkClass("sellerConsultation")}
               onClick={() => setIsMenuOpen(false)}
             >
               {t("imASeller")}
             </Link>
             <Link
-              href={`/${locale}/services`}
-              className={mobileLinkClass("/services")}
+              href={localizedPath(locale, "services")}
+              className={mobileLinkClass("services")}
               onClick={() => setIsMenuOpen(false)}
             >
               {t("services")}
             </Link>
             <Link
-              href={`/${locale}/contact`}
-              className={mobileLinkClass("/contact")}
+              href={localizedPath(locale, "contact")}
+              className={mobileLinkClass("contact")}
               onClick={() => setIsMenuOpen(false)}
             >
               {t("contact")}

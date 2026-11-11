@@ -324,7 +324,7 @@ class EmailService
       formatted_date = property.created_at.strftime('%d/%m/%Y %H:%M')
 
       # Build property details URL
-      property_url = "#{ENV.fetch('FRONTEND_URL', 'http://localhost:3001')}/properties/#{property.id}"
+      property_url = PropertyPublicUrl.url(property, :es)
 
       <<~HTML
         <!DOCTYPE html>

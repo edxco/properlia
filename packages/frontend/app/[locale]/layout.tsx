@@ -22,6 +22,7 @@ import { Navigation } from "@/src/components/Navigation";
 import { Footer } from "@/src/components/Footer";
 import { GoogleAnalytics, GoogleTagManager } from "@properlia/shared";
 import { buildMetadata } from "@/src/lib/metadata";
+import { topCityLinks } from "@/src/lib/geo";
 
 const SUPPORTED_LOCALES = ["es", "en"] as const;
 type Locale = (typeof SUPPORTED_LOCALES)[number];
@@ -70,7 +71,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildMetadata(locale, "/", "metaTitle", "metaDescription");
+  return buildMetadata(locale, "home", "metaTitle", "metaDescription");
 }
 
 export async function generateStaticParams() {
@@ -93,6 +94,7 @@ export default async function RootLayout({
     : "es";
 
   const dict = dictionaries[normalizedLocale];
+  const cityLinks = await topCityLinks(normalizedLocale);
 
   return (
     <html lang={normalizedLocale} className={`${displayFont.variable} ${bodyFont.variable}`} suppressHydrationWarning>
@@ -109,7 +111,7 @@ export default async function RootLayout({
           <TranslationProvider dictionary={dict} locale={normalizedLocale}>
             <Navigation />
             <main className="pt-20">{children}</main>
-            <Footer />
+            <Footer cityLinks={cityLinks} />
           </TranslationProvider>
         </QueryProvider>
       </body>

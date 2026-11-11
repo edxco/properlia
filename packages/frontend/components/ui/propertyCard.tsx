@@ -6,7 +6,6 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "@properlia/shared/components/TranslationProvider";
 import { BadgeItem } from "@properlia/shared/lib/getBadge";
-import { buildPropertyUrl } from "@properlia/shared/lib/slugify";
 import {
   ListingType,
   PropertyFeature,
@@ -128,6 +127,8 @@ const formatPrice = (value: number) =>
 
 interface PropertyCardProps {
   id: string;
+  /** Public detail path, e.g. /es/propiedades/casa-en-venta-pue-r0012 */
+  href: string;
   title: string;
   property_type: BadgeItem;
   images: string[];
@@ -152,6 +153,7 @@ interface PropertyCardProps {
 
 export const PropertyCard = ({
   id,
+  href,
   title,
   property_type,
   images,
@@ -176,7 +178,6 @@ export const PropertyCard = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  const propertyPath = `/${locale}${buildPropertyUrl({ id, title, state, city })}`;
   const imageAlt = displayTitle ?? title;
 
   useEffect(() => {
@@ -230,7 +231,7 @@ export const PropertyCard = ({
 
   return (
     <Link
-      href={propertyPath}
+      href={href}
       className="flex flex-col bg-white rounded-card overflow-hidden h-full"
       style={{
         border: "1px solid var(--brand-border)",

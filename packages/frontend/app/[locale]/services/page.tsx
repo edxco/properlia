@@ -8,6 +8,7 @@ import {
   SectionTitle,
   buttonClasses,
 } from "@properlia/shared/components/ui";
+import { localizedPath } from "@properlia/shared/lib/routes";
 
 type Dict = Record<string, string>;
 const dictionaries: Record<string, Dict> = { en, es };
@@ -78,7 +79,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildMetadata(locale, "/services", "servicesMetaTitle", "servicesMetaDescription");
+  return buildMetadata(locale, "services", "servicesMetaTitle", "servicesMetaDescription");
 }
 
 export default async function ServicesPage({
@@ -172,13 +173,13 @@ export default async function ServicesPage({
         <SectionTitle className="text-white">{dict["servicesCta"]}</SectionTitle>
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
           <Link
-            href={`/${locale}/buyer-consultation`}
+            href={localizedPath(locale, "buyerConsultation")}
             className={buttonClasses({ variant: "inverse", size: "lg", className: "h-14" })}
           >
             {dict["imABuyer"]}
           </Link>
           <Link
-            href={`/${locale}/seller-consultation`}
+            href={localizedPath(locale, "sellerConsultation")}
             className={buttonClasses({ variant: "outlineInverse", size: "lg", className: "h-14" })}
           >
             {dict["imASeller"]}

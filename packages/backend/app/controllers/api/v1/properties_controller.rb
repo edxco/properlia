@@ -2,10 +2,8 @@
 module Api
   module V1
     class PropertiesController < ApplicationController
-      HIDDEN_PUBLIC_STATUSES = %w[sold leased suspended expired].freeze
-
-      skip_before_action :authenticate_user!, only: %i[index show intake]
-      skip_before_action :reject_disabled_user!, only: %i[index show intake]
+      skip_before_action :authenticate_user!, only: %i[index show by_code intake]
+      skip_before_action :reject_disabled_user!, only: %i[index show by_code intake]
       before_action :authenticate_intake_token!, only: %i[intake]
       before_action :set_property, only: %i[show update delete_attachment destroy reorder_images]
       before_action(only: %i[destroy]) { authorize_any!(:admin) }
@@ -17,7 +15,7 @@ module Api
 
         # Public listings hide sold, leased, suspended and expired properties
         if ActiveModel::Type::Boolean.new.cast(params[:public])
-          properties = properties.where.not(status_id: Status.where(name: HIDDEN_PUBLIC_STATUSES).select(:id))
+          properties = properties.merge(Property.publicly_visible)
         end
 
         # Filter by featured
@@ -82,11 +80,11 @@ module Api
                                  .where('LOWER(property_types.name) = ?', params[:property_type_name].downcase)
         end
 
-        # Text search on title, description, address, state, city, and neighborhood
+        # Text search on code, title, description, address, state, city, and neighborhood
         if params[:search].present?
           search_term = "%#{params[:search].downcase}%"
           properties = properties.left_joins(:state, :city).where(
-            'LOWER(properties.title) LIKE :q OR LOWER(properties.description) LIKE :q OR ' \
+            'LOWER(properties.code) LIKE :q OR LOWER(properties.title) LIKE :q OR LOWER(properties.description) LIKE :q OR ' \
             'LOWER(properties.address) LIKE :q OR LOWER(properties.neighborhood) LIKE :q OR ' \
             'LOWER(states.name) LIKE :q OR LOWER(states.es_name) LIKE :q OR ' \
             'LOWER(cities.name) LIKE :q OR LOWER(cities.es_name) LIKE :q',
@@ -114,6 +112,15 @@ module Api
 
       def show
         render json: property_json(@property)
+      end
+
+      # GET /api/v1/properties/by_code/:code
+      # Exact, case-insensitive lookup by public code; only publicly visible properties.
+      def by_code
+        property = Property.publicly_visible.find_by(code: params[:code].to_s.upcase)
+        return render json: { error: 'Not found' }, status: :not_found unless property
+
+        render json: property_json(property)
       end
 
       # POST /api/v1/properties
@@ -243,7 +250,7 @@ module Api
             Array(intake_params.dig(:media, :photos)),
             Array(intake_params.dig(:media, :video))
           )
-          render json: { listing_url: listing_url_for(property), id: property.id }, status: :created
+          render json: { listing_url: PropertyPublicUrl.url(property, :es), id: property.id }, status: :created
         else
           render json: { errors: property.errors.full_messages }, status: :unprocessable_entity
         end
@@ -395,23 +402,6 @@ module Api
         ActiveModel::Type::Boolean.new.cast(intake_params[:presale]) ? 'pre-sale' : 'sale'
       end
 
-      def listing_url_for(property)
-        base = ENV.fetch('FRONTEND_URL', 'https://properlia.com')
-        state = intake_slugify(property.state&.name)
-        city = intake_slugify(property.city&.name)
-        slug = intake_slugify(property.title)
-        "#{base}/es/properties/#{state}/#{city}/#{property.id}/#{slug}"
-      end
-
-      # Mirrors packages/shared/src/lib/slugify.ts so URLs match what the
-      # frontend itself generates for a given title/state/city.
-      def intake_slugify(text)
-        return 'na' if text.blank?
-
-        text.to_s.unicode_normalize(:nfd).gsub(/[\u0300-\u036f]/, '').downcase
-            .gsub(/[^a-z0-9]+/, '-').gsub(/\A-+|-+\z/, '')
-      end
-
       def property_json(property)
         # include signed URLs for immediate consumption by your frontend
         base_attributes = property.attributes.except('created_at')
@@ -445,16 +435,21 @@ module Api
                        {
                          id: property.state.id,
                          name: property.state.name,
-                         es_name: property.state.es_name
+                         es_name: property.state.es_name,
+                         slug: property.state.slug,
+                         slug_en: property.state.slug_en
                        }
                      end,
           'city' => if property.city
                       {
                         id: property.city.id,
                         name: property.city.name,
-                        es_name: property.city.es_name
+                        es_name: property.city.es_name,
+                        slug: property.city.slug,
+                        slug_en: property.city.slug_en
                       }
                     end,
+          'public_url' => PropertyPublicUrl.urls(property),
           'property_categories' => property.property_categories.map do |cat|
             { id: cat.id, name: cat.name, es_name: cat.es_name, slug: cat.slug }
           end,

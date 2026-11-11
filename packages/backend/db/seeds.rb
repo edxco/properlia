@@ -148,25 +148,39 @@ puts "Creating cities for Puebla..."
 PUEBLA_STATE_ID = '18806e68-2870-4fb3-8294-62448b8bbe8d'
 
 puebla_cities = [
-  { id: '06faf67b-9019-47ec-bb1b-f352c49df4f5', name: 'Puebla', es_name: 'Puebla' },
-  { id: 'a2ab8864-12c4-4173-b432-2b82c4a9e36d', name: 'Tehuacan', es_name: 'Tehuacán' },
-  { id: '19af4f1a-fa72-4ed9-941c-6d11f6d91fa2', name: 'San Andres Cholula', es_name: 'San Andrés Cholula' },
-  { id: '13801309-0e23-4539-a5c4-a3cb7fa1cfc9', name: 'San Pedro Cholula', es_name: 'San Pedro Cholula' },
-  { id: 'c540e5e0-375d-4cd1-816b-0a17081b9df5', name: 'Atlixco', es_name: 'Atlixco' },
-  { id: 'a63f7159-6f80-4d14-b722-41d60c5f1f0b', name: 'San Martin Texmelucan', es_name: 'San Martín Texmelucan' },
-  { id: '412f864c-5080-45ad-868c-e025fc5f46bc', name: 'Teziutlan', es_name: 'Teziutlán' },
-  { id: 'f09312d9-2800-424f-b16d-1c69e3e2edf9', name: 'Huauchinango', es_name: 'Huauchinango' },
-  { id: 'd68a9094-a760-40e8-9ec7-50d31e6be0c4', name: 'Zacatlan', es_name: 'Zacatlán' },
-  { id: 'b7ae6e3d-6b17-44ae-9ce2-16e7b4d96e76', name: 'Cuautlancingo', es_name: 'Cuautlancingo' },
-  { id: '8154706c-5e42-415b-a673-00391ada66b1', name: 'Santa Clara Ocoyucan', es_name: 'Santa Clara Ocoyucan' }
+  { id: '06faf67b-9019-47ec-bb1b-f352c49df4f5', name: 'Puebla', es_name: 'Puebla', code: 'PUE' },
+  { id: 'a2ab8864-12c4-4173-b432-2b82c4a9e36d', name: 'Tehuacan', es_name: 'Tehuacán', code: 'TEH' },
+  { id: '19af4f1a-fa72-4ed9-941c-6d11f6d91fa2', name: 'San Andres Cholula', es_name: 'San Andrés Cholula', code: 'SAC' },
+  { id: '13801309-0e23-4539-a5c4-a3cb7fa1cfc9', name: 'San Pedro Cholula', es_name: 'San Pedro Cholula', code: 'SPC' },
+  { id: 'c540e5e0-375d-4cd1-816b-0a17081b9df5', name: 'Atlixco', es_name: 'Atlixco', code: 'ATL' },
+  { id: 'a63f7159-6f80-4d14-b722-41d60c5f1f0b', name: 'San Martin Texmelucan', es_name: 'San Martín Texmelucan', code: 'SMT' },
+  { id: '412f864c-5080-45ad-868c-e025fc5f46bc', name: 'Teziutlan', es_name: 'Teziutlán', code: 'TEZ' },
+  { id: 'f09312d9-2800-424f-b16d-1c69e3e2edf9', name: 'Huauchinango', es_name: 'Huauchinango', code: 'HUA' },
+  { id: 'd68a9094-a760-40e8-9ec7-50d31e6be0c4', name: 'Zacatlan', es_name: 'Zacatlán', code: 'ZAC' },
+  { id: 'b7ae6e3d-6b17-44ae-9ce2-16e7b4d96e76', name: 'Cuautlancingo', es_name: 'Cuautlancingo', code: 'CUA' },
+  { id: '8154706c-5e42-415b-a673-00391ada66b1', name: 'Santa Clara Ocoyucan', es_name: 'Santa Clara Ocoyucan', code: 'SCO' }
 ]
 
 puebla_cities.each do |c|
-  City.find_or_create_by!(id: c[:id]) do |city|
-    city.state_id = PUEBLA_STATE_ID
-    city.name = c[:name]
-    city.es_name = c[:es_name]
+  next if City.exists?(id: c[:id])
+
+  targets = [c[:name], c[:es_name]].map { |n| LocationResolver.normalize(n) }
+  existing = City.where(state_id: PUEBLA_STATE_ID).find do |city|
+    targets.include?(LocationResolver.normalize(city.name)) || targets.include?(LocationResolver.normalize(city.es_name))
   end
+
+  if existing
+    puts "City #{c[:name]} already exists with id #{existing.id}, skipping"
+    next
+  end
+
+  City.create!(
+    id: c[:id],
+    state_id: PUEBLA_STATE_ID,
+    name: c[:name],
+    es_name: c[:es_name],
+    code: City.exists?(code: c[:code]) ? nil : c[:code]
+  )
 end
 puts "Cities ready: #{City.where(state_id: PUEBLA_STATE_ID).count}"
 

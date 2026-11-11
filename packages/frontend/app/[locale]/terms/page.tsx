@@ -22,7 +22,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildMetadata(locale, "/terms", "termsMetaTitle", "termsMetaDescription");
+  return buildMetadata(locale, "terms", "termsMetaTitle", "termsMetaDescription");
 }
 
 export default async function TermsPage({

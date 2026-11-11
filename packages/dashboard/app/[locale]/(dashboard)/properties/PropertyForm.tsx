@@ -900,6 +900,22 @@ export default function PropertyForm({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Select
+            aria-label={t("status")}
+            value={form.status_id}
+            onChange={(event) => handleChange("status_id", event.target.value)}
+            required
+            className="h-10 w-auto rounded-full pl-4 text-sm font-medium"
+          >
+            <option value="">{t("status")} *</option>
+            {statuses?.map((status) => (
+              <option key={status.id} value={status.id}>
+                {capitalizeFirstWord(
+                  locale === "es" ? status.es_name : status.name
+                )}
+              </option>
+            ))}
+          </Select>
           <Chip
             selected={form.featured}
             size="md"
@@ -1160,26 +1176,6 @@ export default function PropertyForm({
               required
             />
           </div>
-        </div>
-
-        <div>
-          <Label>
-            {t("status")} <span className="text-danger">*</span>
-          </Label>
-          <Select
-            value={form.status_id}
-            onChange={(event) => handleChange("status_id", event.target.value)}
-            required
-          >
-            <option value="">{t("select")}</option>
-            {statuses?.map((status) => (
-              <option key={status.id} value={status.id}>
-                {capitalizeFirstWord(
-                  locale === "es" ? status.es_name : status.name
-                )}
-              </option>
-            ))}
-          </Select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
