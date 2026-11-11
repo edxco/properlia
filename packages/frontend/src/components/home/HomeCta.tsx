@@ -10,15 +10,15 @@ export async function HomeCta({ locale }: { locale: string }) {
   const whatsapp = whatsappUrl((await getGeneralInfo())?.whatsapp);
 
   return (
-    <Section tone="navy">
+    <Section tone="base" spacing="md">
       <Container>
-        <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-16">
-          <div className="lg:col-span-7">
+        <div className="grid gap-10 rounded-card bg-brand-navy p-8 shadow-card md:p-12 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:p-16">
+          <div className="lg:max-w-xl">
             <SectionTitle className="text-white">{dict.homeCtaTitle}</SectionTitle>
             <p className="mt-4 max-w-xl text-base text-white/90 md:text-lg">{dict.homeCtaText}</p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row lg:col-span-5 lg:justify-end">
+          <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0 lg:flex-col">
             <Link href={localizedPath(locale, "contact")} className={buttonClasses({ variant: "inverse", size: "lg" })}>
               {dict.homeCtaPrimary}
             </Link>
