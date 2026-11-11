@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { Card, CardTitle, Container, Eyebrow, Section, SectionTitle, buttonClasses } from "@properlia/shared/components/ui";
+import { Container, Eyebrow, Section, SectionTitle } from "@properlia/shared/components/ui";
 import { localizedPath } from "@properlia/shared/lib/routes";
 import { dictionaryFor } from "@/src/lib/metadata";
 import { HOME_PROCESS_STEPS } from "./homeContent";
+import { TextLink } from "./TextLink";
 
 export function HomeAbout({ locale }: { locale: string }) {
   const dict = dictionaryFor(locale);
@@ -10,35 +10,33 @@ export function HomeAbout({ locale }: { locale: string }) {
   return (
     <Section tone="white">
       <Container>
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-          <div>
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-5">
             <Eyebrow>{dict.homeAboutEyebrow}</Eyebrow>
             <SectionTitle className="mt-3">{dict.homeAboutTitle}</SectionTitle>
-            <p className="mt-5 text-base text-brand-carbon/80 md:text-lg">{dict.homeAboutP1}</p>
+          </div>
+          <div className="lg:col-span-7">
+            <p className="text-lg text-brand-carbon">{dict.homeAboutP1}</p>
             <p className="mt-4 text-base text-brand-carbon/80 md:text-lg">{dict.homeAboutP2}</p>
-            <Link href={localizedPath(locale, "services")} className={buttonClasses({ variant: "secondary", className: "mt-8" })}>
+            <TextLink href={localizedPath(locale, "services")} className="mt-6">
               {dict.homeAboutCta}
-            </Link>
+            </TextLink>
           </div>
+        </div>
 
-          <div>
-            <h3 className="font-display text-2xl font-medium text-brand-navy">{dict.homeProcessTitle}</h3>
-            <ol className="mt-6 flex flex-col gap-4">
-              {HOME_PROCESS_STEPS.map((step) => (
-                <li key={step}>
-                  <Card padding="sm" className="flex gap-4">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-pale text-sm font-medium tabular-nums text-brand-blue">
-                      {step}
-                    </span>
-                    <div>
-                      <CardTitle className="text-lg">{dict[`homeProcessStep${step}Title`]}</CardTitle>
-                      <p className="mt-1 text-sm text-brand-carbon/80">{dict[`homeProcessStep${step}Text`]}</p>
-                    </div>
-                  </Card>
-                </li>
-              ))}
-            </ol>
-          </div>
+        <div className="mt-16 md:mt-20">
+          <h3 className="font-display text-2xl font-medium text-brand-navy">{dict.homeProcessTitle}</h3>
+          <ol className="mt-8 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
+            {HOME_PROCESS_STEPS.map((step) => (
+              <li key={step} className="border-t border-brand-navy/20 py-6">
+                <span aria-hidden="true" className="font-display text-4xl font-medium tabular-nums lining-nums text-brand-blue">
+                  {String(step).padStart(2, "0")}
+                </span>
+                <h4 className="mt-4 text-base font-medium text-brand-navy">{dict[`homeProcessStep${step}Title`]}</h4>
+                <p className="mt-2 text-sm text-brand-carbon/80">{dict[`homeProcessStep${step}Text`]}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </Container>
     </Section>

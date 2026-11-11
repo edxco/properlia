@@ -1,20 +1,11 @@
-import Link from "next/link";
-import { IconChartLine, IconHome2, IconSpeakerphone, type Icon } from "@tabler/icons-react";
-import { Card, CardTitle, Container, Section, buttonClasses } from "@properlia/shared/components/ui";
+import { Container, Eyebrow, Section, SectionTitle } from "@properlia/shared/components/ui";
 import { localizedPath, type RouteKey } from "@properlia/shared/lib/routes";
 import { dictionaryFor } from "@/src/lib/metadata";
-import { SectionHeader } from "./SectionHeader";
+import { SplitLayout } from "./SectionHeader";
+import { TextLink } from "./TextLink";
 
-interface Service {
-  icon: Icon;
-  titleKey: string;
-  textKey: string;
-  links: { route: RouteKey; labelKey: string }[];
-}
-
-const SERVICES: Service[] = [
+const SERVICES: { titleKey: string; textKey: string; links: { route: RouteKey; labelKey: string }[] }[] = [
   {
-    icon: IconHome2,
     titleKey: "homeService1Title",
     textKey: "homeService1Text",
     links: [
@@ -23,13 +14,11 @@ const SERVICES: Service[] = [
     ],
   },
   {
-    icon: IconChartLine,
     titleKey: "homeService2Title",
     textKey: "homeService2Text",
     links: [{ route: "services", labelKey: "homeService2Link" }],
   },
   {
-    icon: IconSpeakerphone,
     titleKey: "homeService3Title",
     textKey: "homeService3Text",
     links: [{ route: "sellerConsultation", labelKey: "homeService3Link" }],
@@ -38,39 +27,43 @@ const SERVICES: Service[] = [
 
 export function HomeServices({ locale }: { locale: string }) {
   const dict = dictionaryFor(locale);
-  const linkClass = buttonClasses({ variant: "link", className: "justify-start text-left" });
 
   return (
     <Section tone="white">
       <Container>
-        <SectionHeader eyebrow={dict.homeServicesEyebrow} title={dict.homeServicesTitle} intro={dict.homeServicesIntro} />
-
-        <div className="grid grid-cols-1 gap-7 lg:grid-cols-3">
-          {SERVICES.map(({ icon: ServiceIcon, titleKey, textKey, links }) => (
-            <Card key={titleKey} className="flex flex-col">
-              <span className="flex size-12 items-center justify-center rounded-full bg-brand-pale text-brand-blue">
-                <ServiceIcon size={24} stroke={1.5} aria-hidden="true" />
-              </span>
-              <CardTitle className="mt-5 text-xl md:text-2xl">{dict[titleKey]}</CardTitle>
-              <p className="mt-3 text-brand-carbon/80">{dict[textKey]}</p>
-              <ul className="mt-auto flex flex-col gap-2 pt-6">
-                {links.map((link) => (
-                  <li key={link.labelKey}>
-                    <Link href={localizedPath(locale, link.route)} className={linkClass}>
-                      {dict[link.labelKey]}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
-        </div>
-
-        <div className="mt-10">
-          <Link href={localizedPath(locale, "services")} className={buttonClasses({ variant: "secondary" })}>
-            {dict.homeServicesAllLink}
-          </Link>
-        </div>
+        <SplitLayout
+          aside={
+            <>
+              <Eyebrow>{dict.homeServicesEyebrow}</Eyebrow>
+              <SectionTitle className="mt-3">{dict.homeServicesTitle}</SectionTitle>
+              <p className="mt-4 text-base text-brand-carbon/80 md:text-lg">{dict.homeServicesIntro}</p>
+              <TextLink href={localizedPath(locale, "services")} className="mt-6">
+                {dict.homeServicesAllLink}
+              </TextLink>
+            </>
+          }
+        >
+          <ol className="border-t border-brand-border">
+            {SERVICES.map((service, index) => (
+              <li key={service.titleKey} className="grid gap-3 border-b border-brand-border py-8 md:grid-cols-[5rem_1fr] md:gap-6">
+                <span aria-hidden="true" className="font-display text-4xl font-medium tabular-nums lining-nums text-brand-blue">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h3 className="font-display text-2xl font-medium text-brand-navy md:text-3xl">{dict[service.titleKey]}</h3>
+                  <p className="mt-3 max-w-xl text-brand-carbon/80">{dict[service.textKey]}</p>
+                  <ul className="mt-5 flex flex-col gap-2">
+                    {service.links.map((link) => (
+                      <li key={link.labelKey}>
+                        <TextLink href={localizedPath(locale, link.route)}>{dict[link.labelKey]}</TextLink>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </SplitLayout>
       </Container>
     </Section>
   );

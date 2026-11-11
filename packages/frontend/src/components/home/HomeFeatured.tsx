@@ -1,12 +1,11 @@
-import Link from "next/link";
-import { IconArrowRight } from "@tabler/icons-react";
-import { Container, Section, buttonClasses } from "@properlia/shared/components/ui";
+import { Container, Section } from "@properlia/shared/components/ui";
 import { localizedPath } from "@properlia/shared/lib/routes";
 import { PropertyCard } from "@/components/ui";
 import { dictionaryFor } from "@/src/lib/metadata";
 import { toPropertyCardProps } from "@/src/lib/propertyCardProps";
 import { getPublicProperties } from "@/src/lib/propertyQueries";
 import { SectionHeader } from "./SectionHeader";
+import { TextLink } from "./TextLink";
 
 export async function HomeFeatured({ locale }: { locale: string }) {
   const dict = dictionaryFor(locale);
@@ -16,7 +15,12 @@ export async function HomeFeatured({ locale }: { locale: string }) {
   return (
     <Section id="propiedades" tone="base">
       <Container>
-        <SectionHeader eyebrow={dict.homeFeaturedEyebrow} title={dict.homeFeaturedTitle} intro={dict.homeFeaturedIntro} />
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <SectionHeader eyebrow={dict.homeFeaturedEyebrow} title={dict.homeFeaturedTitle} intro={dict.homeFeaturedIntro} />
+          <TextLink href={localizedPath(locale, "properties")} className="shrink-0 md:pb-2">
+            {dict.homeFeaturedCta}
+          </TextLink>
+        </div>
 
         {properties.length > 0 ? (
           <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
@@ -27,13 +31,6 @@ export async function HomeFeatured({ locale }: { locale: string }) {
         ) : (
           !result && <p className="text-brand-carbon/70">{dict.errorLoading}</p>
         )}
-
-        <div className="mt-10">
-          <Link href={localizedPath(locale, "properties")} className={buttonClasses({ variant: "secondary", size: "lg" })}>
-            {dict.homeFeaturedCta}
-            <IconArrowRight size={20} stroke={1.5} aria-hidden="true" />
-          </Link>
-        </div>
       </Container>
     </Section>
   );
