@@ -4,6 +4,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 
 const displayFont = Playfair_Display({
   subsets: ["latin"],
+  weight: ["500"],
   style: ["normal", "italic"],
   variable: "--font-editorial-display",
   display: "swap",
@@ -11,6 +12,7 @@ const displayFont = Playfair_Display({
 
 const bodyFont = Inter({
   subsets: ["latin"],
+  weight: ["400", "500"],
   variable: "--font-editorial-body",
   display: "swap",
 });
@@ -109,9 +111,15 @@ export default async function RootLayout({
         <GoogleAnalytics gaId={gaId} />
         <QueryProvider>
           <TranslationProvider dictionary={dict} locale={normalizedLocale}>
+            <a
+              href="#contenido"
+              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-brand-navy focus:shadow-overlay focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            >
+              {dict.skipToContent}
+            </a>
             <Navigation />
-            <main className="pt-20">{children}</main>
-            <Footer cityLinks={cityLinks} />
+            <main id="contenido" className="pt-20">{children}</main>
+            <Footer locale={normalizedLocale} cityLinks={cityLinks} />
           </TranslationProvider>
         </QueryProvider>
       </body>

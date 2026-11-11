@@ -49,7 +49,7 @@ export function staticEntries(paths: PublicPaths): SitemapEntry[] {
     paths: routePaths(key),
     priority,
     changeFrequency,
-    ...(key === "properties" && listingUpdate && { lastModified: listingUpdate }),
+    ...((key === "properties" || key === "home") && listingUpdate && { lastModified: listingUpdate }),
   }));
 }
 
