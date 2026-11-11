@@ -1,8 +1,8 @@
 module Api
   module V1
     class LeadsController < ApplicationController
-      skip_before_action :authenticate_user!, only: %i[public_create]
-      skip_before_action :reject_disabled_user!, only: %i[public_create]
+      skip_before_action :authenticate_user!, only: %i[public_create property_create]
+      skip_before_action :reject_disabled_user!, only: %i[public_create property_create]
       before_action :set_lead, only: %i[show update change_status assign record_contact]
       after_action { pagy_headers_merge(@pagy) if @pagy }
 
@@ -126,11 +126,72 @@ module Api
         else
           render json: { errors: lead.errors.full_messages }, status: :unprocessable_entity
         end
-      rescue ActiveRecord::RecordNotUnique
-        render json: { errors: ['Contact information already has a consultation request'] }, status: :unprocessable_entity
+      end
+
+      # POST /api/v1/properties/:id/leads - Public contact form on a property page
+      def property_create
+        # Honeypot: bots fill hidden fields. Pretend success without storing anything.
+        return render json: { message: 'Lead created successfully' }, status: :created if params[:website].present?
+        return render json: { error: 'Too many requests' }, status: :too_many_requests if rate_limited?
+
+        property = Property.find(params[:id])
+        lead = Lead.new(property_lead_params.merge(
+          property: property,
+          source: 'property_form',
+          interest_operation: :buy,
+          consent_at: Time.current
+        ))
+        lead.valid?
+
+        duplicate = recent_duplicate_for(lead, property)
+        return render json: { message: 'Lead created successfully', id: duplicate.id }, status: :created if duplicate
+
+        if lead.save
+          lead.record_event!('created', metadata: { source: lead.source, property_id: property.id })
+          render json: { message: 'Lead created successfully', id: lead.id }, status: :created
+        else
+          render json: { errors: lead.errors.full_messages }, status: :unprocessable_entity
+        end
       end
 
       private
+
+      DUPLICATE_WINDOW = 60.seconds
+      RATE_LIMIT_MAX = 10
+      RATE_LIMIT_WINDOW = 10.minutes
+
+      def property_lead_params
+        params.require(:lead).permit(:full_name, :email, :phone, :whatsapp_consent)
+      end
+
+      def recent_duplicate_for(lead, property)
+        conditions = []
+        values = {}
+        if lead.email_normalized.present?
+          conditions << 'email_normalized = :email'
+          values[:email] = lead.email_normalized
+        end
+        if lead.phone_e164.present?
+          conditions << 'phone_e164 = :phone'
+          values[:phone] = lead.phone_e164
+        end
+        return nil if conditions.empty?
+
+        Lead.where(property_id: property.id, source: 'property_form')
+            .where('created_at > ?', DUPLICATE_WINDOW.ago)
+            .where(conditions.join(' OR '), values)
+            .first
+      end
+
+      def rate_limited?
+        key = "property_lead_rate:#{request.remote_ip}"
+        count = Rails.cache.increment(key, 1, expires_in: RATE_LIMIT_WINDOW)
+        if count.nil?
+          Rails.cache.write(key, 1, expires_in: RATE_LIMIT_WINDOW)
+          count = 1
+        end
+        count > RATE_LIMIT_MAX
+      end
 
       def set_lead
         @lead = Lead.find(params[:id])
