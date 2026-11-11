@@ -29,6 +29,7 @@ Rails.application.routes.draw do
           # Auth: Authorization: Bearer <PROPERTY_INTAKE_TOKEN>, not a user session.
           post 'intake', to: 'properties#intake'
           post 'generate_content', to: 'properties#generate_content'
+          get 'by_code/:code', to: 'properties#by_code', as: 'by_code'
         end
 
         # PDF generation routes
@@ -41,6 +42,7 @@ Rails.application.routes.draw do
       resources :statuses
       resources :listing_types
       resources :states
+      get 'public_paths', to: 'public_paths#index'
       resources :cities
 
       resources :leads, only: %i[index show create update] do

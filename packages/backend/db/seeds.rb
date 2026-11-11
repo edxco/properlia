@@ -162,12 +162,25 @@ puebla_cities = [
 ]
 
 puebla_cities.each do |c|
-  City.find_or_create_by!(id: c[:id]) do |city|
-    city.state_id = PUEBLA_STATE_ID
-    city.name = c[:name]
-    city.es_name = c[:es_name]
-    city.code = c[:code]
+  next if City.exists?(id: c[:id])
+
+  targets = [c[:name], c[:es_name]].map { |n| LocationResolver.normalize(n) }
+  existing = City.where(state_id: PUEBLA_STATE_ID).find do |city|
+    targets.include?(LocationResolver.normalize(city.name)) || targets.include?(LocationResolver.normalize(city.es_name))
   end
+
+  if existing
+    puts "City #{c[:name]} already exists with id #{existing.id}, skipping"
+    next
+  end
+
+  City.create!(
+    id: c[:id],
+    state_id: PUEBLA_STATE_ID,
+    name: c[:name],
+    es_name: c[:es_name],
+    code: City.exists?(code: c[:code]) ? nil : c[:code]
+  )
 end
 puts "Cities ready: #{City.where(state_id: PUEBLA_STATE_ID).count}"
 

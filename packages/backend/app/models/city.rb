@@ -1,4 +1,6 @@
 class City < ApplicationRecord
+  include PublicSlugs
+
   belongs_to :state
   has_many :properties, dependent: :restrict_with_error
   has_many :leads, dependent: :restrict_with_error
@@ -9,8 +11,13 @@ class City < ApplicationRecord
   validates :name, presence: true, uniqueness: { scope: :state_id }
   validates :es_name, presence: true, uniqueness: { scope: :state_id }
   validates :code, presence: true, uniqueness: true, format: { with: /\A[A-Z0-9]{3}\z/ }
+  validates :slug, :slug_en, uniqueness: { scope: :state_id }
 
   private
+
+  def slug_scope
+    City.where(state_id: state_id)
+  end
 
   def assign_code
     self.code = code.to_s.strip.upcase.presence || CityCodeGenerator.generate(es_name.presence || name)

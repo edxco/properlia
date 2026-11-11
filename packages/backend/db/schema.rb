@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_11_10_120100) do
+ActiveRecord::Schema[7.0].define(version: 2026_11_11_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -50,9 +50,14 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_10_120100) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "code", limit: 3, null: false
+    t.string "slug", null: false
+    t.string "slug_en", null: false
+    t.string "previous_slugs", default: [], null: false, array: true
     t.index ["code"], name: "index_cities_on_code", unique: true
     t.index ["state_id", "es_name"], name: "index_cities_on_state_id_and_es_name", unique: true
     t.index ["state_id", "name"], name: "index_cities_on_state_id_and_name", unique: true
+    t.index ["state_id", "slug"], name: "index_cities_on_state_id_and_slug", unique: true
+    t.index ["state_id", "slug_en"], name: "index_cities_on_state_id_and_slug_en", unique: true
     t.index ["state_id"], name: "index_cities_on_state_id"
   end
 
@@ -252,8 +257,13 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_10_120100) do
     t.string "es_name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "slug", null: false
+    t.string "slug_en", null: false
+    t.string "previous_slugs", default: [], null: false, array: true
     t.index ["es_name"], name: "index_states_on_es_name", unique: true
     t.index ["name"], name: "index_states_on_name", unique: true
+    t.index ["slug"], name: "index_states_on_slug", unique: true
+    t.index ["slug_en"], name: "index_states_on_slug_en", unique: true
   end
 
   create_table "statuses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

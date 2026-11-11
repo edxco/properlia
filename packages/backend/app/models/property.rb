@@ -35,6 +35,11 @@ class Property < ApplicationRecord
 
   ON_HOLD_REMINDER_INTERVAL = 3.days
 
+  # Statuses hidden from the public site (listings, detail pages, sitemap).
+  HIDDEN_PUBLIC_STATUSES = %w[sold leased suspended expired].freeze
+
+  scope :publicly_visible, -> { where.not(status_id: Status.where(name: HIDDEN_PUBLIC_STATUSES).select(:id)) }
+
   scope :on_hold, -> { joins(:status).where(statuses: { name: Status::ON_HOLD }) }
 
   scope :on_hold_due_for_reminder, ->(now = Time.current) {

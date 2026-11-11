@@ -6,6 +6,10 @@ class LocationResolver
     new.resolve(state_name: state_name, city_name: city_name)
   end
 
+  def self.normalize(str)
+    str.to_s.unicode_normalize(:nfd).gsub(/[̀-ͯ]/, '').downcase.squish
+  end
+
   def resolve(state_name:, city_name: nil)
     state = find_state(state_name)
     return [nil, nil] unless state
@@ -26,14 +30,26 @@ class LocationResolver
     return nil if raw.blank?
 
     normalized = normalize(raw)
-    existing = state.cities.to_a.find { |c| normalize(c.name) == normalized }
-    return existing if existing
+    match_city(state, normalized) || create_city(state, raw.to_s.squish, normalized)
+  end
 
-    display_name = raw.to_s.strip.split(/\s+/).map(&:capitalize).join(' ')
+  # Concurrent intakes can race on the (state_id, name/es_name) or code unique
+  # indexes; re-read and reuse the winner, or retry once for a code collision.
+  def create_city(state, display_name, normalized, retried: false)
     state.cities.create!(name: display_name, es_name: display_name)
+  rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
+    existing = match_city(state, normalized)
+    return existing if existing
+    raise if retried
+
+    create_city(state, display_name, normalized, retried: true)
+  end
+
+  def match_city(state, normalized)
+    state.cities.reload.find { |c| normalize(c.name) == normalized || normalize(c.es_name) == normalized }
   end
 
   def normalize(str)
-    str.to_s.unicode_normalize(:nfd).gsub(/[\u0300-\u036f]/, '').downcase.strip
+    self.class.normalize(str)
   end
 end
