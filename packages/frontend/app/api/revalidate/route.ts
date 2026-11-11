@@ -1,5 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
+import { invalidatePathIndex } from "@/src/lib/pathIndex";
 
 const ALLOWED_TAGS = ["properties"];
 
@@ -16,5 +17,6 @@ export async function POST(request: NextRequest) {
   }
 
   revalidateTag(tag, { expire: 0 });
+  invalidatePathIndex();
   return NextResponse.json({ revalidated: tag });
 }

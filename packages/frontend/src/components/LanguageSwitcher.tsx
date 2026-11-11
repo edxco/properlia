@@ -1,51 +1,42 @@
 "use client";
 
+import Link from "next/link";
 import { Languages } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@properlia/shared/components/ui";
-
-const SUPPORTED_LOCALES = ["es", "en"] as const;
-type Locale = (typeof SUPPORTED_LOCALES)[number];
+import { usePathname } from "next/navigation";
+import { buttonClasses } from "@properlia/shared/components/ui";
+import { isLocale, switchLocalePath, type Locale } from "@properlia/shared/lib/routes";
 
 const LOCALE_LABELS: Record<Locale, string> = {
   en: "EN",
   es: "ES",
 };
 
+// Crawlable link to the same page in the other language. Fixed segments are
+// translated here; location and title slugs are corrected by the proxy (301).
 export default function LanguageSwitcher() {
-  const router = useRouter();
   const pathname = usePathname();
-
-  const currentLocale = (pathname.split("/")[1] as Locale) || "en";
+  const segment = pathname.split("/")[1];
+  const currentLocale: Locale = isLocale(segment) ? segment : "es";
   const nextLocale: Locale = currentLocale === "es" ? "en" : "es";
 
-  const currentLabel = LOCALE_LABELS[currentLocale];
-  const ariaLabel =
-    currentLocale === "es"
-      ? "Cambiar idioma a inglés"
-      : "Switch language to Spanish";
-
-  function switchLanguage() {
-    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=${
-      60 * 60 * 24 * 365
-    }`;
-
-    const segments = pathname.split("/");
-    segments[1] = nextLocale;
-
-    router.push(segments.join("/"));
-  }
+  const ariaLabel = currentLocale === "es" ? "Cambiar idioma a inglés" : "Switch language to Spanish";
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={switchLanguage}
+    <Link
+      href={switchLocalePath(pathname, nextLocale)}
+      hrefLang={nextLocale}
       aria-label={ariaLabel}
-      className="px-3 tracking-wide text-brand-carbon hover:bg-brand-bg hover:text-brand-navy active:bg-brand-border"
+      onClick={() => {
+        document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=${60 * 60 * 24 * 365}`;
+      }}
+      className={buttonClasses({
+        variant: "ghost",
+        size: "sm",
+        className: "px-3 tracking-wide text-brand-carbon hover:bg-brand-bg hover:text-brand-navy active:bg-brand-border",
+      })}
     >
       <Languages className="w-4 h-4" aria-hidden="true" />
-      <span>{currentLabel}</span>
-    </Button>
+      <span>{LOCALE_LABELS[currentLocale]}</span>
+    </Link>
   );
 }

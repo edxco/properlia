@@ -3,6 +3,7 @@ import Link from "next/link";
 import { buildMetadata } from "@/src/lib/metadata";
 import { enMessages as en, esMessages as es } from "@properlia/shared";
 import { PageTitle } from "@properlia/shared/components/ui";
+import { localizedPath } from "@properlia/shared/lib/routes";
 
 const dictionaries: Record<string, Record<string, string>> = { en, es };
 
@@ -12,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildMetadata(locale, "/sitemap", "sitemapMetaTitle", "sitemapMetaDescription");
+  return buildMetadata(locale, "sitemap", "sitemapMetaTitle", "sitemapMetaDescription");
 }
 
 export default async function SitemapPage({
@@ -27,30 +28,30 @@ export default async function SitemapPage({
     {
       title: dict["sitemapSectionProperties"],
       links: [
-        { label: dict["sitemapHome"], href: `/${locale}` },
-        { label: dict["sitemapAllProperties"], href: `/${locale}/properties` },
-        { label: dict["residential"], href: `/${locale}/properties?category=residential` },
-        { label: dict["commercial"], href: `/${locale}/properties?category=commercial` },
-        { label: dict["industrial"], href: `/${locale}/properties?category=industrial` },
+        { label: dict["sitemapHome"], href: localizedPath(locale, "home") },
+        { label: dict["sitemapAllProperties"], href: localizedPath(locale, "properties") },
+        { label: dict["residential"], href: localizedPath(locale, "properties", "?category=residential") },
+        { label: dict["commercial"], href: localizedPath(locale, "properties", "?category=commercial") },
+        { label: dict["industrial"], href: localizedPath(locale, "properties", "?category=industrial") },
       ],
     },
     {
       title: dict["sitemapSectionServices"],
       links: [
-        { label: dict["sitemapServices"], href: `/${locale}/services` },
-        { label: dict["sitemapBuyerConsultation"], href: `/${locale}/buyer-consultation` },
-        { label: dict["sitemapSellerConsultation"], href: `/${locale}/seller-consultation` },
+        { label: dict["sitemapServices"], href: localizedPath(locale, "services") },
+        { label: dict["sitemapBuyerConsultation"], href: localizedPath(locale, "buyerConsultation") },
+        { label: dict["sitemapSellerConsultation"], href: localizedPath(locale, "sellerConsultation") },
       ],
     },
     {
       title: dict["sitemapSectionContact"],
-      links: [{ label: dict["contact"], href: `/${locale}/contact` }],
+      links: [{ label: dict["contact"], href: localizedPath(locale, "contact") }],
     },
     {
       title: dict["sitemapSectionLegal"],
       links: [
-        { label: dict["termsAndConditions"], href: `/${locale}/terms` },
-        { label: dict["privacyNotice"], href: `/${locale}/privacy` },
+        { label: dict["termsAndConditions"], href: localizedPath(locale, "terms") },
+        { label: dict["privacyNotice"], href: localizedPath(locale, "privacy") },
       ],
     },
   ];

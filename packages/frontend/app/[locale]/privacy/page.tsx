@@ -22,7 +22,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildMetadata(locale, "/privacy", "privacyMetaTitle", "privacyMetaDescription");
+  return buildMetadata(locale, "privacy", "privacyMetaTitle", "privacyMetaDescription");
 }
 
 export default async function PrivacyPage({

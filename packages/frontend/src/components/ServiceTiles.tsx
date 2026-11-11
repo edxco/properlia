@@ -6,12 +6,14 @@ import {
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
 import { buttonClasses } from "@properlia/shared/components/ui";
+import { localizedPath, type RouteKey } from "@properlia/shared/lib/routes";
 
 interface ServiceTile {
   titleKey: string;
   subtitleKey: string;
   buttonKey: string;
-  href: string;
+  route: RouteKey;
+  query?: string;
 }
 
 const tiles: ServiceTile[] = [
@@ -19,19 +21,20 @@ const tiles: ServiceTile[] = [
     titleKey: "serviceTileBuyTitle",
     subtitleKey: "serviceTileBuySubtitle",
     buttonKey: "serviceTileBuyButton",
-    href: "/buyer-consultation",
+    route: "buyerConsultation",
   },
   {
     titleKey: "serviceTileSellTitle",
     subtitleKey: "serviceTileSellSubtitle",
     buttonKey: "serviceTileSellButton",
-    href: "/seller-consultation",
+    route: "sellerConsultation",
   },
   {
     titleKey: "serviceTileInvestTitle",
     subtitleKey: "serviceTileInvestSubtitle",
     buttonKey: "serviceTileInvestButton",
-    href: "/properties?category=investment",
+    route: "properties",
+    query: "?category=investment",
   },
 ];
 
@@ -46,7 +49,7 @@ export function ServiceTiles() {
           {tiles.map((tile, index) => (
             <Link
               key={index}
-              href={`/${locale}${tile.href}`}
+              href={localizedPath(locale, tile.route, tile.query)}
               className="
                 bg-brand-navy
                 relative overflow-hidden

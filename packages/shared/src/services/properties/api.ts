@@ -6,6 +6,7 @@ import type {
   PaginatedResponse,
   Property,
   PropertyPayload,
+  PublicPaths,
   UpdatePropertyDto,
 } from '../../types';
 
@@ -122,6 +123,16 @@ export const propertyApi = {
   // Get a single property by ID
   getById: async (id: string, cache?: CacheOptions): Promise<Property> => {
     return apiClient.get<Property>(`/properties/${id}`, false, cache);
+  },
+
+  // Get a publicly visible property by its public code (exact, case-insensitive)
+  getByCode: async (code: string, cache?: CacheOptions): Promise<Property> => {
+    return apiClient.get<Property>(`/properties/by_code/${encodeURIComponent(code)}`, false, cache);
+  },
+
+  // Index of every public property/location URL
+  getPublicPaths: async (cache?: CacheOptions): Promise<PublicPaths> => {
+    return apiClient.get<PublicPaths>('/public_paths', false, cache);
   },
 
   // Create a new property

@@ -3,6 +3,7 @@ import { enMessages, esMessages } from "@properlia/shared";
 import { PageTitle } from "@properlia/shared/components/ui";
 import type { City, State } from "@properlia/shared/types";
 import PropertiesClient from "./PropertiesClient";
+import { localizedPath } from "@properlia/shared/lib/routes";
 import { buildMetadata } from "@/src/lib/metadata";
 import { getCities, getPublicProperties, getStates } from "@/src/lib/propertyQueries";
 import {
@@ -25,21 +26,18 @@ function fetchListing(filters: Filters, page: number) {
 
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const [{ locale }, sp] = await Promise.all([params, searchParams]);
-  const metadata = buildMetadata(locale, "/properties", "propertiesMetaTitle", "propertiesMetaDescription");
-
   const filters = parseFilters(sp);
   const page = parsePage(sp);
-  if (!hasActiveFilters(filters)) {
-    if (page === 1) return metadata;
-    const canonical = `${metadata.alternates?.canonical}?page=${page}`;
-    return { ...metadata, alternates: { ...metadata.alternates, canonical } };
-  }
 
-  const result = await fetchListing(filters, page);
-  if (result && result.metadata.count === 0) {
-    return { ...metadata, robots: { index: false, follow: true } };
+  // Arbitrary filter combinations are not indexed; the canonical stays on the base listing.
+  if (hasActiveFilters(filters)) {
+    return {
+      ...buildMetadata(locale, "properties", "propertiesMetaTitle", "propertiesMetaDescription"),
+      robots: { index: false, follow: true },
+    };
   }
-  return metadata;
+  const query = page > 1 ? `?page=${page}` : "";
+  return buildMetadata(locale, "properties", "propertiesMetaTitle", "propertiesMetaDescription", query);
 }
 
 export default async function PropertiesPage({ params, searchParams }: PageProps) {
@@ -71,6 +69,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
         </header>
       }
       locale={locale}
+      listingPath={localizedPath(locale, "properties")}
       filters={filters}
       properties={result?.data ?? []}
       page={hasNoResults ? 1 : page}
