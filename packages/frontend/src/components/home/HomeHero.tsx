@@ -6,7 +6,6 @@ import ProperliaBg from "@/public/properlia-bg.webp";
 import { dictionaryFor } from "@/src/lib/metadata";
 
 const CATEGORIES = [
-  { key: "all", value: undefined },
   { key: "residential", value: "residential" },
   { key: "commercial", value: "commercial" },
   { key: "industrial", value: "industrial" },
@@ -49,7 +48,7 @@ export function HomeHero({ locale }: { locale: string }) {
               {CATEGORIES.map((category) => (
                 <li key={category.key}>
                   <Link
-                    href={localizedPath(locale, "properties", category.value ? `?category=${category.value}` : "")}
+                    href={localizedPath(locale, "properties", `?category=${category.value}`)}
                     className="inline-flex min-h-11 items-center rounded-full border border-white/70 bg-white/10 px-5 text-sm font-medium capitalize text-white shadow-pill transition-colors hover:bg-white hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-navy"
                   >
                     {dict[category.key]}
