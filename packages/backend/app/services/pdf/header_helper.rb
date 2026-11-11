@@ -87,7 +87,9 @@ module Pdf
                                end
 
           type_parts = [listing_type_text, property_type_text].compact.reject(&:blank?)
-          type_line = type_parts.map { |t| t.split.map(&:capitalize).join(' ') }.join(' | ')
+          type_parts = type_parts.map { |t| t.split.map(&:capitalize).join(' ') }
+          type_parts << @property.code if @property.code.present?
+          type_line = type_parts.join(' | ')
 
           pdf.fill_color brand_blue
           type_width = pdf.width_of(type_line, size: 9)
