@@ -2,6 +2,7 @@ import type { ComponentProps } from "react";
 import type { Property } from "@properlia/shared/types";
 import { getAbsoluteImageUrl } from "@properlia/shared/lib/api-client";
 import { localizedTitle } from "@properlia/shared/lib/propertyText";
+import { buildPropertyUrl } from "@properlia/shared/lib/slugify";
 import type { PropertyCard } from "@/components/ui";
 
 const UNKNOWN = { id: "", name: "Unknown", es_name: "Desconocido" };
@@ -11,6 +12,7 @@ export type PropertyCardProps = ComponentProps<typeof PropertyCard>;
 export function toPropertyCardProps(property: Property, locale: string): PropertyCardProps {
   return {
     id: property.id,
+    href: buildPropertyUrl(property, locale),
     title: property.title,
     displayTitle: localizedTitle(property, locale),
     property_type: property.property_type ?? UNKNOWN,

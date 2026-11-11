@@ -195,6 +195,11 @@ export default function PropertiesTable({
                       {/* Row 2: Location Details and Type Badges */}
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 text-sm">
                         <div className="flex items-center gap-3 text-brand-carbon/70 flex-wrap">
+                          {property.code && (
+                            <span className="font-medium tabular-nums tracking-wide text-brand-navy">
+                              {property.code}
+                            </span>
+                          )}
                           {property.neighborhood && (
                             <span className="font-medium">
                               {property.neighborhood}

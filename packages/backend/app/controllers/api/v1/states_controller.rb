@@ -71,7 +71,7 @@ module Api
       end
 
       def state_params
-        params.require(:state).permit(:name, :es_name)
+        params.require(:state).permit(:name, :es_name, :slug, :slug_en)
       end
     end
   end

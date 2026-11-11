@@ -7,6 +7,7 @@ import {
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
 import { cardClasses } from "@properlia/shared/components/ui";
+import { localizedPath } from "@properlia/shared/lib/routes";
 
 declare global {
   interface Window {
@@ -90,13 +91,13 @@ export default function ContactClient() {
     { labelKey: "whatsapp", href: WHATSAPP_URL, eventName: "click_whatsapp", Icon: MessageCircle, external: true },
     { labelKey: "phone", href: "tel:2215717269", eventName: "click_phone", Icon: Phone },
     { labelKey: "email", href: "mailto:lesliee.cabrera@properlia.com", eventName: "click_email", Icon: Mail },
-    { labelKey: "propertyListing", href: `/${locale}/properties`, eventName: "click_property_listing", Icon: Home },
+    { labelKey: "propertyListing", href: localizedPath(locale, "properties"), eventName: "click_property_listing", Icon: Home },
   ];
 
   const lookingToOptions = [
-    { labelKey: "lookingToBuy", href: `/${locale}/buyer-consultation`, eventName: "click_looking_to_buy" },
-    { labelKey: "lookingToSell", href: `/${locale}/seller-consultation`, eventName: "click_looking_to_sell" },
-    { labelKey: "lookingToInvest", href: `/${locale}/properties`, eventName: "click_looking_to_invest" },
+    { labelKey: "lookingToBuy", href: localizedPath(locale, "buyerConsultation"), eventName: "click_looking_to_buy" },
+    { labelKey: "lookingToSell", href: localizedPath(locale, "sellerConsultation"), eventName: "click_looking_to_sell" },
+    { labelKey: "lookingToInvest", href: localizedPath(locale, "properties"), eventName: "click_looking_to_invest" },
   ];
 
   return (

@@ -46,10 +46,10 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 rounded-card overflow-hidden" style={{ height: 440 }}>
+      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 rounded-card overflow-hidden md:h-[440px]">
         <button
           onClick={() => setLightboxIndex(0)}
-          className="relative md:col-span-2 md:row-span-2 h-56 md:h-full"
+          className="relative md:col-span-2 md:row-span-2 h-64 sm:h-80 md:h-full"
         >
           <Image
             src={preview[0]}
@@ -88,6 +88,32 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
       </div>
 
       {images.length > 1 && (
+        <div className="mt-2 grid grid-cols-3 gap-2 md:hidden">
+          {images.slice(1, 4).map((src, i) => (
+            <button
+              key={i}
+              onClick={() => setLightboxIndex(i + 1)}
+              className="relative h-24 overflow-hidden rounded-xl sm:h-32"
+            >
+              <Image
+                src={src}
+                alt={`${title} - ${i + 2}`}
+                fill
+                className="object-cover"
+                sizes="33vw"
+                unoptimized={isUnoptimized(src)}
+              />
+              {i === 2 && images.length > 4 && (
+                <div className="absolute inset-0 flex items-center justify-center bg-brand-navy/60 text-base font-medium tabular-nums text-white">
+                  +{images.length - 4}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {images.length > 1 && (
         <button
           onClick={() => setLightboxIndex(0)}
           className={buttonClasses({ variant: "secondary", size: "sm", className: "mt-3 w-full md:hidden" })}
@@ -103,7 +129,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
         >
           <button
             onClick={() => setLightboxIndex(null)}
-            className="absolute top-5 right-5 text-white/80 hover:text-white"
+            className="absolute top-5 right-5 z-10 text-white/80 hover:text-white"
             aria-label={t("propertyDetailCloseGallery")}
           >
             <X size={28} strokeWidth={1.75} />
@@ -114,7 +140,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
               e.stopPropagation();
               setLightboxIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
             }}
-            className="absolute left-4 md:left-8 text-white/80 hover:text-white"
+            className="absolute left-2 md:left-8 z-10 rounded-full bg-brand-navy/50 p-1 text-white/80 hover:text-white md:bg-transparent md:p-0"
             aria-label={t("propertyDetailPreviousImage")}
           >
             <ChevronLeft size={36} strokeWidth={1.75} />
@@ -139,7 +165,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
               e.stopPropagation();
               setLightboxIndex((i) => (i === null ? i : (i + 1) % images.length));
             }}
-            className="absolute right-4 md:right-8 text-white/80 hover:text-white"
+            className="absolute right-2 md:right-8 z-10 rounded-full bg-brand-navy/50 p-1 text-white/80 hover:text-white md:bg-transparent md:p-0"
             aria-label={t("propertyDetailNextImage")}
           >
             <ChevronRight size={36} strokeWidth={1.75} />

@@ -5,6 +5,7 @@ import {
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
 import { SectionTitle, buttonClasses } from "@properlia/shared/components/ui";
+import { localizedPath } from "@properlia/shared/lib/routes";
 
 export function MainAbout() {
   const t = useT();
@@ -24,13 +25,13 @@ export function MainAbout() {
 
           <div className="mt-12 flex flex-col sm:flex-row justify-center gap-4">
             <Link
-              href={`/${locale}/buyer-consultation`}
+              href={localizedPath(locale, "buyerConsultation")}
               className={buttonClasses({ size: "lg", className: "text-sm tracking-wider" })}
             >
               {t("mainAboutCtaPrimary")}
             </Link>
             <Link
-              href={`/${locale}/properties`}
+              href={localizedPath(locale, "properties")}
               className={buttonClasses({
                 variant: "secondary",
                 size: "lg",

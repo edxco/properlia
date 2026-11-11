@@ -19,11 +19,6 @@ module Pdf
     include Pdf::FormatHelper
     include Pdf::DisplayImageCover
 
-    RESIDENTIAL_TYPES = ['house', 'department'].freeze
-    COMMERCIAL_TYPES = ['retail space', 'doctor office', 'office'].freeze
-    INDUSTRIAL_TYPES = %w[warehouse].freeze
-    LAND_TYPES = %w[land].freeze
-
     TRANSLATIONS = {
       en: {
         title: 'Property Details',
@@ -114,16 +109,7 @@ module Pdf
     private
 
     def determine_template
-      return :residential unless @property.property_type
-
-      type_name = @property.property_type.name
-
-      return :residential if RESIDENTIAL_TYPES.include?(type_name)
-      return :commercial if COMMERCIAL_TYPES.include?(type_name)
-      return :industrial if INDUSTRIAL_TYPES.include?(type_name)
-      return :land if LAND_TYPES.include?(type_name)
-
-      :residential
+      @property.property_type&.segment || :residential
     end
 
     def generate_residential_pdf

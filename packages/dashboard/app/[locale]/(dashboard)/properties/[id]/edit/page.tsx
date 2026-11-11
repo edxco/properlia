@@ -68,6 +68,14 @@ export default function EditPropertyPage() {
         >
           ← {t("properties")}
         </Link>
+        {property.code && (
+          <span className="text-sm text-brand-gray">
+            {t("propertyCode")}{" "}
+            <span className="font-medium tabular-nums tracking-wide text-brand-navy">
+              {property.code}
+            </span>
+          </span>
+        )}
       </div>
 
       <div className="w-full">

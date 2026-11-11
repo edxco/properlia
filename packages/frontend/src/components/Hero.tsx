@@ -2,13 +2,14 @@
 
 import { TypingAnimation } from "@/components/ui/typing-animation";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   useT,
   useLocale,
 } from "@properlia/shared/components/TranslationProvider";
 import ProperliaBg from "@/public/properlia-bg.webp";
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
+import { localizedPath } from "@properlia/shared/lib/routes";
 
 const CATEGORIES = [
   { key: "all", value: undefined },
@@ -21,12 +22,6 @@ const CATEGORIES = [
 export function Hero() {
   const t = useT();
   const locale = useLocale();
-  const router = useRouter();
-
-  const handleCategoryClick = (category?: string) => {
-    const query = category ? `?category=${category}` : "";
-    router.push(`/${locale}/properties${query}`);
-  };
 
   return (
     <div id="hero-section" className="relative h-[calc(100vh-5rem)]">
@@ -60,13 +55,13 @@ export function Hero() {
 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               {CATEGORIES.map((category) => (
-                <button
+                <Link
                   key={category.key}
-                  onClick={() => handleCategoryClick(category.value)}
+                  href={localizedPath(locale, "properties", category.value ? `?category=${category.value}` : "")}
                   className="cursor-pointer rounded-full border border-white bg-white/10 px-5 py-2 text-sm font-medium text-white shadow-pill backdrop-blur-sm transition-colors hover:bg-white hover:text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-navy"
                 >
                   {capitalizeEachWord(t(category.key))}
-                </button>
+                </Link>
               ))}
             </div>
 

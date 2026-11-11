@@ -1,4 +1,17 @@
 class PropertyType < ApplicationRecord
+  SEGMENTS = {
+    residential: ['house', 'department'],
+    commercial: ['retail space', 'doctor office', 'office'],
+    industrial: ['warehouse'],
+    land: ['land']
+  }.freeze
+
+  CODE_LETTERS = { residential: 'R', commercial: 'C', industrial: 'I', land: 'T' }.freeze
+
+  def self.segment_for(type_name)
+    SEGMENTS.find { |_, names| names.include?(type_name) }&.first || :residential
+  end
+
   # Associations
   has_and_belongs_to_many :property_categories,
                           join_table: :property_categories_property_types
@@ -11,6 +24,14 @@ class PropertyType < ApplicationRecord
 
   # Callbacks
   before_save :downcase_names
+
+  def segment
+    self.class.segment_for(name)
+  end
+
+  def code_letter
+    CODE_LETTERS.fetch(segment)
+  end
 
   private
 

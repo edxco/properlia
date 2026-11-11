@@ -3,6 +3,7 @@ export * from './lib/utils';
 export * from './lib/api-client';
 export * from './lib/getBadge';
 export * from './lib/slugify';
+export * from './lib/routes';
 export * from './types';
 export * from './components';
 

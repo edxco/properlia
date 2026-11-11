@@ -19,6 +19,10 @@ const DEBOUNCE_MS = 500;
 interface PropertiesClientProps {
   header: ReactNode;
   locale: string;
+  /** Public listing path; filter changes navigate there (the proxy 301s exact location filters to geo pages). */
+  listingPath: string;
+  /** Filters implied by the URL path on geo pages, kept out of pagination links. */
+  lockedFilters?: Filters;
   filters: Filters;
   properties: Property[];
   page: number;
@@ -33,6 +37,8 @@ interface PropertiesClientProps {
 export default function PropertiesClient({
   header,
   locale,
+  listingPath,
+  lockedFilters = {},
   filters: urlFilters,
   properties,
   page,
@@ -63,7 +69,7 @@ export default function PropertiesClient({
 
   const navigate = (next: Filters) => {
     startTransition(() => {
-      router.push(`${pathname}${buildListingQuery(next)}`, { scroll: false });
+      router.push(`${listingPath}${buildListingQuery(next)}`, { scroll: false });
     });
   };
 
@@ -119,7 +125,10 @@ export default function PropertiesClient({
   const selectedState = states.find((s) => s.id === urlFilters.state_id);
   const selectedCity = cities.find((c) => c.id === urlFilters.city_id);
 
-  const pageHref = (target: number) => `${pathname}${buildListingQuery(urlFilters, target)}`;
+  const unlockedFilters = Object.fromEntries(
+    Object.entries(urlFilters).filter(([key]) => !(key in lockedFilters))
+  ) as Filters;
+  const pageHref = (target: number) => `${pathname}${buildListingQuery(unlockedFilters, target)}`;
 
   const banners = [
     {

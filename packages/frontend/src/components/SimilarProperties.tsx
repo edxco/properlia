@@ -39,7 +39,7 @@ export function SimilarProperties({
   const dict: Record<string, string> = locale === "en" ? enMessages : esMessages;
 
   return (
-    <section className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+    <section className="max-w-[1400px] mx-auto px-6 lg:px-8 py-12">
       <SectionTitle className="mb-6 text-2xl md:text-3xl">{dict.similarPropertiesTitle}</SectionTitle>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {similar.map((item) => (

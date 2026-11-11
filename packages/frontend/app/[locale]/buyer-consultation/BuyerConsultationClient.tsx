@@ -20,6 +20,7 @@ import { BuyerHero } from "./_components/BuyerHero";
 import { BuyerAdvantages } from "./_components/BuyerAdvantages";
 import { ProofStrip } from "@/src/components/consultation/ProofStrip";
 import { BuyerStepper } from "./_components/BuyerStepper";
+import { localizedPath } from "@properlia/shared/lib/routes";
 
 declare global {
   interface Window {
@@ -427,7 +428,7 @@ Phone Has WhatsApp: ${formData.phone_has_whatsapp}`,
 
             <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
-                href={`/${locale}/properties`}
+                href={localizedPath(locale, "properties")}
                 className={buttonClasses({ variant: "secondary", size: "lg", className: "text-sm" })}
               >
                 {t("buyerSuccessBrowseCta")}

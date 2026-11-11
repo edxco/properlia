@@ -9,7 +9,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildMetadata(locale, "/seller-consultation", "sellerMetaTitle", "sellerMetaDescription");
+  return buildMetadata(locale, "sellerConsultation", "sellerMetaTitle", "sellerMetaDescription");
 }
 
 export default function SellPage() {
