@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { IconArrowRight } from "@tabler/icons-react";
-import { Container, Section } from "@properlia/shared/components/ui";
+import { IconArrowUpRight } from "@tabler/icons-react";
+import { Container, Eyebrow, Section, SectionTitle } from "@properlia/shared/components/ui";
 import { homeZones } from "@/src/lib/geo";
 import { dictionaryFor } from "@/src/lib/metadata";
-import { SectionHeader } from "./SectionHeader";
 
 export async function HomeZones({ locale }: { locale: string }) {
   const dict = dictionaryFor(locale);
@@ -12,29 +11,37 @@ export async function HomeZones({ locale }: { locale: string }) {
   return (
     <Section tone="pale">
       <Container>
-        <SectionHeader eyebrow={dict.homeZonesEyebrow} title={dict.homeZonesTitle} intro={dict.homeZonesIntro} className="mb-12" />
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-16">
+          <div className="lg:col-span-7">
+            <Eyebrow>{dict.homeZonesEyebrow}</Eyebrow>
+            <SectionTitle className="mt-3">{dict.homeZonesTitle}</SectionTitle>
+          </div>
+          <p className="text-base text-brand-carbon/80 md:text-lg lg:col-span-5">{dict.homeZonesIntro}</p>
+        </div>
 
-        <ul className="grid border-t border-brand-navy/15 md:grid-cols-2 md:gap-x-16">
+        <ul className="mt-14 border-t border-brand-navy/20">
           {zones.map((zone) => (
             <li
               key={zone.slug}
-              className="group relative flex flex-col gap-3 border-b border-brand-navy/15 py-8 transition-colors"
+              className="group relative grid gap-3 border-b border-brand-navy/20 py-8 transition-colors hover:bg-white/50 md:grid-cols-12 md:items-center md:gap-8 md:px-4"
             >
-              <h3 className="font-display text-2xl font-medium text-brand-navy md:text-3xl">{zone.label}</h3>
-              <p className="max-w-md text-brand-carbon/80">{dict[zone.textKey]}</p>
-              {zone.href && (
-                <div className="mt-2 flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <h3 className="font-display text-4xl font-medium text-brand-navy md:col-span-5 md:text-5xl">{zone.label}</h3>
+              <div className="md:col-span-5">
+                <p className="max-w-md text-brand-carbon/80">{dict[zone.textKey]}</p>
+                {zone.href && (
                   <Link
                     href={zone.href}
-                    className="inline-flex items-center gap-1.5 font-medium text-brand-blue underline-offset-4 after:absolute after:inset-0 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                    className="mt-3 inline-flex items-start gap-1 text-sm font-medium text-brand-blue underline-offset-4 after:absolute after:inset-0 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                   >
                     {dict.homeZoneLink} {zone.label}
-                    <IconArrowRight size={16} stroke={1.75} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+                    <IconArrowUpRight size={16} stroke={1.75} aria-hidden="true" className="mt-0.5 shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none" />
                   </Link>
-                  <span className="shrink-0 tabular-nums text-brand-carbon/70">
-                    {zone.count} {zone.count === 1 ? dict.homeZoneCountOne : dict.homeZoneCountMany}
-                  </span>
-                </div>
+                )}
+              </div>
+              {zone.href && (
+                <p className="text-sm tabular-nums text-brand-carbon/70 md:col-span-2 md:text-right">
+                  {zone.count} {zone.count === 1 ? dict.homeZoneCountOne : dict.homeZoneCountMany}
+                </p>
               )}
             </li>
           ))}
