@@ -1,4 +1,4 @@
-import { apiClient } from '../../lib/api-client';
+import { apiClient, type CacheOptions } from '../../lib/api-client';
 
 export interface GeneralInfo {
   phone: string;
@@ -24,8 +24,8 @@ export interface UpdateGeneralInfoDto {
 
 export const generalInfoApi = {
   // Get general info (singleton)
-  get: async (): Promise<GeneralInfo> => {
-    return apiClient.get<GeneralInfo>('/general_info', true);
+  get: async (cache?: CacheOptions): Promise<GeneralInfo> => {
+    return apiClient.get<GeneralInfo>('/general_info', true, cache);
   },
 
   // Update general info
