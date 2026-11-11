@@ -14,13 +14,13 @@ import {
 import { parsePropertyCode, propertyPathFromSlug } from "@properlia/shared/lib/slugify";
 import { findCity, findState, getPathIndex } from "@/src/lib/pathIndex";
 
-// Public URLs are localized (/es/propiedades, /es/contacto…) while app/[locale]/ keeps
-// one folder per page. This proxy:
-//  - 301s every outdated URL (no locale, English segments under /es, legacy property
+// Public URLs are localized and Spanish lives at the root (/propiedades, /contacto; English
+// under /en/properties…) while app/[locale]/ keeps one folder per page. This proxy:
+//  - 301s every outdated URL (/es/... prefix, English segments without /en, legacy property
 //    and filter URLs, old title/location slugs, uppercase) to its final URL in one hop;
-//  - rewrites public localized segments to the internal folders.
+//  - rewrites public localized URLs to the internal app/[locale]/ folders.
+// resolve() works with locale-prefixed paths; toPublicPath() drops the Spanish prefix.
 
-const LOCALE_COOKIE = "NEXT_LOCALE";
 const LEGACY_GEO_PARAMS = new Set(["state_id", "city_id", "type", "page"]);
 
 interface Resolution {
@@ -31,17 +31,8 @@ interface Resolution {
   internalPath?: string;
 }
 
-function detectLocale(req: NextRequest): Locale {
-  const cookie = req.cookies.get(LOCALE_COOKIE)?.value;
-  if (isLocale(cookie)) return cookie;
-
-  const header = req.headers.get("accept-language") ?? "";
-  for (const lang of header.split(",")) {
-    const code = lang.trim().slice(0, 2).toLowerCase();
-    if (isLocale(code)) return code;
-  }
-  return DEFAULT_LOCALE;
-}
+const toPublicPath = (locale: Locale, path: string): string =>
+  locale === DEFAULT_LOCALE ? path.slice(`/${locale}`.length) || "/" : path;
 
 const unchanged = (locale: Locale, rest: string[]): Resolution => ({
   publicPath: `/${[locale, ...rest].join("/")}`,
@@ -146,24 +137,19 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const locale: Locale = hasLocale ? (segments[0] as Locale) : detectLocale(req);
+  const locale: Locale = hasLocale ? (segments[0] as Locale) : DEFAULT_LOCALE;
   const rest = hasLocale ? segments.slice(1) : segments;
   const resolution = await resolve(locale, rest, searchParams);
 
-  const target = `${resolution.publicPath}${resolution.search ?? search}`;
+  const target = `${toPublicPath(locale, resolution.publicPath)}${resolution.search ?? search}`;
   if (target !== `${pathname}${search}`) {
     return NextResponse.redirect(new URL(target, req.url), 301);
   }
 
-  const response =
-    resolution.internalPath && resolution.internalPath !== pathname
-      ? NextResponse.rewrite(new URL(`${resolution.internalPath}${search}`, req.url))
-      : NextResponse.next();
-
-  if (req.cookies.get(LOCALE_COOKIE)?.value !== locale) {
-    response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365 });
-  }
-  return response;
+  const internalPath = resolution.internalPath ?? resolution.publicPath;
+  return internalPath !== pathname
+    ? NextResponse.rewrite(new URL(`${internalPath}${search}`, req.url))
+    : NextResponse.next();
 }
 
 export const config = {

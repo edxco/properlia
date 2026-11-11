@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Languages } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { buttonClasses } from "@properlia/shared/components/ui";
-import { isLocale, switchLocalePath, type Locale } from "@properlia/shared/lib/routes";
+import { switchLocalePath, type Locale } from "@properlia/shared/lib/routes";
 
 const LOCALE_LABELS: Record<Locale, string> = {
   en: "EN",
@@ -16,7 +16,7 @@ const LOCALE_LABELS: Record<Locale, string> = {
 export default function LanguageSwitcher() {
   const pathname = usePathname();
   const segment = pathname.split("/")[1];
-  const currentLocale: Locale = isLocale(segment) ? segment : "es";
+  const currentLocale: Locale = segment === "en" ? "en" : "es";
   const nextLocale: Locale = currentLocale === "es" ? "en" : "es";
 
   const ariaLabel = currentLocale === "es" ? "Cambiar idioma a inglés" : "Switch language to Spanish";
@@ -26,9 +26,6 @@ export default function LanguageSwitcher() {
       href={switchLocalePath(pathname, nextLocale)}
       hrefLang={nextLocale}
       aria-label={ariaLabel}
-      onClick={() => {
-        document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=${60 * 60 * 24 * 365}`;
-      }}
       className={buttonClasses({
         variant: "ghost",
         size: "sm",

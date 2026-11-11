@@ -54,11 +54,19 @@ export function findOperationByFilter(filter: string | undefined): OperationKey 
   );
 }
 
-/** /{locale}/{segment}{query}, e.g. localizedPath('es', 'contact') => /es/contacto */
-export function localizedPath(locale: string, key: RouteKey, query = ''): string {
+/** Spanish (default locale) lives at the domain root; every other locale is prefixed. */
+export function localePrefix(locale: string): string {
   const loc = toLocale(locale);
-  const segment = ROUTES[key][loc];
-  return `/${loc}${segment ? `/${segment}` : ''}${query}`;
+  return loc === DEFAULT_LOCALE ? '' : `/${loc}`;
+}
+
+/** localePrefix + path; never empty ('/' for the Spanish home). */
+const withPrefix = (locale: string, path: string): string => `${localePrefix(locale)}${path}` || '/';
+
+/** /{segment}{query} in Spanish, /en/{segment}{query} in English, e.g. localizedPath('es', 'contact') => /contacto */
+export function localizedPath(locale: string, key: RouteKey, query = ''): string {
+  const segment = ROUTES[key][toLocale(locale)];
+  return `${withPrefix(locale, segment ? `/${segment}` : '')}${query}`;
 }
 
 export function routePaths(key: RouteKey): LocalizedPaths {
@@ -73,7 +81,7 @@ export interface SluggedLocation {
 export const locationSlug = (location: SluggedLocation, locale: string): string =>
   (toLocale(locale) === 'en' ? location.slug_en : location.slug) || location.slug || '';
 
-/** /{locale}/{state}[/{city}[/{operation}]] */
+/** /{state}[/{city}[/{operation}]], prefixed with the locale when it is not Spanish */
 export function geoPath(
   locale: string,
   state: SluggedLocation,
@@ -81,12 +89,12 @@ export function geoPath(
   operation?: OperationKey | null
 ): string {
   const loc = toLocale(locale);
-  const parts = [loc, locationSlug(state, loc)];
+  const parts = [locationSlug(state, loc)];
   if (city) {
     parts.push(locationSlug(city, loc));
     if (operation) parts.push(OPERATIONS[operation][loc]);
   }
-  return `/${parts.join('/')}`;
+  return withPrefix(loc, `/${parts.join('/')}`);
 }
 
 export function geoPaths(
@@ -104,14 +112,13 @@ export function geoPaths(
 export function switchLocalePath(pathname: string, target: Locale): string {
   const segments = pathname.split('/').filter(Boolean);
   if (isLocale(segments[0])) segments.shift();
-  if (segments.length === 0) return `/${target}`;
 
-  const route = findRouteBySegment(segments[0]);
+  const route = segments[0] ? findRouteBySegment(segments[0]) : undefined;
   if (route) {
     segments[0] = ROUTES[route][target];
   } else if (segments.length === 3) {
     const operation = findOperationBySegment(segments[2]);
     if (operation) segments[2] = OPERATIONS[operation][target];
   }
-  return `/${[target, ...segments].filter(Boolean).join('/')}`;
+  return withPrefix(target, segments.length ? `/${segments.join('/')}` : '');
 }
