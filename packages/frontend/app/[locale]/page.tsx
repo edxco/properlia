@@ -7,11 +7,14 @@ import { HomeReviews } from "@/src/components/home/HomeReviews";
 import { HomeServices } from "@/src/components/home/HomeServices";
 import { HomeTypes } from "@/src/components/home/HomeTypes";
 import { HomeZones } from "@/src/components/home/HomeZones";
+import { JsonLdScripts } from "@/src/lib/jsonLd";
+import { homeWebPageJsonLd } from "@/src/lib/structuredData";
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   return (
     <>
+      <JsonLdScripts data={[homeWebPageJsonLd(locale)]} />
       <HomeHero locale={locale} />
       <HomeFeatured locale={locale} />
       <HomeTypes locale={locale} />
