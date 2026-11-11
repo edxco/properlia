@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_11_04_120000) do
+ActiveRecord::Schema[7.0].define(version: 2026_11_10_120100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -49,6 +49,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_120000) do
     t.string "es_name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "code", limit: 3, null: false
+    t.index ["code"], name: "index_cities_on_code", unique: true
     t.index ["state_id", "es_name"], name: "index_cities_on_state_id_and_es_name", unique: true
     t.index ["state_id", "name"], name: "index_cities_on_state_id_and_name", unique: true
     t.index ["state_id"], name: "index_cities_on_state_id"
@@ -171,7 +173,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_04_120000) do
     t.uuid "city_id"
     t.datetime "on_hold_since"
     t.datetime "on_hold_reminded_at"
+    t.bigserial "code_number", null: false
+    t.string "code", null: false
     t.index ["city_id"], name: "index_properties_on_city_id"
+    t.index ["code"], name: "index_properties_on_code", unique: true
+    t.index ["code_number"], name: "index_properties_on_code_number", unique: true
     t.index ["featured"], name: "index_properties_on_featured"
     t.index ["images"], name: "index_properties_on_images", using: :gin
     t.index ["listing_type_id"], name: "index_properties_on_listing_type_id"

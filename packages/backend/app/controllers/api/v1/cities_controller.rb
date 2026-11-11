@@ -74,7 +74,7 @@ module Api
       end
 
       def city_params
-        params.require(:city).permit(:name, :es_name, :state_id)
+        params.require(:city).permit(:name, :es_name, :state_id, :code)
       end
     end
   end

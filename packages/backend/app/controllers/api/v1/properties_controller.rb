@@ -82,11 +82,11 @@ module Api
                                  .where('LOWER(property_types.name) = ?', params[:property_type_name].downcase)
         end
 
-        # Text search on title, description, address, state, city, and neighborhood
+        # Text search on code, title, description, address, state, city, and neighborhood
         if params[:search].present?
           search_term = "%#{params[:search].downcase}%"
           properties = properties.left_joins(:state, :city).where(
-            'LOWER(properties.title) LIKE :q OR LOWER(properties.description) LIKE :q OR ' \
+            'LOWER(properties.code) LIKE :q OR LOWER(properties.title) LIKE :q OR LOWER(properties.description) LIKE :q OR ' \
             'LOWER(properties.address) LIKE :q OR LOWER(properties.neighborhood) LIKE :q OR ' \
             'LOWER(states.name) LIKE :q OR LOWER(states.es_name) LIKE :q OR ' \
             'LOWER(cities.name) LIKE :q OR LOWER(cities.es_name) LIKE :q',

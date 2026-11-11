@@ -43,6 +43,9 @@ class Property < ApplicationRecord
   }
 
   before_save :track_on_hold_status, if: :will_save_change_to_status_id?
+  before_create :assign_code
+
+  attr_readonly :code, :code_number
 
   def on_hold?
     status&.name == Status::ON_HOLD
@@ -61,6 +64,15 @@ class Property < ApplicationRecord
   validate :acceptable_attachments
 
   private
+
+  def assign_code
+    return if code.present?
+
+    self.code_number ||= PropertyCodeGenerator.next_number
+    self.code = PropertyCodeGenerator.format_code(
+      city_code: city&.code, type_letter: property_type.code_letter, number: code_number
+    )
+  end
 
   def track_on_hold_status
     self.on_hold_since = on_hold? ? Time.current : nil
