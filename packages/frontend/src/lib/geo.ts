@@ -1,4 +1,4 @@
-import { OPERATIONS, findOperationBySegment, geoPath, geoPaths, type LocalizedPaths, type OperationKey } from "@properlia/shared/lib/routes";
+import { OPERATIONS, findOperationBySegment, geoPath, geoPaths, localePrefix, type LocalizedPaths, type OperationKey } from "@properlia/shared/lib/routes";
 import type { PublicLocationPath, PublicPaths } from "@properlia/shared/types";
 import { matchesSlug } from "./pathIndex";
 import { getPublicPaths } from "./propertyQueries";
@@ -56,7 +56,7 @@ export async function resolveGeo(
   const operation = operationSlug ? findOperationBySegment(operationSlug) ?? null : null;
   if (operationSlug && !operation) return null;
 
-  const requested = `/${[locale, stateSlug, citySlug, operationSlug].filter(Boolean).join("/")}`;
+  const requested = `${localePrefix(locale)}/${[stateSlug, citySlug, operationSlug].filter(Boolean).join("/")}`;
   return {
     state,
     city,
