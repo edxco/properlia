@@ -45,6 +45,7 @@ export interface PropertyFeaturePayload {
 
 export interface Property {
   id: string;
+  code: string;
   featured: boolean;
   exclusive_listing: boolean;
   title: string;
@@ -92,6 +93,7 @@ export interface State extends CommonEntity {}
 
 export interface City extends CommonEntity {
   state_id: string;
+  code?: string;
 }
 
 export interface PropertyPayload {

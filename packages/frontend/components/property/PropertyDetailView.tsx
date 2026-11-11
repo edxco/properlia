@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bed, Bath, DoorOpen, Car, Home, Trees } from "lucide-react";
+import { Bed, Bath, DoorOpen, Car, Home, Trees, Copy, Check } from "lucide-react";
 import type { Property } from "@properlia/shared/types";
 import { getAbsoluteImageUrl } from "@properlia/shared";
 import { useT } from "@properlia/shared/components/TranslationProvider";
@@ -27,6 +27,17 @@ export const PropertyDetailView = ({
   const t = useT();
   const isEs = locale === "es";
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(property.code);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch {
+      setCodeCopied(false);
+    }
+  };
 
   const label = (entity: { name: string; es_name: string }) =>
     (isEs && entity.es_name) || entity.name;
@@ -79,6 +90,21 @@ export const PropertyDetailView = ({
           <span className="text-sm text-brand-gray">MXN</span>
         </div>
         {property.address && <p className="mt-2 text-brand-carbon/70">{property.address}</p>}
+        {property.code && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-brand-gray">
+            <span>{t("propertyCode")}</span>
+            <span className="font-medium tabular-nums tracking-wide text-brand-navy">{property.code}</span>
+            <button
+              type="button"
+              onClick={copyCode}
+              aria-label={codeCopied ? t("propertyCodeCopied") : t("propertyCodeCopy")}
+              title={codeCopied ? t("propertyCodeCopied") : t("propertyCodeCopy")}
+              className="inline-flex size-7 items-center justify-center rounded-full text-brand-gray transition-colors hover:bg-brand-pale hover:text-brand-blue"
+            >
+              {codeCopied ? <Check size={16} strokeWidth={1.75} /> : <Copy size={16} strokeWidth={1.75} />}
+            </button>
+          </div>
+        )}
       </header>
 
       <PropertyGallery images={images} title={title} />

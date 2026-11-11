@@ -527,5 +527,8 @@
   "propertyDetailSeeAllPhotos": "See all {count} photos",
   "propertyDetailCloseGallery": "Close",
   "propertyDetailPreviousImage": "Previous image",
-  "propertyDetailNextImage": "Next image"
+  "propertyDetailNextImage": "Next image",
+  "propertyCode": "Code",
+  "propertyCodeCopy": "Copy code",
+  "propertyCodeCopied": "Code copied"
 }
