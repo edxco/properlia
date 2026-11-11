@@ -108,7 +108,6 @@ export default async function PropertyPage({ params }: PageProps) {
         locale={locale}
         title={localizedTitle(property, locale)}
         description={localizedDescription(property, locale)}
-        breadcrumbs={buildPropertyBreadcrumbs(property, locale)}
       />
       <SimilarProperties property={property} pool={pool} locale={locale} />
     </>
