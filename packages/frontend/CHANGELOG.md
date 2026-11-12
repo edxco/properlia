@@ -4,6 +4,11 @@ All notable changes to the public website. Newest first. Format: [Keep a Changel
 
 ## [Unreleased]
 
+### 2026-11-11
+
+#### Added
+- Property contact form now creates a lead: it shows a success or error message, blocks double submits, and remembers name, email and phone for 15 days with a "Not you?" action to clear them.
+
 ## [1.0.0] - 2026-11-11
 
 First tracked version: everything shipped from the project start (2025-11-10) until 2026-11-11.

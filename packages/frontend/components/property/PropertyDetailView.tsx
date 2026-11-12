@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import { Bed, Bath, DoorOpen, Car, Home, Trees, Copy, Check, MapPin, Phone, MessageCircle } from "lucide-react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Bed, Bath, DoorOpen, Car, Home, Trees, Copy, Check, MapPin, Phone, MessageCircle, X } from "lucide-react";
 import type { Property } from "@properlia/shared/types";
 import { capitalizeFirstWord, getAbsoluteImageUrl } from "@properlia/shared";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -18,6 +19,8 @@ import {
 } from "@properlia/shared/components/ui";
 import { capitalizeEachWord } from "@/lib/utils/capitalizeEachWord";
 import { useGeneralInfo } from "@/src/services/general-info/queries";
+import { useCreatePropertyLead } from "@/src/services/leads/mutations";
+import { useContactPrefill } from "@/src/lib/useContactPrefill";
 import { PropertyGallery } from "./PropertyGallery";
 
 interface PropertyDetailViewProps {
@@ -47,6 +50,21 @@ export const PropertyDetailView = ({
     whatsappConsent: false,
   });
   const [contactErrors, setContactErrors] = useState<{ name?: string; contact?: string }>({});
+  const [honeypot, setHoneypot] = useState("");
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const submitLock = useRef(false);
+  const createLead = useCreatePropertyLead(property.id);
+  const { saved: savedContact, save: saveContact, clear: clearContact } = useContactPrefill();
+
+  useEffect(() => {
+    if (!savedContact) return;
+    setContactForm((f) => ({
+      ...f,
+      name: f.name || savedContact.name,
+      email: f.email || savedContact.email,
+      phone: f.phone || savedContact.phone,
+    }));
+  }, [savedContact]);
 
   const handleContactSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,16 +76,35 @@ export const PropertyDetailView = ({
     setContactErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    const payload = {
+    if (submitLock.current) return;
+    submitLock.current = true;
+
+    const values = {
       name: contactForm.name.trim(),
-      email: contactForm.email.trim() || null,
-      phone: contactForm.phone.trim() || null,
-      whatsapp_consent: contactForm.whatsappConsent,
-      property_url: pageUrl,
-      property_code: property.code,
-      property_title: title,
+      email: contactForm.email.trim(),
+      phone: contactForm.phone.trim(),
     };
-    void payload;
+
+    createLead.mutate(
+      {
+        full_name: values.name,
+        email: values.email || undefined,
+        phone: values.phone || undefined,
+        whatsapp_consent: contactForm.whatsappConsent,
+        website: honeypot || undefined,
+      },
+      {
+        onSuccess: () => saveContact(values),
+        onSettled: () => {
+          submitLock.current = false;
+        },
+      }
+    );
+  };
+
+  const handleNotYou = () => {
+    clearContact();
+    setContactForm({ name: "", email: "", phone: "", whatsappConsent: false });
   };
 
   const copyCode = async () => {
@@ -257,7 +294,38 @@ export const PropertyDetailView = ({
         <aside className="lg:col-span-1">
           <Card padding="none" className="p-6 lg:sticky lg:top-24">
             <CardTitle className="mb-4">{t("contactTitle")}</CardTitle>
+            {createLead.isSuccess ? (
+              <Alert tone="success">{t("propertyContactSuccess")}</Alert>
+            ) : (
             <form onSubmit={handleContactSubmit} noValidate className="flex flex-col gap-4">
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+              />
+              {savedContact && !noticeDismissed && (
+                <Alert tone="info" className="flex items-start justify-between gap-2 py-3">
+                  <p>
+                    {t("propertyContactPrefillNotice")}{" "}
+                    <button type="button" onClick={handleNotYou} className="underline">
+                      {t("propertyContactNotYou")}
+                    </button>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setNoticeDismissed(true)}
+                    aria-label={t("propertyContactDismissNotice")}
+                    className="shrink-0"
+                  >
+                    <X size={16} strokeWidth={1.75} />
+                  </button>
+                </Alert>
+              )}
               <Field label={t("name")} htmlFor="property-contact-name" required error={contactErrors.name}>
                 <Input
                   id="property-contact-name"
@@ -300,10 +368,12 @@ export const PropertyDetailView = ({
                 />
                 {t("propertyContactWhatsappConsent")}
               </label>
-              <Button type="submit" className="w-full">
-                {t("propertyDetailContact")}
+              {createLead.isError && <Alert tone="danger">{t("propertyContactError")}</Alert>}
+              <Button type="submit" className="w-full" disabled={createLead.isPending}>
+                {createLead.isPending ? t("propertyContactSending") : t("propertyDetailContact")}
               </Button>
             </form>
+            )}
 
             {(generalInfo?.phone || whatsappHref) && (
               <div className="mt-4 flex flex-col gap-4 lg:gap-2 border-t border-brand-border pt-4">
