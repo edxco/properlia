@@ -1,16 +1,11 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import ProperliaLogo from "@/public/properlia.png";
 import { Mail, Smartphone, MessageCircle } from "lucide-react";
-import {
-  useT,
-  useLocale,
-} from "@properlia/shared/components/TranslationProvider";
-import { useGeneralInfo } from "@/src/services/general-info/queries";
 import { localizedPath } from "@properlia/shared/lib/routes";
 import type { GeoLink } from "@/src/lib/geo";
+import { getGeneralInfo, whatsappUrl } from "@/src/lib/generalInfo";
+import { dictionaryFor } from "@/src/lib/metadata";
 
 const LinkedinIcon = () => (
   <svg
@@ -60,11 +55,12 @@ const formatPhone = (number: string) => {
   return number.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
 };
 
-export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
-  const t = useT();
-  const locale = useLocale();
+export async function Footer({ locale, cityLinks = [] }: { locale: string; cityLinks?: GeoLink[] }) {
+  const dict = dictionaryFor(locale);
+  const t = (key: string) => dict[key] ?? key;
   const currentYear = new Date().getFullYear();
-  const { data: generalInfo } = useGeneralInfo();
+  const generalInfo = await getGeneralInfo();
+  const whatsapp = whatsappUrl(generalInfo?.whatsapp);
 
   return (
     <footer className="text-white flex flex-col">
@@ -73,16 +69,16 @@ export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
             {/* Logo and Company Info */}
             <div className="space-y-4 lg:col-span-2">
-              <Link href={localizedPath(locale, "home")} aria-label="Properlia Home">
+              <Link href={localizedPath(locale, "home")} aria-label="Properlia">
                 <Image
                   src={ProperliaLogo}
-                  alt="Properlia - Real Estate"
+                  alt="Properlia"
                   width={160}
                   className="brightness-0 invert"
                 />
               </Link>
               <p className="text-white/80 text-sm leading-relaxed mt-2">
-                {t("properliaBriefTitle")}
+                {t("footerAbout")}
               </p>
               <div className="flex gap-4 pt-2">
                 {generalInfo?.linkedin && (
@@ -133,7 +129,7 @@ export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
             </div>
 
             {/* Properties by Type */}
-            <nav aria-label="Properties by type" className="hidden md:block text-right">
+            <nav aria-label={t("properties")} className="md:text-right">
               <h3 className="font-display font-medium text-lg mb-4">{t("properties")}</h3>
               <ul className="space-y-2">
                 <li>
@@ -165,7 +161,7 @@ export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
 
             {/* Cities with the most listings (server-rendered links to geo pages) */}
             {cityLinks.length > 0 && (
-              <nav aria-label={t("geoCitiesTitle")} className="hidden md:block text-right">
+              <nav aria-label={t("geoCitiesTitle")} className="md:text-right">
                 <h3 className="font-display font-medium text-lg mb-4">{t("geoCitiesTitle")}</h3>
                 <ul className="space-y-2">
                   {cityLinks.map((city) => (
@@ -180,7 +176,7 @@ export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
             )}
 
             {/* Services */}
-            <nav aria-label="Services" className="hidden md:block text-right">
+            <nav aria-label={t("services")} className="md:text-right">
               <h3 className="font-display font-medium text-lg mb-4">{t("services")}</h3>
               <ul className="space-y-2">
                 <li>
@@ -211,28 +207,30 @@ export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
             </nav>
 
             {/* Contact */}
-            <div className="text-center md:text-right">
+            <div className="md:text-right">
               <h3 className="font-display font-medium text-lg mb-4">{t("contact")}</h3>
               <address className="not-italic space-y-2 text-sm text-white/80">
-                {generalInfo?.whatsapp && (
+                {generalInfo?.whatsapp && whatsapp && (
                   <p>
                     <a
-                      href={`mailto:${generalInfo.whatsapp}`}
-                      className="flex justify-center md:justify-end content-center items-center hover:text-white transition-colors"
+                      href={whatsapp}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex md:justify-end content-center items-center hover:text-white transition-colors"
                     >
                       {formatPhone(generalInfo.whatsapp)}
-                      <MessageCircle className="h-4 w-4 ml-2" />
+                      <MessageCircle aria-hidden="true" className="h-4 w-4 ml-2" />
                     </a>
                   </p>
                 )}
                 {generalInfo?.phone && (
                   <p>
                     <a
-                      href={`tel:${generalInfo.phone}`}
-                      className="flex justify-center md:justify-end content-center items-center hover:text-white transition-colors"
+                      href={`tel:${generalInfo.phone.replace(/[^\d+]/g, "")}`}
+                      className="flex md:justify-end content-center items-center hover:text-white transition-colors"
                     >
                       {formatPhone(generalInfo.phone)}
-                      <Smartphone className="h-4 w-4 ml-2" />
+                      <Smartphone aria-hidden="true" className="h-4 w-4 ml-2" />
                     </a>
                   </p>
                 )}
@@ -240,10 +238,10 @@ export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
                   <p>
                     <a
                       href={`mailto:${generalInfo.email_contact}`}
-                      className="flex justify-center md:justify-end content-center items-center text-xs hover:text-white transition-colors"
+                      className="flex md:justify-end content-center items-center text-xs hover:text-white transition-colors"
                     >
                       {generalInfo.email_contact}
-                      <Mail className="h-4 w-4 ml-2" />
+                      <Mail aria-hidden="true" className="h-4 w-4 ml-2" />
                     </a>
                   </p>
                 )}
@@ -268,12 +266,12 @@ export function Footer({ cityLinks = [] }: { cityLinks?: GeoLink[] }) {
                 {t("builtWithLove")}
               </a>
             </div>
-            <nav aria-label="Legal">
-              <div className="text-xs text-right font-normal text-white/70 mb-2">
+            <nav aria-label={t("footerLegalNav")}>
+              <div className="text-xs md:text-right font-normal text-white/70 mb-2">
                 Torre Ejecutiva JV II, Atlixcáyotl 5208-piso 15. San Bernardino
                 Tlaxcalancingo, Pue.
               </div>
-              <div className="flex justify-end gap-4 text-right text-xs">
+              <div className="flex gap-4 text-xs md:justify-end md:text-right">
                 <Link
                   href={localizedPath(locale, "terms")}
                   className="text-white/70 hover:text-white transition-colors"

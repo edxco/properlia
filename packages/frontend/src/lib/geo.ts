@@ -1,4 +1,4 @@
-import { OPERATIONS, findOperationBySegment, geoPath, geoPaths, type LocalizedPaths, type OperationKey } from "@properlia/shared/lib/routes";
+import { OPERATIONS, findOperationBySegment, geoPath, geoPaths, localePrefix, type LocalizedPaths, type OperationKey } from "@properlia/shared/lib/routes";
 import type { PublicLocationPath, PublicPaths } from "@properlia/shared/types";
 import { matchesSlug } from "./pathIndex";
 import { getPublicPaths } from "./propertyQueries";
@@ -56,7 +56,7 @@ export async function resolveGeo(
   const operation = operationSlug ? findOperationBySegment(operationSlug) ?? null : null;
   if (operationSlug && !operation) return null;
 
-  const requested = `/${[locale, stateSlug, citySlug, operationSlug].filter(Boolean).join("/")}`;
+  const requested = `${localePrefix(locale)}/${[stateSlug, citySlug, operationSlug].filter(Boolean).join("/")}`;
   return {
     state,
     city,
@@ -117,4 +117,40 @@ export async function topCityLinks(locale: string, limit = 6): Promise<GeoLink[]
     .sort((a, b) => b.count - a.count || locationLabel(a.city, locale).localeCompare(locationLabel(b.city, locale), locale))
     .slice(0, limit)
     .map(({ city, state }) => ({ key: city.id, label: locationLabel(city, locale), href: geoPath(locale, state!, city) }));
+}
+
+/** Zones shown on the home page, in display order. */
+export const HOME_ZONES = [
+  { slug: "puebla", label: "Puebla", textKey: "homeZonePuebla" },
+  { slug: "san-andres-cholula", label: "San Andrés Cholula", textKey: "homeZoneSanAndresCholula" },
+  { slug: "san-pedro-cholula", label: "San Pedro Cholula", textKey: "homeZoneSanPedroCholula" },
+  { slug: "cuautlancingo", label: "Cuautlancingo", textKey: "homeZoneCuautlancingo" },
+] as const;
+
+export interface HomeZone {
+  slug: string;
+  label: string;
+  textKey: string;
+  count: number;
+  /** Sale page of the city (or the city page when it only has other operations); null without listings. */
+  href: string | null;
+}
+
+export async function homeZones(locale: string): Promise<HomeZone[]> {
+  let paths: PublicPaths | null = null;
+  try {
+    paths = await getPublicPaths();
+  } catch {
+    paths = null;
+  }
+  const statesById = new Map((paths?.states ?? []).map((state) => [state.id, state]));
+
+  return HOME_ZONES.map((zone) => {
+    const city = paths?.cities.find((c) => c.slug === zone.slug);
+    const state = city && statesById.get(city.state_id);
+    const count = paths && city ? countListings(paths, city.state_id, city.id) : 0;
+    const hasSales = paths && city ? countListings(paths, city.state_id, city.id, "sale") > 0 : false;
+    const href = city && state && count > 0 ? geoPath(locale, state, city, hasSales ? "sale" : null) : null;
+    return { ...zone, label: city ? locationLabel(city, locale) : zone.label, count, href };
+  });
 }
