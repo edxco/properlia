@@ -4,6 +4,12 @@ All notable changes to the code shared by frontend, dashboard and links. Newest 
 
 ## [Unreleased]
 
+### 2026-11-11
+
+#### Added
+- Leads service: `createForProperty` for the property contact form, sort parameters for the leads list, and the `property_form` lead source.
+- Spanish and English strings for the property contact form feedback and the sortable leads table.
+
 ## [1.0.0] - 2026-11-11
 
 First tracked version: everything shipped from the start (2025-12-19) until 2026-11-11.

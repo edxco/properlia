@@ -22,6 +22,7 @@ Rails.application.routes.draw do
         member do
           delete 'attachments/:attachment_id', to: 'properties#delete_attachment', as: 'delete_attachment'
           put 'reorder_images', to: 'properties#reorder_images'
+          post 'leads', to: 'leads#property_create', as: 'create_lead'
         end
 
         collection do

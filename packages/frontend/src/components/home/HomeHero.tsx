@@ -16,7 +16,7 @@ export function HomeHero({ locale }: { locale: string }) {
   const dict = dictionaryFor(locale);
 
   return (
-    <section className="relative isolate flex h-[calc(100svh-5rem)] min-h-[600px] max-h-[820px] items-center overflow-hidden bg-brand-navy">
+    <section className="relative isolate flex min-h-[min(820px,max(600px,calc(100svh-5rem)))] items-center overflow-hidden bg-brand-navy">
       <Image
         src={ProperliaBg}
         alt={dict.heroImageAlt}

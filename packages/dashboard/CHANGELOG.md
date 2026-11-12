@@ -4,6 +4,12 @@ All notable changes to the internal admin panel. Newest first. Format: [Keep a C
 
 ## [Unreleased]
 
+### 2026-11-11
+
+#### Added
+- Leads list is now a sortable table (date, name, contact, property, source, interest, status) with server-side sorting and a filter by property.
+- Properties show how many contact requests they received.
+
 ## [1.0.0] - 2026-11-11
 
 First tracked version: everything shipped from the start (2025-12-19) until 2026-11-11.

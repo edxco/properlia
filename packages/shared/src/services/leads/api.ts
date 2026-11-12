@@ -1,6 +1,7 @@
 import { apiClient } from '../../lib/api-client';
 import type {
   CreateLeadResponse,
+  CreatePropertyLeadDto,
   CreatePublicLeadDto,
   Lead,
   LeadFilters,
@@ -8,7 +9,7 @@ import type {
   LeadWithEvents,
 } from './types';
 
-export type { CreateLeadResponse, CreatePublicLeadDto } from './types';
+export type { CreateLeadResponse, CreatePropertyLeadDto, CreatePublicLeadDto } from './types';
 
 export const leadsApi = {
   // Get all leads with filtering and pagination (requires auth)
@@ -22,6 +23,8 @@ export const leadsApi = {
     if (params?.assigned_to_user_id) query.set('assigned_to_user_id', params.assigned_to_user_id);
     if (params?.property_id) query.set('property_id', params.property_id);
     if (params?.source) query.set('source', params.source);
+    if (params?.sort) query.set('sort', params.sort);
+    if (params?.direction) query.set('direction', params.direction);
     if (params?.pending_follow_up !== undefined) query.set('pending_follow_up', String(params.pending_follow_up));
 
     const search = query.toString();
@@ -53,5 +56,13 @@ export const leadsApi = {
   // Public endpoint for website forms (no auth required)
   publicCreate: async (data: CreatePublicLeadDto): Promise<CreateLeadResponse> => {
     return apiClient.post<CreateLeadResponse>('/leads/public', { lead: data }, false);
+  },
+
+  // Contact form on a property page (no auth required). `website` is the honeypot field.
+  createForProperty: async (
+    propertyId: string,
+    { website, ...lead }: CreatePropertyLeadDto
+  ): Promise<CreateLeadResponse> => {
+    return apiClient.post<CreateLeadResponse>(`/properties/${propertyId}/leads`, { lead, website }, false);
   },
 };

@@ -219,6 +219,14 @@ export default function PropertiesTable({
                               <span>{property.zip_code}</span>
                             </>
                           )}
+                          {(property.leads_count ?? 0) > 0 && (
+                            <>
+                              <span>•</span>
+                              <span className="tabular-nums text-brand-blue">
+                                {property.leads_count} {t("leadsSubmissions").toLowerCase()}
+                              </span>
+                            </>
+                          )}
                         </div>
                         <div>
                           {property.property_type &&
