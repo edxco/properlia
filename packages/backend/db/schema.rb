@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_11_12_120000) do
+ActiveRecord::Schema[7.0].define(version: 2026_11_12_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -125,7 +125,6 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_12_120000) do
     t.uuid "state_id"
     t.uuid "city_id"
     t.boolean "whatsapp_consent", default: false, null: false
-    t.datetime "visitor_confirmation_sent_at"
     t.index ["assigned_to_user_id", "status"], name: "index_leads_on_assigned_status"
     t.index ["city_id"], name: "index_leads_on_city_id"
     t.index ["email_normalized"], name: "index_leads_on_email_normalized"
@@ -137,7 +136,6 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_12_120000) do
     t.index ["state_id"], name: "index_leads_on_state_id"
     t.index ["status", "created_at"], name: "index_leads_on_status_created_at"
     t.index ["utm_campaign"], name: "index_leads_on_utm_campaign"
-    t.index ["visitor_confirmation_sent_at"], name: "index_leads_on_visitor_confirmation_sent_at"
     t.check_constraint "(min_budget IS NULL OR min_budget >= 0::numeric) AND (max_budget IS NULL OR max_budget >= 0::numeric)", name: "leads_budget_non_negative"
     t.check_constraint "email_normalized IS NOT NULL OR phone_e164 IS NOT NULL", name: "leads_require_email_or_phone"
     t.check_constraint "min_budget IS NULL OR max_budget IS NULL OR min_budget <= max_budget", name: "leads_budget_range_ok"
