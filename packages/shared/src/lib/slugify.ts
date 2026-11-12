@@ -1,4 +1,4 @@
-import { ROUTES, toLocale } from './routes';
+import { ROUTES, localePrefix, toLocale } from './routes';
 
 // Mirrors Slugger.slugify in packages/backend/app/services/slugger.rb; both must match.
 export function slugify(text: string | null | undefined): string {
@@ -25,7 +25,7 @@ export function propertySlug(property: PropertyUrlFields, locale: string): strin
 
 export function propertyPathFromSlug(locale: string, slug: string): string {
   const loc = toLocale(locale);
-  return `/${loc}/${ROUTES.properties[loc]}/${slug}`;
+  return `${localePrefix(loc)}/${ROUTES.properties[loc]}/${slug}`;
 }
 
 /** /{locale}/{propiedades|properties}/{title-slug}-{code}. Mirrors PropertyPublicUrl in the backend. */

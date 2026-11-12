@@ -14,6 +14,7 @@
     "build:dashboard": "npm run build --workspace=properlia-dashboard",
     "build:links": "npm run build --workspace=properlia-links",
     "build:all": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "check:versions": "node scripts/check-versions.mjs"
   }
 }

@@ -7,6 +7,7 @@ const nextConfig = {
     NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID || "",
   },
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: 'https',
@@ -21,12 +22,18 @@ const nextConfig = {
         port: '3000',
         pathname: '/rails/active_storage/**',
       },
-      // Add your own image domains here
+      // Production Active Storage (same origin as the site and the API host)
       {
         protocol: 'https',
-        hostname: 'your-domain.com',
+        hostname: 'properlia.com',
         port: '',
-        pathname: '/**',
+        pathname: '/rails/active_storage/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.properlia.com',
+        port: '',
+        pathname: '/rails/active_storage/**',
       },
     ],
   },

@@ -10,6 +10,9 @@ export const dictionaryFor = (locale: string) => dictionaries[toLocale(locale)];
 
 export const absoluteUrl = (path: string) => `${BASE_URL}${path}`;
 
+const OG_IMAGE = { url: absoluteUrl("/og-home.jpg"), width: 1200, height: 630 };
+const OG_LOCALES: Record<Locale, string> = { es: "es_MX", en: "en_US" };
+
 /**
  * Title, description, self-referencing canonical and hreflang (es / en / x-default).
  * `route` is a fixed page key or the page's path in each locale (paths differ per language).
@@ -26,11 +29,26 @@ export function buildMetadata(
   const dict = dictionaries[loc];
   const paths = typeof route === "string" ? routePaths(route) : route;
 
+  const title = dict[titleKey] ?? titleKey;
+  const description = dict[descriptionKey] ?? descriptionKey;
+  const canonical = absoluteUrl(`${paths[loc]}${query}`);
+
   return {
-    title: dict[titleKey] ?? titleKey,
-    description: dict[descriptionKey] ?? descriptionKey,
+    metadataBase: new URL(BASE_URL),
+    title,
+    description,
+    openGraph: {
+      type: "website",
+      siteName: "Properlia",
+      locale: OG_LOCALES[loc],
+      title,
+      description,
+      url: canonical,
+      images: [{ ...OG_IMAGE, alt: dict.heroImageAlt }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE.url] },
     alternates: {
-      canonical: absoluteUrl(`${paths[loc]}${query}`),
+      canonical,
       languages: {
         es: absoluteUrl(`${paths.es}${query}`),
         en: absoluteUrl(`${paths.en}${query}`),
