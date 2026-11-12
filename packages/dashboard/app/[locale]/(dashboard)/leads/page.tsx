@@ -1,23 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { LeadStatus, InterestOperation } from "@properlia/shared/types";
+import { Suspense, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { LeadStatus, InterestOperation, LeadSortColumn } from "@properlia/shared/types";
 
 import { useLeads } from "@/src/services/leads/queries";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import LeadsTable from "./LeadsTable";
+import { DEFAULT_LEAD_SORT, toggleLeadSort, type LeadSort } from "./leadsSort";
 import { Alert, DashboardTitle } from "@properlia/shared/components/ui";
 
-export default function LeadsPage() {
+function LeadsPageContent() {
   const t = useT();
+  const router = useRouter();
+  const propertyId = useSearchParams().get("property_id") ?? undefined;
   const [filters, setFilters] = useState<{
     status?: LeadStatus;
     interest_operation?: InterestOperation;
   }>({});
+  const [sort, setSort] = useState<LeadSort>(DEFAULT_LEAD_SORT);
 
   const { data, isLoading, error } = useLeads({
     status: filters.status,
     interest_operation: filters.interest_operation,
+    property_id: propertyId,
+    sort: sort.column,
+    direction: sort.direction,
   });
 
   const leads = useMemo(() => data?.data ?? [], [data]);
@@ -50,7 +58,19 @@ export default function LeadsPage() {
         metadata={metadata}
         filters={filters}
         onFilterChange={setFilters}
+        sort={sort}
+        onSortChange={(column: LeadSortColumn) => setSort((current) => toggleLeadSort(current, column))}
+        propertyFilterActive={Boolean(propertyId)}
+        onClearPropertyFilter={() => router.replace("/leads")}
       />
     </div>
+  );
+}
+
+export default function LeadsPage() {
+  return (
+    <Suspense fallback={null}>
+      <LeadsPageContent />
+    </Suspense>
   );
 }

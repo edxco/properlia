@@ -1,6 +1,6 @@
 class Lead < ApplicationRecord
   # Associations
-  belongs_to :property, optional: true
+  belongs_to :property, optional: true, counter_cache: true
   belongs_to :property_type, optional: true
   belongs_to :state, optional: true
   belongs_to :city, optional: true
@@ -33,8 +33,6 @@ class Lead < ApplicationRecord
   validates :full_name, presence: true
   validates :source, presence: true
   validates :interest_operation, presence: true
-  validates :email_normalized, uniqueness: { allow_nil: true, message: 'already has a consultation request' }
-  validates :phone_e164, uniqueness: { allow_nil: true, message: 'already has a consultation request' }
   validate :email_or_phone_present
 
   # Callbacks

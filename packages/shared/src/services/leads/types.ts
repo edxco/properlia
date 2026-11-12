@@ -12,7 +12,19 @@ export type LeadStatus =
 
 export type InterestOperation = 'buy' | 'rent' | 'invest' | 'sell';
 
-export type LeadSource = 'seller_form' | 'buyer_form' | 'manual' | 'website' | 'referral' | 'other';
+export type LeadSource = 'seller_form' | 'buyer_form' | 'property_form' | 'manual' | 'website' | 'referral' | 'other';
+
+export type LeadSortColumn =
+  | 'created_at'
+  | 'full_name'
+  | 'email'
+  | 'status'
+  | 'interest_operation'
+  | 'source'
+  | 'property'
+  | 'contact_attempts';
+
+export type SortDirection = 'asc' | 'desc';
 
 export interface Lead {
   id: string;
@@ -33,10 +45,12 @@ export interface Lead {
   last_contacted_at?: string | null;
   contact_attempts: number;
   consent_marketing: boolean;
+  whatsapp_consent?: boolean;
   property_id?: string | null;
   property?: {
     id: string;
     title: string;
+    code?: string | null;
   } | null;
   property_type?: CommonEntity | null;
   utm_source?: string | null;
@@ -71,6 +85,8 @@ export interface LeadFilters {
   property_id?: string;
   source?: LeadSource;
   pending_follow_up?: boolean;
+  sort?: LeadSortColumn;
+  direction?: SortDirection;
   page?: number;
   items?: number;
 }
@@ -93,6 +109,14 @@ export interface CreatePublicLeadDto {
   consent_marketing?: boolean;
   source_detail?: Record<string, unknown>;
   interest_property_type?: string;
+}
+
+export interface CreatePropertyLeadDto {
+  full_name: string;
+  email?: string;
+  phone?: string;
+  whatsapp_consent: boolean;
+  website?: string;
 }
 
 export interface CreateLeadResponse {

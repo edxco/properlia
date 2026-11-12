@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_11_11_120000) do
+ActiveRecord::Schema[7.0].define(version: 2026_11_12_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -124,12 +124,13 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_11_120000) do
     t.uuid "property_type_id"
     t.uuid "state_id"
     t.uuid "city_id"
+    t.boolean "whatsapp_consent", default: false, null: false
     t.index ["assigned_to_user_id", "status"], name: "index_leads_on_assigned_status"
     t.index ["city_id"], name: "index_leads_on_city_id"
-    t.index ["email_normalized"], name: "index_leads_unique_email_normalized", unique: true, where: "(email_normalized IS NOT NULL)"
+    t.index ["email_normalized"], name: "index_leads_on_email_normalized"
     t.index ["interest_operation"], name: "index_leads_on_interest_operation"
     t.index ["next_follow_up_at"], name: "index_leads_on_next_follow_up_at"
-    t.index ["phone_e164"], name: "index_leads_unique_phone_e164", unique: true, where: "(phone_e164 IS NOT NULL)"
+    t.index ["phone_e164"], name: "index_leads_on_phone_e164"
     t.index ["property_id"], name: "index_leads_on_property_id"
     t.index ["property_type_id"], name: "index_leads_on_property_type_id"
     t.index ["state_id"], name: "index_leads_on_state_id"
@@ -180,6 +181,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_11_120000) do
     t.datetime "on_hold_reminded_at"
     t.bigserial "code_number", null: false
     t.string "code", null: false
+    t.integer "leads_count", default: 0, null: false
     t.index ["city_id"], name: "index_properties_on_city_id"
     t.index ["code"], name: "index_properties_on_code", unique: true
     t.index ["code_number"], name: "index_properties_on_code_number", unique: true

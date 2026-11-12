@@ -45,3 +45,13 @@ Source of truth: `docs/design-system.md` (system-wide rules: tokens, type scale,
 - Always reply in english (code in english) even input spanish
 - Not use large (simplify) explanatory comments unless requested
 - When asking for creating commits message, never add any claude co-author comments
+
+# Changelog
+Each of `packages/frontend`, `packages/dashboard`, `packages/links` and `packages/shared` has a `CHANGELOG.md` (Keep a Changelog format; `1.0.0` = everything shipped until 2026-11-11).
+- Every time you make a change in one of these packages, update that package's `CHANGELOG.md` in the same work, before committing. A change in several packages updates each changelog.
+- Group entries per day: under `## [Unreleased]` add (or reuse) a `### YYYY-MM-DD` heading with today's date, newest day first, and put one-line English bullets under `Added`, `Changed`, `Fixed` or `Removed`.
+- Record user-visible behavior, not file lists; merge several edits of the same feature on the same day into one bullet.
+- Cutting a release is a manual step: move the `[Unreleased]` days under a new `## [x.y.z] - YYYY-MM-DD` heading when asked.
+- **Version sync (rule):** the `version` in each package's `package.json` must always equal the latest released heading (`## [x.y.z]`) in that package's `CHANGELOG.md`. Whenever a release heading is added, bump the package at the same time with `npm version <x.y.z> --workspace=<name> --no-git-tag-version` from the repo root (updates `package.json` and the lockfiles; names: `properlia-frontend`, `properlia-dashboard`, `properlia-links`, `@properlia/shared`). Never edit one without the other. Run `npm run check:versions` (from the repo root) before committing any change that touches a version or a changelog; it must exit 0.
+- Versions are independent per package and follow semver: patch for fixes, minor for new features, major for breaking changes.
+- The backend has no changelog.

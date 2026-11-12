@@ -628,5 +628,18 @@
   "propertyDetailNextImage": "Imagen siguiente",
   "propertyCode": "Código",
   "propertyCodeCopy": "Copiar código",
-  "propertyCodeCopied": "Código copiado"
+  "propertyCodeCopied": "Código copiado",
+  "leadsDate": "Fecha",
+  "leadsSource": "Origen",
+  "leadsContact": "Contacto",
+  "leadsFilteredByProperty": "Filtrado por propiedad",
+  "leadsClearPropertyFilter": "Quitar filtro",
+  "leadsSubmissions": "Contactos recibidos",
+  "leadsWhatsappConsent": "Acepta WhatsApp",
+  "propertyContactSending": "Enviando...",
+  "propertyContactSuccess": "¡Gracias! Recibimos tu mensaje y un asesor te contactará pronto.",
+  "propertyContactError": "No pudimos enviar tu mensaje. Inténtalo de nuevo en unos minutos.",
+  "propertyContactPrefillNotice": "Llenamos el formulario con tus datos de la última vez.",
+  "propertyContactNotYou": "¿No eres tú?",
+  "propertyContactDismissNotice": "Cerrar aviso"
 }

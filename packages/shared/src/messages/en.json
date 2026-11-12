@@ -628,5 +628,18 @@
   "propertyDetailNextImage": "Next image",
   "propertyCode": "Code",
   "propertyCodeCopy": "Copy code",
-  "propertyCodeCopied": "Code copied"
+  "propertyCodeCopied": "Code copied",
+  "leadsDate": "Date",
+  "leadsSource": "Source",
+  "leadsContact": "Contact",
+  "leadsFilteredByProperty": "Filtered by property",
+  "leadsClearPropertyFilter": "Clear filter",
+  "leadsSubmissions": "Contact requests",
+  "leadsWhatsappConsent": "WhatsApp OK",
+  "propertyContactSending": "Sending...",
+  "propertyContactSuccess": "Thank you! We received your message and an advisor will contact you soon.",
+  "propertyContactError": "We couldn't send your message. Please try again in a few minutes.",
+  "propertyContactPrefillNotice": "We filled the form with your details from last time.",
+  "propertyContactNotYou": "Not you?",
+  "propertyContactDismissNotice": "Dismiss notice"
 }
