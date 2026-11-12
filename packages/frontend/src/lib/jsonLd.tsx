@@ -37,6 +37,20 @@ export function itemListJsonLd(name: string, properties: Property[], locale: str
   };
 }
 
+/** Visible question and answer texts, passed as-is so the markup always matches the page. */
+export function faqJsonLd(items: { question: string; answer: string }[], locale: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    inLanguage: locale === "en" ? "en" : "es",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: { "@type": "Answer", text: item.answer },
+    })),
+  };
+}
+
 export function JsonLdScripts({ data }: { data: object[] }) {
   return (
     <>

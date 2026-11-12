@@ -25,47 +25,14 @@ import { Footer } from "@/src/components/Footer";
 import { GoogleAnalytics, GoogleTagManager } from "@properlia/shared";
 import { buildMetadata } from "@/src/lib/metadata";
 import { topCityLinks } from "@/src/lib/geo";
+import { getGeneralInfo } from "@/src/lib/generalInfo";
+import { JsonLdScripts } from "@/src/lib/jsonLd";
+import { siteJsonLd } from "@/src/lib/structuredData";
 
 const SUPPORTED_LOCALES = ["es", "en"] as const;
 type Locale = (typeof SUPPORTED_LOCALES)[number];
 
 const dictionaries: Record<Locale, any> = { en, es };
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "RealEstateAgent",
-      "@id": "https://properlia.com/#organization",
-      name: "Properlia",
-      url: "https://properlia.com",
-      logo: "https://properlia.com/properlia.png",
-      image: "https://properlia.com/properlia.png",
-      description:
-        "Properlia is a real estate platform in Puebla, Mexico. We help buyers find their ideal property and sellers get the best price.",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "Torre Ejecutiva JV II, Atlixcáyotl 5208, Piso 15",
-        addressLocality: "San Bernardino Tlaxcalancingo",
-        addressRegion: "Puebla",
-        addressCountry: "MX",
-      },
-      areaServed: {
-        "@type": "State",
-        name: "Puebla",
-      },
-      sameAs: [] as string[],
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://properlia.com/#website",
-      url: "https://properlia.com",
-      name: "Properlia",
-      publisher: { "@id": "https://properlia.com/#organization" },
-      inLanguage: ["es", "en"],
-    },
-  ],
-};
 
 export async function generateMetadata({
   params,
@@ -96,15 +63,12 @@ export default async function RootLayout({
     : "es";
 
   const dict = dictionaries[normalizedLocale];
-  const cityLinks = await topCityLinks(normalizedLocale);
+  const [cityLinks, generalInfo] = await Promise.all([topCityLinks(normalizedLocale), getGeneralInfo()]);
 
   return (
     <html lang={normalizedLocale} className={`${displayFont.variable} ${bodyFont.variable}`} suppressHydrationWarning>
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <JsonLdScripts data={[siteJsonLd(normalizedLocale, generalInfo)]} />
       </head>
       <body suppressHydrationWarning>
         <GoogleTagManager gtmId={gtmId} />

@@ -1,5 +1,6 @@
 import { IconChevronDown } from "@tabler/icons-react";
 import { Container, Eyebrow, Section, SectionTitle } from "@properlia/shared/components/ui";
+import { JsonLdScripts, faqJsonLd } from "@/src/lib/jsonLd";
 import { dictionaryFor } from "@/src/lib/metadata";
 import { HOME_FAQ_ITEMS, HOME_INSIGHTS } from "./homeContent";
 import { SplitLayout } from "./SectionHeader";
@@ -26,6 +27,9 @@ export function HomeInsights({ locale }: { locale: string }) {
       </Section>
 
       <Section tone="pale">
+        <JsonLdScripts
+          data={[faqJsonLd(HOME_FAQ_ITEMS.map((item) => ({ question: dict[`homeFaq${item}Q`], answer: dict[`homeFaq${item}A`] })), locale)]}
+        />
         <Container>
           <SplitLayout aside={<SectionTitle className="text-2xl md:text-3xl">{dict.homeFaqTitle}</SectionTitle>}>
             <div className="border-t border-brand-navy/20">
