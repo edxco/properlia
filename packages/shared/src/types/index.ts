@@ -53,6 +53,7 @@ export interface PropertyFeaturePayload {
 export interface Property {
   id: string;
   code: string;
+  leads_count?: number;
   featured: boolean;
   exclusive_listing: boolean;
   title: string;
