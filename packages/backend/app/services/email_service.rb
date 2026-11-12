@@ -149,7 +149,99 @@ class EmailService
       send_email(params)
     end
 
+    # Admin notification for a lead created from a property page
+    # @param lead [Lead] Lead linked to a property
+    # @return [Hash] Resend API response or error
+    def send_property_lead_admin_email(lead:)
+      validate_resend_configured!
+
+      params = {
+        from: ENV.fetch('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
+        to: GeneralInfo.instance.email_to,
+        subject: "Nuevo contacto: #{lead.property&.title || 'Propiedad'}",
+        html: property_lead_admin_html(lead: lead)
+      }
+      params[:reply_to] = lead.email if lead.email.present?
+
+      send_email(params)
+    end
+
+    # Confirmation to a visitor right after they contact us about a property
+    # @param lead [Lead] Lead created from the property page (must have an email)
+    # @return [Hash] Resend API response or error
+    def send_property_lead_confirmation(lead:)
+      validate_resend_configured!
+      return { success: false, error: 'No email provided' } if lead.email.blank?
+
+      send_email(
+        from: ENV.fetch('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
+        to: lead.email,
+        subject: "Recibimos tu mensaje sobre #{lead.property&.title || 'la propiedad'} - Properlia",
+        html: property_lead_confirmation_html(lead: lead)
+      )
+    end
+
     private
+
+    def whatsapp_digits(phone_e164)
+      digits = phone_e164.to_s.delete('^0-9')
+      digits.length == 10 ? "52#{digits}" : digits
+    end
+
+    def email_button(label, href, color)
+      %(<a href="#{CGI.escapeHTML(href)}" style="display:inline-block;margin:4px 6px 4px 0;padding:10px 18px;border-radius:999px;background-color:#{color};color:#ffffff;text-decoration:none;font-size:14px;">#{label}</a>)
+    end
+
+    def property_lead_admin_html(lead:)
+      esc = ->(value) { CGI.escapeHTML(value.to_s) }
+      property = lead.property
+      dashboard_url = ENV.fetch('DASHBOARD_URL', 'http://localhost:3002').chomp('/')
+
+      buttons = []
+      buttons << email_button('WhatsApp', "https://wa.me/#{whatsapp_digits(lead.phone_e164)}", '#214C9B') if lead.whatsapp_consent && lead.phone.present?
+      buttons << email_button('Llamar', "tel:#{lead.phone_e164}", '#1A3A5C') if lead.phone.present?
+      buttons << email_button('Enviar email', "mailto:#{lead.email}", '#214C9B') if lead.email.present?
+      buttons << email_button('Ver en el dashboard', "#{dashboard_url}/leads", '#888780')
+
+      <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #2C2C2A; background-color: #F6F6F2; margin: 0; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #EAEAE3; border-radius: 16px; padding: 28px;">
+              <h1 style="color: #1A3A5C; font-size: 20px; font-weight: 500; margin: 0 0 16px;">Nuevo contacto desde una propiedad</h1>
+              <p style="margin: 0 0 4px;"><strong>Propiedad:</strong> #{esc.call(property&.title)}#{property&.code.present? ? " (#{esc.call(property.code)})" : ''}</p>
+              <p style="margin: 0 0 4px;"><strong>Nombre:</strong> #{esc.call(lead.full_name)}</p>
+              <p style="margin: 0 0 4px;"><strong>Email:</strong> #{lead.email.present? ? esc.call(lead.email) : 'No proporcionado'}</p>
+              <p style="margin: 0 0 4px;"><strong>Teléfono:</strong> #{lead.phone.present? ? esc.call(lead.phone) : 'No proporcionado'}</p>
+              <p style="margin: 0 0 16px;"><strong>Acepta WhatsApp:</strong> #{lead.whatsapp_consent ? 'Sí' : 'No'}</p>
+              <div>#{buttons.join}</div>
+              <p style="margin: 20px 0 0; font-size: 12px; color: #888780;">Lead ID: #{lead.id} · #{lead.created_at.strftime('%d/%m/%Y %H:%M')}</p>
+            </div>
+          </body>
+        </html>
+      HTML
+    end
+
+    def property_lead_confirmation_html(lead:)
+      esc = ->(value) { CGI.escapeHTML(value.to_s) }
+
+      <<~HTML
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #2C2C2A; background-color: #F6F6F2; margin: 0; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #EAEAE3; border-radius: 16px; padding: 28px;">
+              <h1 style="color: #1A3A5C; font-size: 20px; font-weight: 500; margin: 0 0 16px;">Hola #{esc.call(lead.full_name)}, recibimos tu mensaje</h1>
+              <p>Gracias por tu interés en <strong>#{esc.call(lead.property&.title)}</strong>. Un asesor de Properlia te contactará pronto.</p>
+              <p style="margin-top: 20px;">
+                #{email_button('Seguir explorando', ENV.fetch('FRONTEND_URL', 'http://localhost:3001'), '#214C9B')}
+              </p>
+            </div>
+          </body>
+        </html>
+      HTML
+    end
 
     def validate_resend_configured!
       return if ENV['RESEND_API_KEY'].present?

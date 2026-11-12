@@ -32,7 +32,7 @@ module Api
           leads = leads.pending_follow_up
         end
 
-        @pagy, @leads = pagy(leads.recent)
+        @pagy, @leads = pagy(sorted(leads))
 
         render json: {
           data: @leads.map { |lead| lead_json(lead) },
@@ -148,6 +148,7 @@ module Api
 
         if lead.save
           lead.record_event!('created', metadata: { source: lead.source, property_id: property.id })
+          notify_of_property_lead(lead)
           render json: { message: 'Lead created successfully', id: lead.id }, status: :created
         else
           render json: { errors: lead.errors.full_messages }, status: :unprocessable_entity
@@ -156,9 +157,41 @@ module Api
 
       private
 
+      SORT_COLUMNS = {
+        'created_at' => 'leads.created_at',
+        'full_name' => 'LOWER(leads.full_name)',
+        'email' => 'LOWER(leads.email)',
+        'status' => 'leads.status',
+        'interest_operation' => 'leads.interest_operation',
+        'source' => 'leads.source',
+        'property' => 'LOWER(properties.title)',
+        'contact_attempts' => 'leads.contact_attempts'
+      }.freeze
+
+      def sorted(leads)
+        column = SORT_COLUMNS[params[:sort].to_s]
+        return leads.recent unless column
+
+        direction = params[:direction].to_s.casecmp?('asc') ? 'ASC' : 'DESC'
+        leads = leads.left_joins(:property).includes(:property) if params[:sort] == 'property'
+        leads.order(Arel.sql("#{column} #{direction} NULLS LAST"), 'leads.created_at DESC')
+      end
+
       DUPLICATE_WINDOW = 60.seconds
       RATE_LIMIT_MAX = 10
       RATE_LIMIT_WINDOW = 10.minutes
+
+      def notify_of_property_lead(lead)
+        [
+          -> { EmailService.send_property_lead_admin_email(lead: lead) },
+          -> { EmailService.send_property_lead_confirmation(lead: lead) }
+        ].each do |send_email|
+          result = send_email.call
+          Rails.logger.error "Property lead email failed: #{result[:error]}" unless result[:success]
+        rescue StandardError => e
+          Rails.logger.error "Property lead email failed: #{e.message}"
+        end
+      end
 
       def property_lead_params
         params.require(:lead).permit(:full_name, :email, :phone, :whatsapp_consent)
@@ -265,6 +298,7 @@ module Api
           last_contacted_at: lead.last_contacted_at,
           contact_attempts: lead.contact_attempts,
           consent_marketing: lead.consent_marketing,
+          whatsapp_consent: lead.whatsapp_consent,
           property_id: lead.property_id,
           utm_source: lead.utm_source,
           utm_medium: lead.utm_medium,
@@ -276,7 +310,8 @@ module Api
         if lead.property
           json[:property] = {
             id: lead.property.id,
-            title: lead.property.title
+            title: lead.property.title,
+            code: lead.property.code
           }
         end
 
