@@ -4,6 +4,11 @@ All notable changes to the code shared by frontend, dashboard and links. Newest 
 
 ## [Unreleased]
 
+### 2026-11-13
+
+#### Added
+- Leads service: `delete` for admin hard delete, plus Spanish and English strings for it.
+
 ### 2026-11-11
 
 #### Added

@@ -12,8 +12,9 @@ import {
   useT,
 } from "@properlia/shared/components/TranslationProvider";
 import { capitalizeFirstWord } from "@properlia/shared";
-import { Phone, Mail, ChevronDown, ChevronUp, ChevronsUpDown, X } from "lucide-react";
-import { useChangeLeadStatus } from "@/src/services/leads/queries";
+import { Phone, Mail, ChevronDown, ChevronUp, ChevronsUpDown, Trash2, X } from "lucide-react";
+import { useChangeLeadStatus, useDeleteLead } from "@/src/services/leads/queries";
+import { useAuth } from "@/src/contexts/AuthContext";
 import { Badge, Card, Chip, type BadgeTone } from "@properlia/shared/components/ui";
 import type { LeadSort } from "./leadsSort";
 
@@ -207,6 +208,15 @@ export default function LeadsTable({
   const t = useT();
   const locale = useLocale();
   const changeStatusMutation = useChangeLeadStatus();
+  const deleteLeadMutation = useDeleteLead();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
+  const handleDelete = (lead: Lead) => {
+    if (window.confirm(t("leadsDeleteConfirm").replace("{name}", lead.full_name))) {
+      deleteLeadMutation.mutate(lead.id);
+    }
+  };
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "—";
@@ -330,6 +340,11 @@ export default function LeadsTable({
                   {header("source", t("leadsSource"))}
                   {header("interest_operation", t("interest"))}
                   {header("status", t("status"))}
+                  {isAdmin && (
+                    <th scope="col" className="w-12 px-4 py-3">
+                      <span className="sr-only">{t("leadsDelete")}</span>
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-border">
@@ -405,6 +420,20 @@ export default function LeadsTable({
                           isLoading={changeStatusMutation.isPending}
                         />
                       </td>
+                      {isAdmin && (
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(lead)}
+                            disabled={deleteLeadMutation.isPending}
+                            title={t("leadsDelete")}
+                            aria-label={t("leadsDelete")}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-brand-gray transition-colors hover:bg-brand-bg hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}

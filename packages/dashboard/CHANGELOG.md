@@ -4,6 +4,11 @@ All notable changes to the internal admin panel. Newest first. Format: [Keep a C
 
 ## [Unreleased]
 
+### 2026-11-13
+
+#### Added
+- Admins can permanently delete a lead from the leads table (with confirmation).
+
 ### 2026-11-11
 
 #### Added
