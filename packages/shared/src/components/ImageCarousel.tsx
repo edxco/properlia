@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import styles from "./styles/ImageCarousel.module.css";
 import { PhotoGalleryModal, CarouselImage } from "./PhotoGalleryModal";
 import { Button } from "./ui";
@@ -44,7 +43,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
             {main ? (
               <>
                 {!loadedImages.has(0) && <div className={styles.skeleton} />}
-                <img src={main.url} alt={title} loading="lazy" onLoad={() => markLoaded(0)} />
+                <img src={main.url} alt={title} decoding="async" onLoad={() => markLoaded(0)} />
               </>
             ) : (
               <div className="flex h-full w-full items-center justify-center text-sm text-brand-gray">
@@ -67,25 +66,25 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
             {preview[1] && (
               <div className={styles.card}>
                 {!loadedImages.has(1) && <div className={styles.skeleton} />}
-                <img src={preview[1].url} alt={title} loading="lazy" onLoad={() => markLoaded(1)} />
+                <img src={preview[1].url} alt={title} loading="lazy" decoding="async" onLoad={() => markLoaded(1)} />
               </div>
             )}
             {preview[2] && (
               <div className={styles.card}>
                 {!loadedImages.has(2) && <div className={styles.skeleton} />}
-                <img src={preview[2].url} alt={title} loading="lazy" onLoad={() => markLoaded(2)} />
+                <img src={preview[2].url} alt={title} loading="lazy" decoding="async" onLoad={() => markLoaded(2)} />
               </div>
             )}
             {preview[3] && (
               <div className={styles.card}>
                 {!loadedImages.has(3) && <div className={styles.skeleton} />}
-                <img src={preview[3].url} alt={title} loading="lazy" onLoad={() => markLoaded(3)} />
+                <img src={preview[3].url} alt={title} loading="lazy" decoding="async" onLoad={() => markLoaded(3)} />
               </div>
             )}
             {preview[4] && (
               <div className={styles.card}>
                 {!loadedImages.has(4) && <div className={styles.skeleton} />}
-                <img src={preview[4].url} alt={title} loading="lazy" onLoad={() => markLoaded(4)} />
+                <img src={preview[4].url} alt={title} loading="lazy" decoding="async" onLoad={() => markLoaded(4)} />
               </div>
             )}
           </section>
