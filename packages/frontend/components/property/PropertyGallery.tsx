@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { isLocalImage } from "@/src/lib/imageUtils";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import { buttonClasses } from "@properlia/shared/components/ui";
@@ -14,9 +15,6 @@ interface PropertyGalleryProps {
 export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
   const t = useT();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-  const isUnoptimized = (src: string) =>
-    src.includes("localhost") || src.includes("rails/active_storage");
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -58,7 +56,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
-            unoptimized={isUnoptimized(preview[0])}
+            unoptimized={isLocalImage(preview[0])}
           />
         </button>
 
@@ -74,7 +72,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
               fill
               className="object-cover"
               sizes="25vw"
-              unoptimized={isUnoptimized(src)}
+              unoptimized={isLocalImage(src)}
             />
             {i === 3 && images.length > 5 && (
               <div
@@ -101,7 +99,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
                 fill
                 className="object-cover"
                 sizes="33vw"
-                unoptimized={isUnoptimized(src)}
+                unoptimized={isLocalImage(src)}
               />
               {i === 2 && images.length > 4 && (
                 <div className="absolute inset-0 flex items-center justify-center bg-brand-navy/60 text-base font-medium tabular-nums text-white">
@@ -156,7 +154,7 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
               fill
               className="object-contain"
               sizes="90vw"
-              unoptimized={isUnoptimized(images[lightboxIndex])}
+              unoptimized={isLocalImage(images[lightboxIndex])}
             />
           </div>
 

@@ -9,6 +9,9 @@ All notable changes to the internal admin panel. Newest first. Format: [Keep a C
 #### Added
 - Admins can permanently delete a lead from the leads table (with confirmation).
 
+#### Changed
+- Property form no longer converts WebP images to PNG before upload; the server handles them.
+
 ### 2026-11-11
 
 #### Added

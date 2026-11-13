@@ -148,6 +148,7 @@ export const PhotoGalleryModal: React.FC<PhotoGalleryModalProps> = ({
                   alt={currentImage.filename || title}
                   className={`${styles.image}${isImageLoading ? ` ${styles.imageHidden}` : ''}`}
                   loading="lazy"
+                  decoding="async"
                   onLoad={() => setIsImageLoading(false)}
                 />
               </div>

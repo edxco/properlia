@@ -489,83 +489,14 @@ export default function PropertyForm({
     }
   };
 
-  // Convert WebP image to PNG
-  const convertWebPToPNG = async (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                // Create new File from blob with .png extension
-                const pngFile = new File(
-                  [blob],
-                  file.name.replace(/\.webp$/i, ".png"),
-                  { type: "image/png" }
-                );
-                resolve(pngFile);
-              } else {
-                reject(new Error("Failed to convert image to PNG"));
-              }
-            },
-            "image/png",
-            0.95
-          ); // 95% quality
-        } else {
-          reject(new Error("Canvas context not available"));
-        }
-      };
-
-      img.onerror = () => {
-        reject(new Error("Failed to load image"));
-      };
-
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
-  const handleFileChange = async (
+  const handleFileChange = (
     field: "images" | "videos",
     files: FileList | null
   ) => {
     if (!files) return;
     const fileArray = Array.from(files);
 
-    // For images, check for WebP and convert to PNG
-    if (field === "images") {
-      const processedFiles: File[] = [];
-
-      for (const file of fileArray) {
-        if (file.type === "image/webp") {
-          try {
-            const pngFile = await convertWebPToPNG(file);
-            processedFiles.push(pngFile);
-          } catch (error) {
-            console.error("Failed to convert WebP to PNG:", error);
-            // If conversion fails, keep the original file
-            processedFiles.push(file);
-          }
-        } else {
-          processedFiles.push(file);
-        }
-      }
-
-      setForm((prev) => ({
-        ...prev,
-        [field]: [...prev[field], ...processedFiles],
-      }));
-    } else {
-      // For videos, no conversion needed
-      setForm((prev) => ({ ...prev, [field]: [...prev[field], ...fileArray] }));
-    }
+    setForm((prev) => ({ ...prev, [field]: [...prev[field], ...fileArray] }));
   };
 
   const removeFile = useCallback((field: "images" | "videos", index: number) => {
