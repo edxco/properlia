@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { isLocalImage } from "@/src/lib/imageUtils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "@properlia/shared/components/TranslationProvider";
 import { BadgeItem } from "@properlia/shared/lib/getBadge";
@@ -258,10 +259,7 @@ export const PropertyCard = ({
                 }`}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 priority={priority && index === 0}
-                unoptimized={
-                  image.includes("localhost") ||
-                  image.includes("rails/active_storage")
-                }
+                unoptimized={isLocalImage(image)}
               />
             ))
           : images[0] && (
@@ -272,10 +270,7 @@ export const PropertyCard = ({
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 priority={priority}
-                unoptimized={
-                  images[0].includes("localhost") ||
-                  images[0].includes("rails/active_storage")
-                }
+                unoptimized={isLocalImage(images[0])}
               />
             )}
 
