@@ -8,6 +8,7 @@ All notable changes to the code shared by frontend, dashboard and links. Newest 
 
 #### Added
 - Leads service: `delete` for admin hard delete, plus Spanish and English strings for it.
+- Spanish and English strings for the property form draft banner.
 
 #### Changed
 - Photo carousel and gallery modal decode images asynchronously.

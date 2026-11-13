@@ -29,6 +29,8 @@ import { useStatuses } from "@/src/services/statuses/queries";
 import { useListingTypes } from "@/src/services/listing-types/queries";
 import { usePropertyFeatures } from "@/src/services/property-features/queries";
 import { useStates } from "@/src/services/states/queries";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { usePropertyDraft } from "@/src/lib/usePropertyDraft";
 import { useCities } from "@/src/services/cities/queries";
 import {
   useLocale,
@@ -244,6 +246,22 @@ const ExistingImageCard = memo(function ExistingImageCard({
   );
 });
 
+type DraftFields = Omit<FormState, "images" | "videos">;
+
+const isDraftEmpty = (
+  fields: DraftFields,
+  media: { images: File[]; videos: File[] }
+) =>
+  media.images.length === 0 &&
+  media.videos.length === 0 &&
+  !fields.featured &&
+  fields.property_category_ids.length === 0 &&
+  fields.property_feature_ids.length === 0 &&
+  (Object.keys(fields) as (keyof DraftFields)[]).every((key) => {
+    const value = fields[key];
+    return typeof value !== "string" || key === "status_id" || value === "";
+  });
+
 interface PropertyFormProps {
   editingProperty: Property | null;
   onCancelEdit: () => void;
@@ -256,6 +274,7 @@ export default function PropertyForm({
   const t = useT();
   const locale = useLocale();
   const router = useRouter();
+  const { user } = useAuth();
   const [form, setForm] = useState<FormState>(emptyForm);
   const [formError, setFormError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -414,9 +433,50 @@ export default function PropertyForm({
       (s) => s.name.toLowerCase() === "active"
     );
     if (activeStatus) {
-      setForm((prev) => ({ ...prev, status_id: activeStatus.id }));
+      setForm((prev) =>
+        prev.status_id ? prev : { ...prev, status_id: activeStatus.id }
+      );
     }
   }, [editingProperty, statuses]);
+
+  const draftFields = useMemo<DraftFields>(() => {
+    const fields: Partial<FormState> = { ...form };
+    delete fields.images;
+    delete fields.videos;
+    return fields as DraftFields;
+  }, [form]);
+  const draftMedia = useMemo(
+    () => ({ images: form.images, videos: form.videos }),
+    [form.images, form.videos]
+  );
+  const {
+    restored: draftRestored,
+    dismissBanner: dismissDraftBanner,
+    discard: discardDraft,
+    clear: clearPropertyDraft,
+  } = usePropertyDraft<DraftFields>({
+    userId: user?.id,
+    enabled: !editingProperty,
+    fields: draftFields,
+    media: draftMedia,
+    isEmpty: isDraftEmpty,
+    onRestore: (draft) =>
+      setForm((prev) => ({
+        ...prev,
+        ...draft.fields,
+        images: draft.images,
+        videos: draft.videos,
+      })),
+  });
+
+  const handleDiscardDraft = async () => {
+    await discardDraft();
+    setForm({
+      ...emptyForm,
+      status_id:
+        statuses?.find((s) => s.name.toLowerCase() === "active")?.id ?? "",
+    });
+  };
 
   const handleChange = (
     field: keyof FormState,
@@ -809,12 +869,16 @@ export default function PropertyForm({
         });
       } else {
         property = await createProperty(payload);
+        await clearPropertyDraft();
       }
       router.push(`/properties/${property.id}`);
     } catch (mutationError: any) {
+      const details: string[] | undefined = mutationError?.errors;
       setFormError(
-        mutationError?.message ||
-          "There was a problem saving the property. Please try again."
+        details && details.length > 0
+          ? details.join(" ")
+          : mutationError?.message ||
+              "There was a problem saving the property. Please try again."
       );
     }
   };
@@ -882,6 +946,20 @@ export default function PropertyForm({
           )}
         </div>
       </div>
+
+      {draftRestored && !editingProperty && (
+        <Alert tone="info" className="mt-4 flex items-center justify-between gap-3 p-3">
+          <span>{t("draftRestored")}</span>
+          <span className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={dismissDraftBanner}>
+              {t("keepDraft")}
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleDiscardDraft}>
+              {t("discardDraft")}
+            </Button>
+          </span>
+        </Alert>
+      )}
 
       {formError && (
         <Alert tone="danger" className="mt-4 p-3">

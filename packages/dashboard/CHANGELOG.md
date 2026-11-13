@@ -8,6 +8,10 @@ All notable changes to the internal admin panel. Newest first. Format: [Keep a C
 
 #### Added
 - Admins can permanently delete a lead from the leads table (with confirmation).
+- The new property form saves a draft (fields, images and videos) in the browser, restores it after a failed save or reload, and clears it once the property is created; a banner lets you keep or discard it.
+
+#### Fixed
+- The new property form now shows the detailed errors returned by the API instead of a generic message.
 
 #### Changed
 - Property form no longer converts WebP images to PNG before upload; the server handles them.
