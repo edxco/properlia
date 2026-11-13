@@ -53,6 +53,11 @@ export const leadsApi = {
     return apiClient.post<LeadWithEvents>(`/leads/${id}/record_contact`, { method, notes }, true);
   },
 
+  // Permanently delete a lead (admin only)
+  delete: async (id: string): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/leads/${id}`, true);
+  },
+
   // Public endpoint for website forms (no auth required)
   publicCreate: async (data: CreatePublicLeadDto): Promise<CreateLeadResponse> => {
     return apiClient.post<CreateLeadResponse>('/leads/public', { lead: data }, false);

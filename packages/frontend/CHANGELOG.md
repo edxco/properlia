@@ -4,6 +4,11 @@ All notable changes to the public website. Newest first. Format: [Keep a Changel
 
 ## [Unreleased]
 
+### 2026-11-13
+
+#### Changed
+- Property photos on cards and the gallery are now served through the Next.js image optimizer (resized AVIF/WebP) instead of the full-size original.
+
 ### 2026-11-11
 
 #### Added

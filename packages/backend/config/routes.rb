@@ -46,7 +46,7 @@ Rails.application.routes.draw do
       get 'public_paths', to: 'public_paths#index'
       resources :cities
 
-      resources :leads, only: %i[index show create update] do
+      resources :leads, only: %i[index show create update destroy] do
         collection do
           post 'public', to: 'leads#public_create'
         end
