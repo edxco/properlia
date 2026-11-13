@@ -57,3 +57,15 @@ export const useRecordContact = () => {
     },
   });
 };
+
+export const useDeleteLead = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => leadsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+    },
+  });
+};

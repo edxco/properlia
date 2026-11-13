@@ -3,7 +3,8 @@ module Api
     class LeadsController < ApplicationController
       skip_before_action :authenticate_user!, only: %i[public_create property_create]
       skip_before_action :reject_disabled_user!, only: %i[public_create property_create]
-      before_action :set_lead, only: %i[show update change_status assign record_contact]
+      before_action :set_lead, only: %i[show update change_status assign record_contact destroy]
+      before_action(only: %i[destroy]) { authorize_any!(:admin) }
       after_action { pagy_headers_merge(@pagy) if @pagy }
 
       # GET /api/v1/leads
@@ -69,6 +70,15 @@ module Api
         if @lead.update(lead_params)
           ProcessLeadImagesJob.perform_later(@lead.id, @lead.images.pluck(:id)) if params.dig(:lead, :images).present?
           render json: lead_json(@lead), status: :ok
+        else
+          render json: { errors: @lead.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      # DELETE /api/v1/leads/:id
+      def destroy
+        if @lead.destroy
+          render json: { message: 'Lead deleted successfully' }, status: :ok
         else
           render json: { errors: @lead.errors.full_messages }, status: :unprocessable_entity
         end

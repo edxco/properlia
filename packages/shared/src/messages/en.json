@@ -634,6 +634,8 @@
   "leadsContact": "Contact",
   "leadsFilteredByProperty": "Filtered by property",
   "leadsClearPropertyFilter": "Clear filter",
+  "leadsDelete": "Delete lead",
+  "leadsDeleteConfirm": "Permanently delete {name}? This action cannot be undone.",
   "leadsSubmissions": "Contact requests",
   "leadsWhatsappConsent": "WhatsApp OK",
   "propertyContactSending": "Sending...",

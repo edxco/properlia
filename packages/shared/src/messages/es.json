@@ -634,6 +634,8 @@
   "leadsContact": "Contacto",
   "leadsFilteredByProperty": "Filtrado por propiedad",
   "leadsClearPropertyFilter": "Quitar filtro",
+  "leadsDelete": "Eliminar lead",
+  "leadsDeleteConfirm": "¿Eliminar definitivamente a {name}? Esta acción no se puede deshacer.",
   "leadsSubmissions": "Contactos recibidos",
   "leadsWhatsappConsent": "Acepta WhatsApp",
   "propertyContactSending": "Enviando...",
