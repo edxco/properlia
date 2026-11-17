@@ -4,6 +4,11 @@ All notable changes to the code shared by frontend, dashboard and links. Newest 
 
 ## [Unreleased]
 
+### 2026-11-17
+
+#### Changed
+- Upgraded React to 19.2.9 to match the patched Next.js and React versions used by the apps.
+
 ### 2026-11-13
 
 #### Added
