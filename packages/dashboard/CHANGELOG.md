@@ -4,6 +4,11 @@ All notable changes to the internal admin panel. Newest first. Format: [Keep a C
 
 ## [Unreleased]
 
+### 2026-11-17
+
+#### Changed
+- Upgraded Next.js to 16.4.5 and React to 19.2.9 to patch the October and November 2026 security advisories.
+
 ### 2026-11-13
 
 #### Added

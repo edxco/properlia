@@ -4,6 +4,11 @@ All notable changes to the link-in-bio site. Newest first. Format: [Keep a Chang
 
 ## [Unreleased]
 
+### 2026-11-17
+
+#### Changed
+- Upgraded Next.js to 16.4.5 and React to 19.2.9 to patch the October and November 2026 security advisories.
+
 ## [1.0.0] - 2026-11-11
 
 First tracked version: everything shipped from the start (2026-02-13) until 2026-11-11.
