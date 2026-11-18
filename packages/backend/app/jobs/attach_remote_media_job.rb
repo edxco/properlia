@@ -33,13 +33,18 @@ class AttachRemoteMediaJob < ApplicationJob
     body = response.body
     return if body.bytesize > MAX_BYTES
 
-    filename = filename_from(response, uri)
-    content_type = response['content-type'].presence || 'application/octet-stream'
+    io = StringIO.new(body)
+    problems = MediaUploadValidator.errors_for([{ io: io }], kind: association,
+                                               existing: property.public_send(association).count)
+    if problems.any?
+      Rails.logger.warn "AttachRemoteMediaJob rejected #{url}: #{problems.join('; ')}"
+      return
+    end
 
     property.public_send(association).attach(
-      io: StringIO.new(body),
-      filename: filename,
-      content_type: content_type
+      io: io,
+      filename: filename_from(response, uri),
+      content_type: MediaUploadValidator.detect(io)
     )
   rescue StandardError => e
     Rails.logger.error "AttachRemoteMediaJob failed for #{url}: #{e.message}"

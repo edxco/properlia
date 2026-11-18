@@ -127,8 +127,6 @@ module Api
 
         if lead.save
           lead.record_event!('created', metadata: { source: lead.source })
-          ProcessLeadImagesJob.perform_later(lead.id, lead.images.pluck(:id)) if params.dig(:lead, :images).present?
-
           # Send consultation emails for buyer/seller forms
           send_consultation_emails(lead) if %w[buyer_form seller_form].include?(lead.source)
 
@@ -259,8 +257,7 @@ module Api
           :interest_operation, :max_budget, :notes, :interest_property_type,
           :desired_date, :neighborhood, :city_id, :state_id,
           :consent_marketing,
-          source_detail: {},
-          images: []
+          source_detail: {}
         )
       end
 
