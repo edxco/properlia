@@ -155,7 +155,7 @@ ACTIVE_STORAGE_SERVICE=amazon
 DEVISE_JWT_SECRET_KEY=your-jwt-secret
 
 # AWS (if using S3)
-AWS_REGION=us-east-1
+AWS_REGION=mx-central-1
 AWS_BUCKET=properlia-staging
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key

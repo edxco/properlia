@@ -1,0 +1,13 @@
+[Unit]
+Description=Block container access to the instance metadata service
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/properlia-imds-guard.sh
+
+[Install]
+WantedBy=multi-user.target

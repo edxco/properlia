@@ -10,7 +10,7 @@ require 'aws-sdk-s3'
 
 if Rails.env.production? || Rails.env.staging?
   Aws.config.update({
-    region: ENV.fetch('AWS_REGION', 'us-east-1'),
+    region: ENV.fetch('AWS_REGION', 'mx-central-1'),
     credentials: Aws::InstanceProfileCredentials.new(
       retries: 5,
       http_open_timeout: 5,

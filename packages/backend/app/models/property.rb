@@ -5,8 +5,12 @@ class Property < ApplicationRecord
   belongs_to :listing_type
   belongs_to :state, optional: true
   belongs_to :city, optional: true
+  include MediaUploadValidation
+
   has_many_attached :images
   has_many_attached :videos
+  validates_media_upload :images, kind: :images
+  validates_media_upload :videos, kind: :videos
   has_many :leads, dependent: :nullify
 
   after_commit :revalidate_frontend_cache

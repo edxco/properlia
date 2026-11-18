@@ -33,7 +33,7 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 
     resource "/rails/active_storage/*",
       headers: :any,
-      methods: %i[get post put patch delete options head],
+      methods: %i[get options head],
       expose: ["Content-Disposition"]  # so browsers can read filename
   end
 end
