@@ -349,18 +349,22 @@ jobs:
             docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
 
             # Wait for services to be ready
-            sleep 5
+            echo "Waiting for the backend to accept connections..."
+            for i in $(seq 1 60); do
+              if docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T backend bash -c 'echo > /dev/tcp/127.0.0.1/3000' 2>/dev/null; then break; fi
+              sleep 3
+            done
 
             echo "Clearing migration locks (if any)..."
-            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails runner "
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T backend bundle exec rails runner "
               ActiveRecord::Base.connection.execute('SELECT pg_advisory_unlock_all();')
             " || echo "No locks to clear"
 
             echo "Running database migrations..."
-            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails db:migrate
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T backend bundle exec rails db:migrate
 
             echo "Running database seeds..."
-            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" run --rm backend bundle exec rails db:seed
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T backend bundle exec rails db:seed
 
             echo "Cleaning up old images..."
             docker image prune -f
