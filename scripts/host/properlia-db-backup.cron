@@ -1,0 +1,1 @@
+15 3 * * * ubuntu /usr/local/sbin/properlia-db-backup.sh >> /var/log/properlia-db-backup.log 2>&1

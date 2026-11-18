@@ -16,7 +16,7 @@ services:
       - app-network
 
   db:
-    image: postgres:15
+    image: postgres:15.14
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -72,7 +72,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.30.0.10
 
   scheduler:
     image: ${BACKEND_IMAGE:-properlia-backend:latest}
@@ -99,7 +100,8 @@ services:
       - backend
     restart: unless-stopped
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.30.0.11
 
   frontend:
     image: ${FRONTEND_IMAGE:-properlia-frontend:latest}
@@ -113,6 +115,12 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     networks:
       - app-network
 
@@ -127,6 +135,14 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/packages/dashboard/.next/cache:rw,size=256m,uid=1001,gid=1001
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     networks:
       - app-network
 
@@ -137,6 +153,14 @@ services:
     environment:
       NODE_ENV: production
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/packages/links/.next/cache:rw,size=64m,uid=1001,gid=1001
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     networks:
       - app-network
 
@@ -147,3 +171,6 @@ volumes:
 networks:
   app-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
