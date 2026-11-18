@@ -35,3 +35,5 @@ node_modules/
 
 # Design guidelines
 /design-guidelines/
+# Local-only files that must never be committed
+no-commit/
