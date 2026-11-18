@@ -15,6 +15,17 @@ RUN apt-get update -qq && apt-get install -y \
   unzip \
   && rm -rf /var/lib/apt/lists/*
 
+# Restrict ImageMagick to JPEG, PNG and WebP; the build fails if risky inputs are still accepted
+COPY config/imagemagick/policy.xml /etc/ImageMagick-6/policy.xml
+RUN set -e; \
+  printf 'MATLAB 5.0 MAT-file, Platform: x' > /tmp/fake.png; \
+  for input in msl:/dev/null mvg:/dev/null mat:/dev/null svg:/dev/null https://example.com/x.png @/etc/hostname /tmp/fake.png; do \
+    if identify "$input" >/dev/null 2>&1; then echo "ImageMagick policy still accepts: $input"; exit 1; fi; \
+  done; \
+  echo 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' | base64 -d > /tmp/ok.png; \
+  identify /tmp/ok.png >/dev/null; \
+  rm -f /tmp/fake.png /tmp/ok.png
+
 # Install AWS CLI (must be after unzip is installed)
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awsclip.zip" && \
     unzip awsclip.zip && \

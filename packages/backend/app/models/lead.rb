@@ -8,7 +8,10 @@ class Lead < ApplicationRecord
   belongs_to :created_by, class_name: 'User', foreign_key: 'created_by_user_id', optional: true
 
   has_many :lead_events, dependent: :destroy
+  include MediaUploadValidation
+
   has_many_attached :images
+  validates_media_upload :images, kind: :images, max_files: 10
 
   # Enums
   enum :status, {

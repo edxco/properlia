@@ -159,6 +159,10 @@ module Api
         new_images = params.dig(:property, :images)
         new_videos = params.dig(:property, :videos)
 
+        media_errors = MediaUploadValidator.errors_for(new_images, kind: :images, existing: @property.images.count) +
+                       MediaUploadValidator.errors_for(new_videos, kind: :videos, existing: @property.videos.count)
+        return render json: { errors: media_errors }, status: :unprocessable_entity if media_errors.any?
+
         # Normalize image_order IDs to strings to prevent integer/string mismatch
         update_params = property_params.except(:images, :videos)
         update_params[:image_order] = update_params[:image_order].map(&:to_s) if update_params[:image_order].present?
