@@ -4,6 +4,11 @@ All notable changes to the internal admin panel. Newest first. Format: [Keep a C
 
 ## [Unreleased]
 
+### 2026-11-23
+
+#### Changed
+- Property form image previews now use 4 columns with a 4:3 ratio, and the save button floats at the bottom so it is always visible.
+
 ### 2026-11-17
 
 #### Changed
