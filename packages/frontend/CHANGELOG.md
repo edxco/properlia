@@ -4,6 +4,14 @@ All notable changes to the public website. Newest first. Format: [Keep a Changel
 
 ## [Unreleased]
 
+### 2026-11-23
+
+#### Changed
+- Property photos are now served as WebP only and cached for 30 days, which cuts first-load time.
+
+#### Fixed
+- Gallery lightbox now shows a loading spinner, preloads the adjacent photos and keeps the image in sync with the counter.
+
 ### 2026-11-17
 
 #### Changed

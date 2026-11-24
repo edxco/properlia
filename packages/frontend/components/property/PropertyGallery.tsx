@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { isLocalImage } from "@/src/lib/imageUtils";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useT } from "@properlia/shared/components/TranslationProvider";
 import { buttonClasses } from "@properlia/shared/components/ui";
 
@@ -15,6 +15,16 @@ interface PropertyGalleryProps {
 export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
   const t = useT();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+    setShowSpinner(false);
+    if (lightboxIndex === null) return;
+    const timer = setTimeout(() => setShowSpinner(true), 150);
+    return () => clearTimeout(timer);
+  }, [lightboxIndex]);
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -148,14 +158,44 @@ export const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
             className="relative w-[90vw] h-[80vh]"
             onClick={(e) => e.stopPropagation()}
           >
+            {!loaded && showSpinner && (
+              <div
+                role="status"
+                aria-label={t("propertyDetailLoadingImage")}
+                className="absolute inset-0 flex items-center justify-center text-white/80"
+              >
+                <Loader2 size={36} strokeWidth={1.75} className="animate-spin" />
+              </div>
+            )}
             <Image
+              key={lightboxIndex}
               src={images[lightboxIndex]}
               alt={`${title} - ${lightboxIndex + 1}`}
               fill
-              className="object-contain"
-              sizes="90vw"
+              quality={80}
+              className={`object-contain transition-opacity duration-200 ${loaded ? "opacity-100" : "opacity-0"}`}
+              sizes="(max-width: 768px) 100vw, 90vw"
               unoptimized={isLocalImage(images[lightboxIndex])}
+              onLoad={() => setLoaded(true)}
+              onError={() => setLoaded(true)}
             />
+            {images.length > 1 &&
+              [(lightboxIndex + 1) % images.length, (lightboxIndex - 1 + images.length) % images.length].map(
+                (idx) => (
+                  <Image
+                    key={`preload-${idx}`}
+                    src={images[idx]}
+                    alt=""
+                    aria-hidden
+                    fill
+                    quality={80}
+                    loading="eager"
+                    className="pointer-events-none opacity-0"
+                    sizes="(max-width: 768px) 100vw, 90vw"
+                    unoptimized={isLocalImage(images[idx])}
+                  />
+                ),
+              )}
           </div>
 
           <button

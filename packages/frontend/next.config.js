@@ -7,7 +7,8 @@ const nextConfig = {
     NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID || "",
   },
   images: {
-    formats: ["image/avif", "image/webp"],
+    formats: ["image/webp"],
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       {
         protocol: 'https',
