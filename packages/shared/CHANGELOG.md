@@ -4,6 +4,11 @@ All notable changes to the code shared by frontend, dashboard and links. Newest 
 
 ## [Unreleased]
 
+### 2026-11-23
+
+#### Added
+- Added the "Loading image" message (es/en) used by the property gallery lightbox.
+
 ### 2026-11-17
 
 #### Changed

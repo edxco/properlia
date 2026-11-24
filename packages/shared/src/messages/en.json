@@ -629,6 +629,7 @@
   "propertyDetailCloseGallery": "Close",
   "propertyDetailPreviousImage": "Previous image",
   "propertyDetailNextImage": "Next image",
+  "propertyDetailLoadingImage": "Loading image",
   "propertyCode": "Code",
   "propertyCodeCopy": "Copy code",
   "propertyCodeCopied": "Code copied",

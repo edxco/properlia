@@ -103,13 +103,14 @@ Decision: build and verify the whole new stack while the current site stays up, 
 - Rebuild every image from a clean commit that includes the dependency upgrade (Next.js 16.4.5, React 19.2.9). The new ECR repo starts empty, so old tags are never reused.
 - **New IAM roles** named `ProperliaStage-EC2-mx`, `ProperliaStage-GitHub-mx` and `ProperliaStage-FlowLogs-mx` (the rebuild user can only create roles named `ProperliaStage-*`), not `ProperliaEC2SSMRole`: SSM core, ECR pull for the new repo only, S3 `Get/Put/Delete/ListBucket` on the new bucket only. No `ec2:*`, no `iam:*`. Replace `EC2Role-ECRPush` with a new GitHub OIDC role limited to ECR push on the new repo, the security-group edit it needs, and the `stage` branch; no `AmazonS3FullAccess`. Add object-level S3 logging so any later read is visible.
 - **Metadata access:** IMDSv2 required, hop limit 2, plus a host firewall rule (`DOCKER-USER` chain) that drops traffic to `169.254.169.254` from every container except `backend` and `scheduler` (give them fixed IPs on `app-network`). Alternative: hop limit 1 and a scoped static S3 key in the backend and scheduler env only. Verify with `curl -m 3 http://169.254.169.254/` from the `frontend`, `dashboard`, `links` and `nginx` containers: it must fail.
-- **Container hardening** for `frontend`, `dashboard` and `links`: non-root user, `read_only: true` with a tmpfs for writable paths, `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`.
+- **Container hardening** for `frontend`, `dashboard` and `links`: non-root user (already the case), `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`, tmpfs for `/tmp`. `dashboard` and `links` also run `read_only: true` with a tmpfs for `.next/cache`. `frontend` stays writable because Next.js on-demand revalidation writes under `.next/`. Implemented in `docker-compose.stage.yml`; confirm on the first deploy.
 - **Egress control:** security group outbound limited to 443, 80, 53 and 123. This blocks typical mining-pool ports.
 - **Detection from day one:** VPC flow logs, a CloudTrail trail (bucket `proper-cloudtrail-stage-mx`) with S3 data events for the new assets bucket, and GuardDuty, all in `mx-central-1`.
 
 ### Restore data without trusting it
 - **Database dump:** inspect before restoring. Run `pg_restore -l db.dump`, restore into a scratch container with no network, then look for unexpected roles, functions, triggers, event triggers, extensions and large objects. Review the users table for admin accounts you do not recognize.
-- **S3 objects:** sync only allow-listed extensions (images and videos), then review what was excluded. Check content types, and flag HTML, SVG with scripts, or executables.
+- **S3 objects:** Active Storage keys have no file extension, so sync only objects whose bytes are images or videos (checked by magic bytes, not by the declared type), then review what was excluded. Initial copy done: 809 of 812 objects.
+- **Probe blobs:** after the restore, purge the six unattached blobs created on 2026-11-12, and exclude their keys from the final delta sync. The three 68-byte PNGs were among the 809 copied, so delete those three objects from the new assets bucket (the instance role can; the rebuild user cannot).
 - **Cutover gate:** do not point Cloudflare at the new host until the verification checks below pass.
 
 ### Security verification
@@ -120,7 +121,7 @@ Decision: build and verify the whole new stack while the current site stays up, 
 - Upload hardening: inside the backend container, `identify` works for JPEG, PNG and WebP and fails for MAT, MVG, MSL, SVG, `https:` and `@file` inputs. An upload of a synthetic file with a MAT header (generated in the test, never the original probes) declared as `image/png` is rejected, and the public lead form rejects images.
 
 ### Upload hardening (backend; merged before the go-live images are built)
-Context: three objects in the old assets bucket (uploaded 2026-11-12, `poc_cba7.png`, `p_15c0.png`, `p_1d7d.png`) are declared `image/png` but are MATLAB MAT-file headers containing `/etc/hostname`. They look like probes of the image-processing path. The backend image installs ImageMagick and libvips, and Rails 7.0 uses ImageMagick (MiniMagick) by default. The cause of the compromise is not proven; these items close the path regardless.
+Context: six blobs in the old assets bucket and database were uploaded on 2026-11-12 between 02:55 and 03:18 UTC and never attached to any record. Three (`poc_cba7.png`, `p_15c0.png`, `p_1d7d.png`, 6,120 bytes each) are declared `image/png` but are MATLAB MAT-file headers containing `/etc/hostname`; each came with a 68-byte PNG (`poc_5349.png`, `p_bfb3.png`, `p_e5b9.png`), probably a control file. No client uses Active Storage direct uploads, yet the endpoint is open and unauthenticated, which fits files that were uploaded and never attached. They look like probes of the image-processing path. The backend image installs ImageMagick and libvips, and Rails 7.0 uses ImageMagick (MiniMagick) by default. The cause of the compromise is not proven; these items close the path regardless.
 
 1. **ImageMagick `policy.xml` (deny by default).** ImageMagick cannot be removed yet, so restrict it to JPEG, PNG and WebP and copy the file into the backend image (`/etc/ImageMagick-6/policy.xml` on Debian bookworm; confirm with `identify -list policy` inside the container). Proposed content, to be tested before use:
    ```xml
@@ -144,11 +145,12 @@ Context: three objects in the old assets bucket (uploaded 2026-11-12, `poc_cba7.
    The resource limits are starting values to tune. Add a build-time check in the Dockerfile that fails the build if `identify` still accepts an `msl:`, `mvg:`, `https:`, `@file` or MAT input. Future work, not part of this migration: replace ImageMagick/MiniMagick with libvips.
 2. **Shared upload validator** for `Property#images`, `Property#videos` and `Lead#images`.
    - Reads the first bytes with `Marcel::MimeType.for(io)` (content only, ignoring filename and the declared type) and checks the result against an allowlist: `image/jpeg`, `image/png`, `image/webp`, plus `video/mp4` and `video/quicktime` (mov) for videos.
-   - Enforces a size limit and a maximum file count per attachment.
-   - Runs **before attaching** (in the controller or service on the incoming files, because attaching to a saved record uploads to S3 before model validations run), with a model validation as a backstop. The detected type replaces the declared one on the blob.
+   - Enforces a size limit and a maximum file count per attachment. Starting values taken from the dump (largest image 3.1 MB, largest video 7.6 MB, at most 52 images on a property): images 10 MB and 60 per property, videos 200 MB and 5 per property, lead images 10.
+   - Runs **before anything is uploaded**: as a model validation (validations run before Active Storage uploads on commit), plus an explicit pre-check in `properties#update`, because `attach` on a saved record silently ignores a failed validation. Signed blob ids and any non-file value are rejected. The detected type replaces the declared one in the job.
    - Also runs in `AttachRemoteMediaJob` before `attach`. Today the job takes `content_type` from the remote response header and only caps the size at 200 MB, so it must stop trusting that header.
 3. **Public lead form takes no images.** Remove `images: []` from `public_lead_params` in `leads_controller.rb`, and the now-dead `ProcessLeadImagesJob` enqueue in the public create action. The authenticated dashboard `lead_params` keeps `images: []` and gets the validator.
-4. Skipped by decision: checking the database for the three held-back blobs and who uploaded them.
+4. Skipped by decision: checking the database for the held-back blobs and who uploaded them.
+5. **Active Storage direct uploads disabled** (added during implementation): no client uses them, so an initializer makes `DirectUploadsController` return 404 and the CORS rule for `/rails/active_storage/*` keeps only GET, HEAD and OPTIONS.
 
 ## Phases
 
@@ -213,6 +215,8 @@ The old host is suspected compromised and must not serve traffic again, so it is
 - Whether the root console logins (2026-09-10, 11-16, 11-17) were yours.
 - Whether a pipeline push carried tampered content (workflow files, GitHub secrets and recent commits need review).
 - Current IMDS hop limit.
-- Upload validator limits: maximum file size (images and videos) and maximum files per attachment; the policy.xml resource limits are starting values.
+- Upload validator limits and the policy.xml resource limits are starting values; confirm or adjust them.
+- `AttachRemoteMediaJob` checks only the first URL host and follows redirects to any host; decide whether to restrict redirect targets.
+- The backend container runs as root; consider a non-root user later.
 - Whether `storage_data` (the local Active Storage volume) holds anything.
 - Other regions were not scanned; resources there would not appear in this inventory.
