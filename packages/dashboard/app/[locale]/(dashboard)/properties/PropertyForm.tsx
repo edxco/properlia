@@ -157,7 +157,7 @@ const NewImageCard = memo(function NewImageCard({
       <img
         src={objectUrl}
         alt={file.name}
-        className="w-full h-20 object-cover rounded border border-brand-border pointer-events-none select-none"
+        className="w-full aspect-[4/3] object-cover rounded border border-brand-border pointer-events-none select-none"
         draggable={false}
       />
       {index === 0 && (
@@ -226,7 +226,7 @@ const ExistingImageCard = memo(function ExistingImageCard({
       <img
         src={getAbsoluteImageUrl(image.url)}
         alt={image.filename}
-        className="w-full h-20 object-cover rounded border border-brand-border pointer-events-none select-none"
+        className="w-full aspect-[4/3] object-cover rounded border border-brand-border pointer-events-none select-none"
         draggable={false}
       />
       {index === 0 && (
@@ -1428,7 +1428,7 @@ export default function PropertyForm({
                   {t("currentImages")} - Drag to reorder (first image will be
                   the cover):
                 </p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   {visibleExistingAttachments.map((img, index) => (
                     <ExistingImageCard
                       key={img.id}
@@ -1501,7 +1501,7 @@ export default function PropertyForm({
               <p className="text-xs text-brand-gray mb-2">
                 Drag to reorder images (first image will be the cover)
               </p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {form.images.map((file, index) => (
                   <NewImageCard
                     key={index}
@@ -1679,17 +1679,19 @@ export default function PropertyForm({
           />
         </div>
 
-        <Button
-          type="submit"
-          fullWidth
-          disabled={creating || updating}
-        >
-          {creating || updating
-            ? "Saving..."
-            : editingProperty
-            ? t("updateProperty")
-            : t("createProperty")}
-        </Button>
+        <div className="sticky bottom-4 z-30 rounded-2xl border border-brand-border bg-white/90 p-3 shadow-card backdrop-blur">
+          <Button
+            type="submit"
+            fullWidth
+            disabled={creating || updating}
+          >
+            {creating || updating
+              ? "Saving..."
+              : editingProperty
+              ? t("updateProperty")
+              : t("createProperty")}
+          </Button>
+        </div>
       </form>
     </Card>
   );
