@@ -4,6 +4,11 @@ All notable changes to the public website. Newest first. Format: [Keep a Changel
 
 ## [Unreleased]
 
+### 2026-11-26
+
+#### Fixed
+- Sharing a property link (WhatsApp, Facebook…) now shows the property title, price and cover photo instead of the generic home preview.
+
 ### 2026-11-23
 
 #### Changed

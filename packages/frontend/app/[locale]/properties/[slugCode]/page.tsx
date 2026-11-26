@@ -2,6 +2,7 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getAbsoluteImageUrl } from "@properlia/shared/lib/api-client";
+import { formatPriceDisplay } from "@properlia/shared";
 import { isPubliclyVisible } from "@properlia/shared/lib/propertyVisibility";
 import { buildPropertyUrl, hasPublicLocation, parsePropertyCode, propertySlug } from "@properlia/shared/lib/slugify";
 import {
@@ -83,10 +84,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const paths = { es: buildPropertyUrl(property, "es"), en: buildPropertyUrl(property, "en") };
   const base = buildMetadata(locale, paths, "metaTitle", "metaDescription");
+  const title = `${localizedTitle(property, locale)} | Properlia`;
+  const description = localizedMetaDescription(property, locale) || (base.description as string);
+
+  // Share cards (WhatsApp, Facebook…) show the price and the cover as a resized WebP thumbnail.
+  const price = formatPriceDisplay(property.price, locale === "en" ? "en-US" : "es-MX");
+  const shareTitle = `${localizedTitle(property, locale)} · ${price}`;
+  const cover = property.images?.[0]?.url ? getAbsoluteImageUrl(property.images[0].url) : undefined;
+  const coverUrl = cover
+    ? absoluteUrl(`/_next/image?url=${encodeURIComponent(cover)}&w=1200&q=75`)
+    : undefined;
+  const images = coverUrl
+    ? [{ url: coverUrl, width: 1200, height: 630, alt: localizedTitle(property, locale) }]
+    : base.openGraph?.images;
+
   return {
     ...base,
-    title: `${localizedTitle(property, locale)} | Properlia`,
-    description: localizedMetaDescription(property, locale) || base.description,
+    title,
+    description,
+    openGraph: { ...base.openGraph, title: shareTitle, description, url: absoluteUrl(paths[locale === "en" ? "en" : "es"]), images },
+    twitter: { ...base.twitter, title: shareTitle, description, images: coverUrl ? [coverUrl] : undefined },
   };
 }
 
